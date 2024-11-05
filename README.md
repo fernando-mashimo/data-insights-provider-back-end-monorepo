@@ -17,6 +17,7 @@
 ## Documentation
 
 - [Getting Started with AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
+  - [CDK Reference](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-construct-library.html)
 - [Getting Started with AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
 - [Overall Architecture](https://excalidraw.com/#room=7d48cdcfbb084fdc1c67,HP7Ftq5iio-hqxUzn4eC_A)
 
