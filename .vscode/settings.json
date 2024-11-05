@@ -1,0 +1,23 @@
+{
+	"cSpell.language": "en,pt,pt-BR",
+	"cSpell.languageSettings": [],
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[svelte]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[md]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[mdx]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "always"
+	},
+	"editor.formatOnSave": true
+}
