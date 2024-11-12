@@ -23,7 +23,7 @@ export class AuthzStack extends cdk.Stack {
 	private createUserPool(): cognito.IUserPool {
 		return new cognito.UserPool(this, 'UserPool', {
 			userPoolName: 'DefaultUserPool',
-			selfSignUpEnabled: true,
+			selfSignUpEnabled: false,
 			signInAliases: { email: true },
 			autoVerify: { email: true },
 			standardAttributes: {
@@ -83,11 +83,14 @@ export class AuthzStack extends cdk.Stack {
 		const userPoolAppClient = new cognito.UserPoolClient(this, 'CognitoAppClient', {
 			userPool,
 			generateSecret: false,
+			idTokenValidity: cdk.Duration.minutes(5),
+			accessTokenValidity: cdk.Duration.minutes(5),
+			refreshTokenValidity: cdk.Duration.days(10),
 			oAuth: {
 				callbackUrls: $config.APPLICATION_LOGIN_URL_CALLBACKS,
 				logoutUrls: $config.APPLICATION_LOGOUT_URL_CALLBACKS,
 				flows: {
-					implicitCodeGrant: true
+					authorizationCodeGrant: true
 				},
 				scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE, cognito.OAuthScope.OPENID]
 			},
