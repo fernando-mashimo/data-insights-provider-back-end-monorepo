@@ -14,9 +14,12 @@
 		"check": "tsc"
 	},
 	"devDependencies": {
+		"@types/aws-lambda": "^8.10.145",
 		"@types/eslint": "^9.6.0",
 		"@types/jest": "^29.5.12",
+		"@types/jsonwebtoken": "^9.0.7",
 		"@types/node": "22.5.4",
+		"@types/uuid": "^10.0.0",
 		"aws-cdk": "2.164.0",
 		"eslint": "^9.7.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -30,7 +33,10 @@
 	},
 	"dependencies": {
 		"aws-cdk-lib": "2.164.0",
+		"aws-lambda": "^1.0.7",
 		"constructs": "^10.0.0",
+		"jsonwebtoken": "^9.0.2",
+		"jwt-decode": "^4.0.0",
 		"source-map-support": "^0.5.21"
 	}
 }

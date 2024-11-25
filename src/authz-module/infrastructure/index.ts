@@ -10,14 +10,30 @@ import * as path from 'path';
 
 export interface AuthzStackProps extends cdk.StackProps {}
 
+/**
+ * When deploying this stack from ground up or when the User Pool and its
+ * corresponding CUSTOM DOMAIN have being removed, the Authentication UI Customization
+ * method must be commented out, because it depends on the CUSTOM DOMAIN status
+ * to be ACTIVE. Normally, after creating the domain, it will take about 10
+ * minutes to become ACTIVE - the status can be checked in real time in the
+ * AWS Console.
+ * After the CUSTOM DOMAIN status is ACTIVE, the Authentication UI Customization
+ * method can be uncommented and the stack can be updated.
+ *
+ * Nov, 28th, 2024: Currently, when this stack is removed/destroyed,
+ * the Cognito User Pool remains in the AWS account. If required,
+ * the user pool must be manually deleted.
+ */
 export class AuthzStack extends cdk.Stack {
+	public readonly userPool: cognito.IUserPool;
+
 	constructor(scope: Construct, id: string, props?: AuthzStackProps) {
 		super(scope, id, props);
 
-		const userPool = this.createUserPool();
-		this.addCustomDomain(userPool);
-		this.addAppClient(userPool);
-		this.customizeAuthUI(userPool);
+		this.userPool = this.createUserPool();
+		this.addCustomDomain(this.userPool);
+		this.addAppClient(this.userPool);
+		this.customizeAuthUI(this.userPool);
 	}
 
 	private createUserPool(): cognito.IUserPool {
@@ -45,7 +61,12 @@ export class AuthzStack extends cdk.Stack {
 				fromName: $config.NOREPLY_EMAIL_NAME,
 				replyTo: $config.CONTACT_EMAIL,
 				sesVerifiedDomain: $config.DOMAIN_NAME
-			})
+			}),
+			customAttributes: {
+				company_name: new cognito.StringAttribute({ mutable: true }),
+				company_cnpj: new cognito.StringAttribute({ mutable: true }),
+				dashboard_id: new cognito.NumberAttribute({ mutable: true })
+			}
 		});
 	}
 

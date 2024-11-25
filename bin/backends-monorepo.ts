@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { AuthzStack } from '../src/authz-module/infrastructure';
 import { DomainStack } from '../src/domain-module/infrastructure';
+import { ApiGatewayStack } from '../src/api-gateway-module/infrastructure';
 import { MetabaseStack } from '../src/metabase-module/infrastructure';
 
 const app = new cdk.App();
@@ -36,3 +37,15 @@ const metabaseStack = new MetabaseStack(app, 'MetabaseStack', {
 	},
 	description: 'Deploy Metabase and db on EC2 instance'
 });
+
+const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
+	env: prodEnv,
+	tags: {
+		module: 'api-gateway-module'
+	},
+	description: 'Configure API Gateway for Delta AI',
+	ssoHandler: metabaseStack.ssoHandler,
+	userPool: authzStack.userPool
+});
+apiGatewayStack.addDependency(metabaseStack);
+apiGatewayStack.addDependency(authzStack);

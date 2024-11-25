@@ -8,6 +8,8 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 /**
  * This stack creates a Metabase instance with a persistent EBS volume for DB data store.
@@ -27,6 +29,8 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
  *  - Data Lifecycle Manager Role Arn
  */
 export class MetabaseStack extends cdk.Stack {
+	public readonly ssoHandler: lambdaNodejs.NodejsFunction;
+
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
@@ -35,6 +39,7 @@ export class MetabaseStack extends cdk.Stack {
 		const ebsVolume = this.createPersistentEBSVolumeToDb();
 		const ec2Instance = this.createEc2Instance(vpc, securityGroup);
 		const cloudFront = this.createCloudFrontForMetabase(ec2Instance);
+    this.ssoHandler = this.createSsoHandler();
 
 		/**
 		 * TODO - when cloudfront vpc origin become available through cdk
@@ -231,4 +236,21 @@ export class MetabaseStack extends cdk.Stack {
 			recordName: $config.BI_DOMAIN_NAME
 		});
 	}
+
+  private createSsoHandler(): lambdaNodejs.NodejsFunction {
+    return new lambdaNodejs.NodejsFunction(this, 'SsoFunction', {
+			functionName: 'SsoFunction',
+			description: 'Lambda function to handle SSO in Delta AI',
+			entry: 'src/metabase-module/adapters/input/http-api-gateway/ssoFunction.ts',
+			handler: 'handler',
+			runtime: lambda.Runtime.NODEJS_20_X,
+			memorySize: 128, // might require 512MB
+			timeout: cdk.Duration.seconds(10),
+			bundling: {
+				minify: true,
+				sourceMap: true
+			},
+			environment: {} // might require environment variables
+		});
+  }
 }
