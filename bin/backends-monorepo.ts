@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { AuthzStack } from '../src/authz-module/infrastructure';
 import { DomainStack } from '../src/domain-module/infrastructure';
+import { MetabaseStack } from '../src/metabase-module/infrastructure';
 
 const app = new cdk.App();
 
@@ -27,3 +28,11 @@ const authzStack = new AuthzStack(app, 'AuthzStack', {
 	description: 'Configure Cognito User Pool, custom emails, and others'
 });
 authzStack.addDependency(domainStack);
+
+const metabaseStack = new MetabaseStack(app, 'MetabaseStack', {
+	env: prodEnv,
+	tags: {
+		module: 'metabase-module'
+	},
+	description: 'Deploy Metabase and db on EC2 instance'
+});
