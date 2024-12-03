@@ -5,7 +5,7 @@ import { SsoUseCase } from '../../../domain/useCases/ssoUseCase';
 import { UserAttributes } from '../types/userAttributes';
 import { jwtDecode } from 'jwt-decode';
 import { GetDashboardRequest } from './request';
-import { DataDisplayManager } from '../../output/http/dataDisplayManager'
+import { DataDisplayManager } from '../../output/http/dataDisplayManager';
 
 export const handler = async (
 	event: APIGatewayProxyEvent,
@@ -17,14 +17,14 @@ export const handler = async (
 		console.info(`API Gateway RequestId: ${apiRequestId}\nLambda RequestId: ${lambdaRequestId}`);
 
 		const idToken: string = event.headers['Authorization']
-    ? event.headers['Authorization'].split('Bearer ')[1]
-    : '';
-    const userAttributes: UserAttributes = jwtDecode(idToken);
+			? event.headers['Authorization'].split('Bearer ')[1]
+			: '';
+		const userAttributes: UserAttributes = jwtDecode(idToken);
 
-    const request = new GetDashboardRequest(userAttributes);
-    request.validate();
+		const request = new GetDashboardRequest(userAttributes);
+		request.validate();
 
-    const dataDisplayManager = new DataDisplayManager();
+		const dataDisplayManager = new DataDisplayManager();
 		const useCase = new SsoUseCase(dataDisplayManager);
 		const result = await useCase.execute(userAttributes);
 

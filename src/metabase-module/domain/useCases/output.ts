@@ -1,3 +1,3 @@
 export interface SsoUseCaseOutput {
-  url: string;
+	url: string;
 }

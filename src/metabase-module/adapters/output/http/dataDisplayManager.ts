@@ -6,7 +6,7 @@ import { $config } from '../../../../config';
 export class DataDisplayManager implements IDataDisplayManager {
 	public getDashboardUrl(userAttributes: UserAttributes): string {
 		try {
-      // To be implemented when the actual logic with dashboard parameters is known
+			// To be implemented when the actual logic with dashboard parameters is known
 			// const dashboardParams = Object.keys(userAttributes)
 			// 	.filter((key) => key.startsWith('custom:'))
 			// 	.reduce((params: { [key: string]: any }, key: string) => {

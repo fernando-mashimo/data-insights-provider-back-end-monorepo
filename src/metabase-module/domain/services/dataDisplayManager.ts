@@ -1,5 +1,5 @@
-import { UserAttributes } from "../../adapters/input/types/userAttributes";
+import { UserAttributes } from '../../adapters/input/types/userAttributes';
 
 export interface IDataDisplayManager {
-  getDashboardUrl(userAttributes: UserAttributes): string;
+	getDashboardUrl(userAttributes: UserAttributes): string;
 }

@@ -91,7 +91,7 @@ export class ApiGatewayStack extends cdk.Stack {
 	): void {
 		// Adds resources for metabase/dashboard endpoint
 		const metabaseResource = api.root.addResource('metabase');
-    const dashboardResource = metabaseResource.addResource('dashboard');
+		const dashboardResource = metabaseResource.addResource('dashboard');
 		const ssoIntegration = new apiGateway.LambdaIntegration(props.ssoHandler);
 		dashboardResource.addMethod('POST', ssoIntegration, {
 			authorizer: authorizer,

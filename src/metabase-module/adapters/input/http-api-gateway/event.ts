@@ -1,4 +1,4 @@
 export interface SsoEvent {
-  idToken: string;
-  accessToken: string;
+	idToken: string;
+	accessToken: string;
 }

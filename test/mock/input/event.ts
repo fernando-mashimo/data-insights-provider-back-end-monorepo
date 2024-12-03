@@ -49,11 +49,11 @@ export const SQSRecordBaseEvent: SQSRecord = {
 	receiptHandle: '',
 	body: '',
 	attributes: {
-    ApproximateReceiveCount: '',
-    SentTimestamp: '',
-    SenderId: '',
-    ApproximateFirstReceiveTimestamp: ''
-  },
+		ApproximateReceiveCount: '',
+		SentTimestamp: '',
+		SenderId: '',
+		ApproximateFirstReceiveTimestamp: ''
+	},
 	messageAttributes: {},
 	md5OfBody: '',
 	eventSource: '',
@@ -62,24 +62,24 @@ export const SQSRecordBaseEvent: SQSRecord = {
 };
 
 export const ApiGatewayBaseContext: Context = {
-  callbackWaitsForEmptyEventLoop: false,
-  functionName: '',
-  functionVersion: '',
-  invokedFunctionArn: '',
-  memoryLimitInMB: '',
-  awsRequestId: '',
-  logGroupName: '',
-  logStreamName: '',
-  getRemainingTimeInMillis: function (): number {
-    throw new Error('Function not implemented.');
-  },
-  done: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  fail: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  succeed: function (): void {
-    throw new Error('Function not implemented.');
-  }
+	callbackWaitsForEmptyEventLoop: false,
+	functionName: '',
+	functionVersion: '',
+	invokedFunctionArn: '',
+	memoryLimitInMB: '',
+	awsRequestId: '',
+	logGroupName: '',
+	logStreamName: '',
+	getRemainingTimeInMillis: function (): number {
+		throw new Error('Function not implemented.');
+	},
+	done: function (): void {
+		throw new Error('Function not implemented.');
+	},
+	fail: function (): void {
+		throw new Error('Function not implemented.');
+	},
+	succeed: function (): void {
+		throw new Error('Function not implemented.');
+	}
 };
