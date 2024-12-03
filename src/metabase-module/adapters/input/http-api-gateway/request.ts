@@ -1,4 +1,3 @@
-import { IllegalArgumentError } from '../../../domain/errors/illegalArgumentError';
 import { UserAttributes } from '../types/userAttributes';
 
 export class GetDashboardRequest {

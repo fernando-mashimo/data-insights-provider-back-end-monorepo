@@ -13,7 +13,7 @@ export class Parser {
 			const targetString = decodeURIComponent(uriComponent).split(key)[1].substring(1);
 
 			return [JSON.parse(targetString), uriComponent];
-		} catch (error) {
+		} catch {
 			throw new IllegalArgumentError('Invalid body shape provided');
 		}
 	}

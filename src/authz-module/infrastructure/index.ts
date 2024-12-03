@@ -8,8 +8,6 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export interface AuthzStackProps extends cdk.StackProps {}
-
 /**
  * When deploying this stack from ground up or when the User Pool and its
  * corresponding CUSTOM DOMAIN have being removed, the Authentication UI Customization
@@ -27,7 +25,7 @@ export interface AuthzStackProps extends cdk.StackProps {}
 export class AuthzStack extends cdk.Stack {
 	public readonly userPool: cognito.IUserPool;
 
-	constructor(scope: Construct, id: string, props?: AuthzStackProps) {
+	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
 		this.userPool = this.createUserPool();

@@ -36,9 +36,9 @@ export class MetabaseStack extends cdk.Stack {
 
 		const vpc = this.createVpc();
 		const securityGroup = this.createSecurityGroup(vpc);
-		const ebsVolume = this.createPersistentEBSVolumeToDb();
+		this.createPersistentEBSVolumeToDb();
 		const ec2Instance = this.createEc2Instance(vpc, securityGroup);
-		const cloudFront = this.createCloudFrontForMetabase(ec2Instance);
+		this.createCloudFrontForMetabase(ec2Instance);
 		this.ssoHandler = this.createSsoHandler();
 
 		/**
