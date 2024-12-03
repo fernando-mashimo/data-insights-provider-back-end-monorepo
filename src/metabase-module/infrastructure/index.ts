@@ -39,7 +39,7 @@ export class MetabaseStack extends cdk.Stack {
 		const ebsVolume = this.createPersistentEBSVolumeToDb();
 		const ec2Instance = this.createEc2Instance(vpc, securityGroup);
 		const cloudFront = this.createCloudFrontForMetabase(ec2Instance);
-    this.ssoHandler = this.createSsoHandler();
+		this.ssoHandler = this.createSsoHandler();
 
 		/**
 		 * TODO - when cloudfront vpc origin become available through cdk
@@ -178,7 +178,10 @@ export class MetabaseStack extends cdk.Stack {
 						ec2.InitCommand.shellCommand('while [ ! -e /dev/sdf ]; do sleep 1; done'),
 						ec2.InitCommand.shellCommand('sudo mkdir -p /mnt/data'),
 						ec2.InitCommand.shellCommand('sudo mount /dev/sdf /mnt/data'),
-						ec2.InitCommand.shellCommand('sudo mkdir -p /mnt/data/metabase-db-data')
+						ec2.InitCommand.shellCommand('sudo mkdir -p /mnt/data/metabase-db-data'),
+						ec2.InitCommand.shellCommand(
+							'echo "/dev/sdf /mnt/data ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab'
+						)
 					]),
 					startApplication: new ec2.InitConfig([
 						ec2.InitFile.fromFileInline(`${wDir}/docker-compose.yml`, `${sDir}/docker-compose.yml`),
@@ -237,8 +240,8 @@ export class MetabaseStack extends cdk.Stack {
 		});
 	}
 
-  private createSsoHandler(): lambdaNodejs.NodejsFunction {
-    return new lambdaNodejs.NodejsFunction(this, 'SsoFunction', {
+	private createSsoHandler(): lambdaNodejs.NodejsFunction {
+		return new lambdaNodejs.NodejsFunction(this, 'SsoFunction', {
 			functionName: 'SsoFunction',
 			description: 'Lambda function to handle SSO in Delta AI',
 			entry: 'src/metabase-module/adapters/input/http-api-gateway/ssoFunction.ts',
@@ -252,5 +255,5 @@ export class MetabaseStack extends cdk.Stack {
 			},
 			environment: {} // might require environment variables
 		});
-  }
+	}
 }
