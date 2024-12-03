@@ -241,10 +241,10 @@ export class MetabaseStack extends cdk.Stack {
 	}
 
 	private createSsoHandler(): lambdaNodejs.NodejsFunction {
-		return new lambdaNodejs.NodejsFunction(this, 'SsoFunction', {
-			functionName: 'SsoFunction',
-			description: 'Lambda function to handle SSO in Delta AI',
-			entry: 'src/metabase-module/adapters/input/http-api-gateway/ssoFunction.ts',
+		return new lambdaNodejs.NodejsFunction(this, 'GetEmbedUrlFunction', {
+			functionName: 'GetEmbedUrlFunction',
+			description: 'Lambda function to handle Get Embed Url in Delta AI',
+			entry: 'src/metabase-module/adapters/input/http-api-gateway/getEmbedUrl/index.ts',
 			handler: 'handler',
 			runtime: lambda.Runtime.NODEJS_20_X,
 			memorySize: 128, // might require 512MB

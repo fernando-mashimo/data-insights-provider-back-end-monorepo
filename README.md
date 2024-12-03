@@ -55,7 +55,7 @@ src/                # Main source code directory
     │   │   ├── schedule/           # Schedule handlers
     │   │   └── core/               # Core input classes to be extended
     │   └── output/         # Output adapters
-    │   │   ├── helpers/           # Helper functions for output
+    │       ├── helpers/           # Helper functions for output
     │       ├── database/          # Database access implementations
     │       ├── file/              # File system access implementations
     │       ├── sns/               # Message producer implementations using SNS

@@ -1,8 +1,9 @@
+import { APIGatewayEvent } from 'aws-lambda';
 import { IllegalArgumentError } from '../../../domain/errors/illegalArgumentError';
 import { IllegalBodyError } from '../../../domain/errors/illegalBodyError';
 
-export class Parser {
-	public static parseFormURLEncodedBody<T>(
+export class HttpBodyParser {
+	public static parseFormURLEncoded<T>(
 		body: string,
 		isBase64Encoded: boolean,
 		key: string
@@ -18,8 +19,13 @@ export class Parser {
 		}
 	}
 
-	public static parseAPIGatewayBody<T>(body: string, isBase64Encoded: boolean): T {
+	public static parseJson<T>(event: APIGatewayEvent): T {
+		const body = event.body;
+		const isBase64Encoded = event.isBase64Encoded;
+
 		try {
+			if (!body) throw new IllegalBodyError('No body provided');
+
 			if (!isBase64Encoded) return JSON.parse(body);
 
 			return JSON.parse(Buffer.from(body, 'base64').toString());

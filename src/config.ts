@@ -19,10 +19,10 @@ class Config {
 		`https://${Config.APP_DOMAIN_NAME}/login-callback`
 	];
 
-	public static EXTERNAL_DATA_API_URL: string = 'http://bi.isdelta.com';
-	public static EXTERNAL_DATA_API_KEY: string =
+	public static BI_API_URL: string = `https://${Config.BI_DOMAIN_NAME}`;
+	public static BI_EMBED_ENCODE_SECRET: string =
 		'55ff965c97be0be75a6208d62d9593ef7402365988cb5f0f63ccad11bfa0f66c';
-	public static EXTERNAL_DATA_API_TOKEN_EXPIRATION_MINUTES: number = 60;
+	public static BI_EMBED_URL_EXPIRATION_IN_MINUTES: number = 60;
 }
 
 export const $config = Config;
