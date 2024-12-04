@@ -2,7 +2,8 @@
 export type PreFilters = {};
 
 export enum Dashboards {
-	TEST = 1
+	TEST = 1,
+  TEST_UPDATE_DASHBOARD_CARDS = 2
 }
 
 export interface MetabaseClient {

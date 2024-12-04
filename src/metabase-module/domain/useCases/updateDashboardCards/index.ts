@@ -10,15 +10,15 @@ export class UpdateDashboardCardsUseCase implements UseCase<null, void> {
 
 	public async execute(): Promise<void> {
 		try {
-			const dashboardId = Dashboards.TEST;
+			const dashboardIds = Object.values(Dashboards);
 
 			const cardsIds = await this.metabaseClient.getDashboardCardsIds();
 
-			const updatePromises = cardsIds.map((cardId) =>
-				this.metabaseClient.updateDashboardCard(cardId, dashboardId)
+			const updatePromises = dashboardIds.flatMap((dashboardId) =>
+				cardsIds.map((cardId) => this.metabaseClient.updateDashboardCard(cardId, +dashboardId))
 			);
 
-      await Promise.all(updatePromises);
+			await Promise.all(updatePromises);
 		} catch (error) {
 			console.error('Cannot update dashboard cards', error);
 			throw error;
