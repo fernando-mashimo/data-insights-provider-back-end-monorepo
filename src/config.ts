@@ -20,6 +20,7 @@ class Config {
 	];
 
 	public static BI_API_URL: string = `https://${Config.BI_DOMAIN_NAME}`;
+  public static BI_API_KEY: string = 'mb_qUVcSwZ6d0R9RjPu20cAUFDRHjiWs/8pxRkLXcEuEKM='
 	public static BI_EMBED_ENCODE_SECRET: string =
 		'55ff965c97be0be75a6208d62d9593ef7402365988cb5f0f63ccad11bfa0f66c';
 	public static BI_EMBED_URL_EXPIRATION_IN_MINUTES: number = 60;

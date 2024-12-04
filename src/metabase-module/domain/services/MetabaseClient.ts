@@ -7,4 +7,6 @@ export enum Dashboards {
 
 export interface MetabaseClient {
 	getEmbedDashboardUrl(dashboard: Dashboards, preFilters: PreFilters): string;
+	getDashboardCardsIds(): Promise<string[]>;
+	updateDashboardCard(cardId: string, dashboardId: number): Promise<void>;
 }

@@ -10,6 +10,8 @@ import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as eventsTargets from 'aws-cdk-lib/aws-events-targets';
 
 /**
  * This stack creates a Metabase instance with a persistent EBS volume for DB data store.
@@ -30,6 +32,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
  */
 export class MetabaseStack extends cdk.Stack {
 	public readonly ssoHandler: lambdaNodejs.NodejsFunction;
+	public readonly updateDashboardCardsHandler: lambdaNodejs.NodejsFunction;
 
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
@@ -40,6 +43,8 @@ export class MetabaseStack extends cdk.Stack {
 		const ec2Instance = this.createEc2Instance(vpc, securityGroup);
 		this.createCloudFrontForMetabase(ec2Instance);
 		this.ssoHandler = this.createSsoHandler();
+		this.updateDashboardCardsHandler = this.createUpdateDashboardCardsHandler();
+    this.scheduleUpdateDashboardCards();
 
 		/**
 		 * TODO - when cloudfront vpc origin become available through cdk
@@ -255,5 +260,29 @@ export class MetabaseStack extends cdk.Stack {
 			},
 			environment: {} // might require environment variables
 		});
+	}
+
+	private createUpdateDashboardCardsHandler(): lambdaNodejs.NodejsFunction {
+		return new lambdaNodejs.NodejsFunction(this, 'UpdateDashboardCardsFunction', {
+			functionName: 'UpdateDashboardCardsFunction',
+			description: 'Lambda function to handle Update Dashboard Cards in Delta AI',
+			entry: 'src/metabase-module/adapters/input/http-api-gateway/updateDashboardCards/index.ts',
+			handler: 'handler',
+			runtime: lambda.Runtime.NODEJS_20_X,
+			memorySize: 512,
+			timeout: cdk.Duration.seconds(30),
+			bundling: {
+				minify: true,
+				sourceMap: true
+			},
+			environment: {}
+		});
+	}
+
+	private scheduleUpdateDashboardCards(): void {
+		const rule = new events.Rule(this, 'UpdateDashboardCardsScheduleRule', {
+			schedule: events.Schedule.cron({ minute: '0', hour: '3' })
+		});
+		rule.addTarget(new eventsTargets.LambdaFunction(this.updateDashboardCardsHandler));
 	}
 }
