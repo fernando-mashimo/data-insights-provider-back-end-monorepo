@@ -37,14 +37,17 @@ export class MetabaseStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
+		// metabase instance
 		const vpc = this.createVpc();
 		const securityGroup = this.createSecurityGroup(vpc);
 		this.createPersistentEBSVolumeToDb();
 		const ec2Instance = this.createEc2Instance(vpc, securityGroup);
 		this.createCloudFrontForMetabase(ec2Instance);
+
+		// metabase integration
 		this.ssoHandler = this.createSsoHandler();
 		this.updateDashboardCardsHandler = this.createUpdateDashboardCardsHandler();
-    this.scheduleUpdateDashboardCards();
+		this.scheduleUpdateDashboardCards();
 
 		/**
 		 * TODO - when cloudfront vpc origin become available through cdk
@@ -281,7 +284,10 @@ export class MetabaseStack extends cdk.Stack {
 
 	private scheduleUpdateDashboardCards(): void {
 		const rule = new events.Rule(this, 'UpdateDashboardCardsScheduleRule', {
-			schedule: events.Schedule.cron({ minute: '0', hour: '3' })
+			schedule: events.Schedule.cron({
+				minute: '0',
+				hour: $config.BI_CACHE_REFRESH_EVERY_DAY_AT_HOUR.toString()
+			})
 		});
 		rule.addTarget(new eventsTargets.LambdaFunction(this.updateDashboardCardsHandler));
 	}
