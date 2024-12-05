@@ -52,7 +52,7 @@ export class MetabaseClientImp implements MetabaseClient {
 		}
 	}
 
-	public async updateDashboardCard(cardId: string, dashboardId: number): Promise<void> {
+	public async updateDashboardCard(cardId: string): Promise<void> {
 		try {
 			const url = new URL($config.BI_API_URL);
 			url.pathname = `/api/card/${cardId}/query`;
@@ -60,9 +60,8 @@ export class MetabaseClientImp implements MetabaseClient {
 			const payload = {
 				ignore_cache: true,
 				collection_preview: false,
-				dashboard_id: dashboardId
+				dashboard_id: null
 			};
-
 			await this.client.post(url.toString(), payload, {
 				headers: {
 					'x-api-key': $config.BI_API_KEY
