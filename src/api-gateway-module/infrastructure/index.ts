@@ -10,7 +10,7 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
 interface ApiGatewayStackProps extends cdk.StackProps {
-	ssoHandler: lambdaNodejs.NodejsFunction;
+	getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
 	updateDashboardCardsHandler: lambdaNodejs.NodejsFunction;
 	userPool: cognito.IUserPool;
 }
@@ -93,8 +93,8 @@ export class ApiGatewayStack extends cdk.Stack {
 		// Adds resources for metabase/dashboard endpoint
 		const metabaseResource = api.root.addResource('metabase');
 		const dashboardResource = metabaseResource.addResource('dashboard');
-		const ssoIntegration = new apiGateway.LambdaIntegration(props.ssoHandler);
-		dashboardResource.addMethod('POST', ssoIntegration, {
+		const getEmbedUrlIntegration = new apiGateway.LambdaIntegration(props.getEmbedUrlHandler);
+		dashboardResource.addMethod('POST', getEmbedUrlIntegration, {
 			authorizer: authorizer,
 			authorizationType: apiGateway.AuthorizationType.COGNITO
 		});
@@ -104,6 +104,6 @@ export class ApiGatewayStack extends cdk.Stack {
 		const updateDashboardCardsIntegration = new apiGateway.LambdaIntegration(
 			props.updateDashboardCardsHandler
 		);
-    cardsResource.addMethod('PUT', updateDashboardCardsIntegration);
+		cardsResource.addMethod('PUT', updateDashboardCardsIntegration);
 	}
 }

@@ -35,7 +35,7 @@ import * as cwActions from 'aws-cdk-lib/aws-cloudwatch-actions';
  *  - Data Lifecycle Manager Role Arn
  */
 export class MetabaseStack extends cdk.Stack {
-	public readonly ssoHandler: lambdaNodejs.NodejsFunction;
+	public readonly getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
 	public readonly updateDashboardCardsHandler: lambdaNodejs.NodejsFunction;
 	public readonly updateDashboardCardsAsyncHandler: lambdaNodejs.NodejsFunction;
 
@@ -50,7 +50,7 @@ export class MetabaseStack extends cdk.Stack {
 		this.createCloudFrontForMetabase(ec2Instance);
 
 		// metabase integration
-		this.ssoHandler = this.createSsoHandler();
+		this.getEmbedUrlHandler = this.createGetEmbedUrlHandler();
 		this.updateDashboardCardsHandler = this.createUpdateDashboardCardsHandler();
 		this.updateDashboardCardsAsyncHandler = this.createUpdateDashboardCardsAsyncHandler();
 		this.scheduleUpdateDashboardCards();
@@ -254,7 +254,7 @@ export class MetabaseStack extends cdk.Stack {
 		});
 	}
 
-	private createSsoHandler(): lambdaNodejs.NodejsFunction {
+	private createGetEmbedUrlHandler(): lambdaNodejs.NodejsFunction {
 		return new lambdaNodejs.NodejsFunction(this, 'GetEmbedUrlFunction', {
 			functionName: 'GetEmbedUrlFunction',
 			description: 'Lambda function to handle Get Embed Url in Delta AI',
