@@ -299,7 +299,7 @@ export class MetabaseStack extends cdk.Stack {
 				handler: 'handler',
 				runtime: lambda.Runtime.NODEJS_20_X,
 				memorySize: 256,
-				timeout: cdk.Duration.seconds(30),
+				timeout: cdk.Duration.seconds(900),
 				bundling: {
 					minify: true,
 					sourceMap: true
@@ -314,7 +314,7 @@ export class MetabaseStack extends cdk.Stack {
 			}),
 			evaluationPeriods: 1,
 			datapointsToAlarm: 1,
-			threshold: (lambdaFunction.timeout ?? cdk.Duration.seconds(30)).toMilliseconds(),
+			threshold: (lambdaFunction.timeout ?? cdk.Duration.seconds(900)).toMilliseconds(),
 			treatMissingData: cw.TreatMissingData.IGNORE,
 			alarmName: 'UpdateDashboardCardsAsyncFunctionTimeoutAlarm',
 			actionsEnabled: true
