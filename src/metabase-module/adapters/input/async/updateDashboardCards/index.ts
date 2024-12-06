@@ -1,7 +1,14 @@
-import { APIGatewayProxyResult } from 'aws-lambda';
-// import { LambdaHttpResponse } from "../../helpers/httpResponse";
+import { UpdateDashboardCardsUseCase } from '../../../../domain/useCases/updateDashboardCards';
+import { MetabaseClientImp } from '../../../output/http/MetabaseClientImp';
 
-export const handler = async (): Promise<APIGatewayProxyResult> => {
-	// return LambdaHttpResponse.success();
-	throw new Error('Async DLQ test error');
+const metabaseClient = new MetabaseClientImp();
+const useCase = new UpdateDashboardCardsUseCase(metabaseClient);
+
+export const handler = async (): Promise<void> => {
+	try {
+    await useCase.execute();
+	} catch (error) {
+		console.error("Cannot handle update dashboard cards async event", error);
+    throw error;
+	}
 };
