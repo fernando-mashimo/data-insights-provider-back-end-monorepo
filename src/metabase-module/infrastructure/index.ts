@@ -12,6 +12,10 @@ import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as eventsTargets from 'aws-cdk-lib/aws-events-targets';
+import * as cw from 'aws-cdk-lib/aws-cloudwatch';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
+import * as cwActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 
 /**
  * This stack creates a Metabase instance with a persistent EBS volume for DB data store.
@@ -33,6 +37,7 @@ import * as eventsTargets from 'aws-cdk-lib/aws-events-targets';
 export class MetabaseStack extends cdk.Stack {
 	public readonly ssoHandler: lambdaNodejs.NodejsFunction;
 	public readonly updateDashboardCardsHandler: lambdaNodejs.NodejsFunction;
+	public readonly updateDashboardCardsAsyncHandler: lambdaNodejs.NodejsFunction;
 
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
@@ -47,6 +52,7 @@ export class MetabaseStack extends cdk.Stack {
 		// metabase integration
 		this.ssoHandler = this.createSsoHandler();
 		this.updateDashboardCardsHandler = this.createUpdateDashboardCardsHandler();
+		this.updateDashboardCardsAsyncHandler = this.createUpdateDashboardCardsAsyncHandler();
 		this.scheduleUpdateDashboardCards();
 
 		/**
@@ -272,7 +278,7 @@ export class MetabaseStack extends cdk.Stack {
 			entry: 'src/metabase-module/adapters/input/http-api-gateway/updateDashboardCards/index.ts',
 			handler: 'handler',
 			runtime: lambda.Runtime.NODEJS_20_X,
-			memorySize: 512,
+			memorySize: 256,
 			timeout: cdk.Duration.seconds(30),
 			bundling: {
 				minify: true,
@@ -282,6 +288,76 @@ export class MetabaseStack extends cdk.Stack {
 		});
 	}
 
+	private createUpdateDashboardCardsAsyncHandler(): lambdaNodejs.NodejsFunction {
+		const lambdaFunction = new lambdaNodejs.NodejsFunction(
+			this,
+			'UpdateDashboardCardsAsyncFunction',
+			{
+				functionName: 'UpdateDashboardCardsAsyncFunction',
+				description: 'Lambda function to handle Update Dashboard Cards async requests in Delta AI',
+				entry: 'src/metabase-module/adapters/input/async/updateDashboardCards/index.ts',
+				handler: 'handler',
+				runtime: lambda.Runtime.NODEJS_20_X,
+				memorySize: 256,
+				timeout: cdk.Duration.seconds(30),
+				bundling: {
+					minify: true,
+					sourceMap: true
+				},
+				environment: {}
+			}
+		);
+
+		const timeoutAlarm = new cw.Alarm(this, 'UpdateDashboardCardsAsyncFunctionTimeoutAlarm', {
+			metric: lambdaFunction.metricDuration().with({
+				statistic: 'Maximum'
+			}),
+			evaluationPeriods: 1,
+			datapointsToAlarm: 1,
+			threshold: (lambdaFunction.timeout ?? cdk.Duration.seconds(30)).toMilliseconds(),
+			treatMissingData: cw.TreatMissingData.IGNORE,
+			alarmName: 'UpdateDashboardCardsAsyncFunctionTimeoutAlarm',
+			actionsEnabled: true
+		});
+		const timeoutAlarmTopic = new sns.Topic(
+			this,
+			'UpdateDashboardCardsAsyncFunctionTimeoutAlarmTopic',
+			{
+				topicName: 'UpdateDashboardCardsAsyncFunctionTimeoutAlarmTopic',
+				displayName: 'Update Dashboard Cards Async Function Timeout Alarm Topic'
+			}
+		);
+		timeoutAlarmTopic.addSubscription(new subs.EmailSubscription($config.AWS_ADMIN_EMAIL));
+		timeoutAlarm.addAlarmAction(new cwActions.SnsAction(timeoutAlarmTopic));
+
+		const executionErrorAlarm = new cw.Alarm(
+			this,
+			'UpdateDashboardCardsAsyncFunctionExecutionErrorAlarm',
+			{
+				metric: lambdaFunction.metricErrors().with({
+					statistic: 'Sum'
+				}),
+				evaluationPeriods: 1,
+				threshold: 1,
+				comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				alarmName: 'UpdateDashboardCardsAsyncFunctionExecutionErrorAlarm',
+				actionsEnabled: true
+			}
+		);
+		const executionErrorAlarmTopic = new sns.Topic(
+			this,
+			'UpdateDashboardCardsAsyncFunctionExecutionErrorAlarmTopic',
+			{
+				topicName: 'UpdateDashboardCardsAsyncFunctionExecutionErrorAlarmTopic',
+				displayName: 'Update Dashboard Cards Async Function Execution Error Alarm Topic'
+			}
+		);
+		executionErrorAlarmTopic.addSubscription(new subs.EmailSubscription($config.AWS_ADMIN_EMAIL));
+		executionErrorAlarm.addAlarmAction(new cwActions.SnsAction(executionErrorAlarmTopic));
+
+		return lambdaFunction;
+	}
+
 	private scheduleUpdateDashboardCards(): void {
 		const rule = new events.Rule(this, 'UpdateDashboardCardsScheduleRule', {
 			schedule: events.Schedule.cron({
@@ -289,6 +365,13 @@ export class MetabaseStack extends cdk.Stack {
 				hour: $config.BI_CACHE_REFRESH_EVERY_DAY_AT_HOUR.toString()
 			})
 		});
-		rule.addTarget(new eventsTargets.LambdaFunction(this.updateDashboardCardsHandler));
+
+		// Adding the lambda function as a target of the rule
+		rule.addTarget(
+			new eventsTargets.LambdaFunction(this.updateDashboardCardsAsyncHandler, {
+				retryAttempts: 2,
+				maxEventAge: cdk.Duration.days(1)
+			})
+		);
 	}
 }

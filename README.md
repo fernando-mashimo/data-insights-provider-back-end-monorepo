@@ -50,6 +50,7 @@ src/                # Main source code directory
     │   │   ├── helpers/            # Helper functions for input
     │   │   ├── types/              # Common type definitions for input
     │   │   ├── http-api-gateway/   # HTTP API Gateway handlers
+    │   │   ├── async/              # Async request handlers (cron)
     │   │   ├── sns/                # SNS handlers
     │   │   ├── sqs/                # SQS handlers
     │   │   ├── schedule/           # Schedule handlers
