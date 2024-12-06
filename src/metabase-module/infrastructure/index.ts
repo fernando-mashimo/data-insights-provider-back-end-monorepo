@@ -54,6 +54,7 @@ export class MetabaseStack extends cdk.Stack {
 		this.updateDashboardCardsHandler = this.createUpdateDashboardCardsHandler();
 		this.updateDashboardCardsAsyncHandler = this.createUpdateDashboardCardsAsyncHandler();
 		this.scheduleUpdateDashboardCards();
+    this.setMetabaseLambdaFunctionsErrorsAlarm();
 
 		/**
 		 * TODO - when cloudfront vpc origin become available through cdk
@@ -299,7 +300,7 @@ export class MetabaseStack extends cdk.Stack {
 				handler: 'handler',
 				runtime: lambda.Runtime.NODEJS_20_X,
 				memorySize: 256,
-				timeout: cdk.Duration.seconds(900),
+				timeout: cdk.Duration.seconds($config.AXIOS_REQUEST_TIMEOUT_SECONDS),
 				bundling: {
 					minify: true,
 					sourceMap: true
@@ -376,5 +377,30 @@ export class MetabaseStack extends cdk.Stack {
 				maxEventAge: cdk.Duration.days(1)
 			})
 		);
+	}
+
+	private setMetabaseLambdaFunctionsErrorsAlarm(): void {
+		const lambdaFunctionsErrorAlarm = new cw.Alarm(
+			this,
+			'MetabaseLambdaFunctionsExecutionErrorAlarm',
+			{
+				metric: lambdaNodejs.NodejsFunction.metricAllErrors(),
+				evaluationPeriods: 1,
+				threshold: 1,
+				comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				alarmName: 'MetabaseLambdaFunctionsExecutionErrorAlarm',
+				actionsEnabled: true
+			}
+		);
+		const lambdaFunctionsErrorAlarmTopic = new sns.Topic(
+			this,
+			'MetabaseLambdaFunctionsExecutionErrorAlarmTopic',
+			{
+				topicName: 'MetabaseLambdaFunctionsExecutionErrorAlarmTopic',
+				displayName: 'Metabase Stack Lambda Functions Execution Error Alarm Topic'
+			}
+		);
+		lambdaFunctionsErrorAlarmTopic.addSubscription(new subs.EmailSubscription($config.AWS_ADMIN_EMAIL));
+		lambdaFunctionsErrorAlarm.addAlarmAction(new cwActions.SnsAction(lambdaFunctionsErrorAlarmTopic));
 	}
 }
