@@ -7,7 +7,9 @@ export class MetabaseClientImp implements MetabaseClient {
 	private client: Axios;
 
 	constructor() {
-		this.client = axios.create();
+		this.client = axios.create({
+      timeout: $config.AXIOS_REQUEST_TIMEOUT_SECONDS * 1000,
+    });
 	}
 
 	public getEmbedDashboardUrl(dashboard: Dashboards, preFilters: PreFilters): string {

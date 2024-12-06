@@ -314,7 +314,10 @@ export class MetabaseStack extends cdk.Stack {
 			}),
 			evaluationPeriods: 1,
 			datapointsToAlarm: 1,
-			threshold: (lambdaFunction.timeout ?? cdk.Duration.seconds(900)).toMilliseconds(),
+			threshold: (
+				lambdaFunction.timeout ?? cdk.Duration.seconds($config.AXIOS_REQUEST_TIMEOUT_SECONDS)
+			).toMilliseconds(),
+			comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			treatMissingData: cw.TreatMissingData.IGNORE,
 			alarmName: 'UpdateDashboardCardsAsyncFunctionTimeoutAlarm',
 			actionsEnabled: true
