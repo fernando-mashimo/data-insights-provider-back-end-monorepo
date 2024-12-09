@@ -1,6 +1,5 @@
 import { APIGatewayEvent } from 'aws-lambda';
-import { IllegalArgumentError } from '../../../domain/errors/illegalArgumentError';
-import { IllegalBodyError } from '../../../domain/errors/illegalBodyError';
+import { BadRequestError } from './httpErrors';
 
 export class HttpBodyParser {
 	public static parseFormURLEncoded<T>(
@@ -15,7 +14,7 @@ export class HttpBodyParser {
 
 			return [JSON.parse(targetString), uriComponent];
 		} catch {
-			throw new IllegalArgumentError('Invalid body shape provided');
+			throw new BadRequestError('Invalid body shape provided');
 		}
 	}
 
@@ -24,14 +23,14 @@ export class HttpBodyParser {
 		const isBase64Encoded = event.isBase64Encoded;
 
 		try {
-			if (!body) throw new IllegalBodyError('No body provided');
+			if (!body) throw new BadRequestError('No body provided');
 
 			if (!isBase64Encoded) return JSON.parse(body);
 
 			return JSON.parse(Buffer.from(body, 'base64').toString());
 		} catch (error) {
 			console.error(`Cannot parse API Gateway body with value ${body}`, error);
-			throw new IllegalBodyError('Invalid body shape provided');
+			throw new BadRequestError('Invalid body shape provided');
 		}
 	}
 }

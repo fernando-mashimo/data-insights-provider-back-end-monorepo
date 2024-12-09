@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { LoggedInUser } from '../../../domain/entities/LoggedInUser';
-import { UnauthorizedError } from '../../../domain/errors/unauthorizedError';
 import * as jwt from 'jsonwebtoken';
+import { UnauthorizedError } from './httpErrors';
+import { LoggedInUser } from '../../../../domain/entities/LoggedInUser';
 
 export type IdTokenAttributes = {
 	at_hash?: string;

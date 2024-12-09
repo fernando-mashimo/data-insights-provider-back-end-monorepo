@@ -1,4 +1,4 @@
-import { Dashboards, MetabaseClient, PreFilters } from '../../services/MetabaseClient';
+import { MetabaseClient, PreFilters } from '../../services/MetabaseClient';
 import { UseCase } from '../UseCase';
 import { GetEmbedUrlUseCaseInput } from './input';
 import { GetEmbedUrlUseCaseOutput } from './output';
@@ -12,17 +12,16 @@ export class GetEmbedUrlUseCase
 		this.metabaseClient = metabaseClient;
 	}
 
-	public async execute(userAttributes: GetEmbedUrlUseCaseInput): Promise<GetEmbedUrlUseCaseOutput> {
+	public async execute(input: GetEmbedUrlUseCaseInput): Promise<GetEmbedUrlUseCaseOutput> {
 		try {
-			const dashboard = Dashboards.TEST;
 			const preFilters: PreFilters = {};
-			const dashboardUrl = this.metabaseClient.getEmbedDashboardUrl(dashboard, preFilters);
+			const dashboardUrl = this.metabaseClient.getEmbedDashboardUrl(input.dashboard, preFilters);
 
 			return {
 				url: dashboardUrl
 			};
 		} catch (error) {
-			console.error(`Cannot get embed url with input ${JSON.stringify(userAttributes)}`, error);
+			console.error(`Cannot get embed url with input ${JSON.stringify(input)}`, error);
 			throw error;
 		}
 	}

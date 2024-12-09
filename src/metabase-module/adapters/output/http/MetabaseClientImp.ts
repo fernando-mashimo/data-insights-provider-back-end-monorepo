@@ -1,18 +1,19 @@
 import * as jwt from 'jsonwebtoken';
 import { $config } from '$config';
-import { Dashboards, MetabaseClient, PreFilters } from '../../../domain/services/MetabaseClient';
+import { MetabaseClient, PreFilters } from '../../../domain/services/MetabaseClient';
 import axios, { Axios } from 'axios';
+import { Dashboard } from '../../../domain/entities/Dashboard';
 
 export class MetabaseClientImp implements MetabaseClient {
 	private client: Axios;
 
 	constructor() {
 		this.client = axios.create({
-      timeout: $config.AXIOS_REQUEST_TIMEOUT_SECONDS * 1000,
-    });
+			timeout: $config.AXIOS_REQUEST_TIMEOUT_SECONDS * 1000
+		});
 	}
 
-	public getEmbedDashboardUrl(dashboard: Dashboards, preFilters: PreFilters): string {
+	public getEmbedDashboardUrl(dashboard: Dashboard, preFilters: PreFilters): string {
 		try {
 			const dashboardId = dashboard;
 			const payload = {

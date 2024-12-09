@@ -1,7 +1,7 @@
 import { MetabaseClientImp } from '../MetabaseClientImp';
 import { $config } from '$config';
 import * as jwt from 'jsonwebtoken';
-import { Dashboards } from '../../../../domain/services/MetabaseClient';
+import { Dashboard } from '../../../../domain/entities/Dashboard';
 
 const metabaseClientImp = new MetabaseClientImp();
 
@@ -12,12 +12,12 @@ $config.BI_EMBED_URL_EXPIRATION_IN_MINUTES = 60;
 let spyOnJwtSign: jest.SpyInstance;
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+	jest.restoreAllMocks();
 
-  spyOnJwtSign = jest.spyOn(jwt, 'sign').mockImplementation(() => 'any_token');
+	spyOnJwtSign = jest.spyOn(jwt, 'sign').mockImplementation(() => 'any_token');
 });
 
-const dashboard = Dashboards.TEST;
+const dashboard = Dashboard.TEST;
 const preFilters = {};
 
 describe('Should return a dashboard url', () => {
