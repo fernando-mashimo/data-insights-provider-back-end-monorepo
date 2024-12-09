@@ -91,7 +91,13 @@ export class ApiGatewayStack extends cdk.Stack {
 		props: ApiGatewayStackProps
 	): void {
 		// Adds resources for metabase/dashboard endpoint
-		const metabaseResource = api.root.addResource('metabase');
+		const metabaseResource = api.root.addResource('metabase', {
+			defaultCorsPreflightOptions: {
+				allowOrigins: $config.APPLICATION_ORIGINS,
+				allowMethods: apiGateway.Cors.ALL_METHODS,
+				allowHeaders: apiGateway.Cors.DEFAULT_HEADERS
+			}
+		});
 		const dashboardResource = metabaseResource.addResource('dashboard');
 		const getEmbedUrlIntegration = new apiGateway.LambdaIntegration(props.getEmbedUrlHandler);
 		dashboardResource.addMethod('POST', getEmbedUrlIntegration, {

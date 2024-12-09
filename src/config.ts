@@ -1,5 +1,5 @@
 class Config {
-  public static AXIOS_REQUEST_TIMEOUT_SECONDS: number = 900;
+	public static AXIOS_REQUEST_TIMEOUT_SECONDS: number = 900;
 
 	public static DOMAIN_NAME: string = 'isdelta.com'; // This is the domain name that you have registered and hosted on Route 53,
 	public static AUTH_DOMAIN_NAME: string = `auth.${Config.DOMAIN_NAME}`; // Must be a subdomain of DOMAIN_NAME
@@ -21,6 +21,11 @@ class Config {
 		`https://${Config.APP_DOMAIN_NAME}/login-callback`
 	];
 
+	public static APPLICATION_ORIGINS: string[] = [
+		'http://localhost:5173',
+		`https://${Config.APP_DOMAIN_NAME}`
+	];
+
 	public static BI_API_URL: string = `https://${Config.BI_DOMAIN_NAME}`;
 	public static BI_API_KEY: string = 'mb_qUVcSwZ6d0R9RjPu20cAUFDRHjiWs/8pxRkLXcEuEKM=';
 	public static BI_EMBED_ENCODE_SECRET: string =
@@ -28,7 +33,7 @@ class Config {
 	public static BI_EMBED_URL_EXPIRATION_IN_MINUTES: number = 60;
 	public static BI_CACHE_REFRESH_EVERY_DAY_AT_HOUR: number = 12; // Gmt time
 
-  public static AWS_ADMIN_EMAIL: string = 'tecnologia@isdelta.com';
+	public static AWS_ADMIN_EMAIL: string = 'tecnologia@isdelta.com';
 }
 
 export const $config = Config;

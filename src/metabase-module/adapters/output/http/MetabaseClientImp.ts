@@ -25,7 +25,6 @@ export class MetabaseClientImp implements MetabaseClient {
 
 			const url = new URL($config.BI_API_URL);
 			url.pathname = `/embed/dashboard/${embedToken}`;
-			url.hash = 'bordered=true&titled=true';
 
 			return url.toString();
 		} catch (error) {
