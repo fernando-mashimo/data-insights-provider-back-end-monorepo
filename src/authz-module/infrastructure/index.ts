@@ -127,7 +127,7 @@ export class AuthzStack extends cdk.Stack {
 	}
 
 	private customizeAuthUI(pool: cognito.IUserPool) {
-		// https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-ui-customization.html
+		// https://docs.aws.amazon.com/pt_br/cognito/latest/developerguide/cognito-user-pools-app-ui-customization.html
 
 		const imageData = fs.readFileSync(path.join(__dirname, 'assets/logo.png')).toString('base64');
 		const cssData = fs
