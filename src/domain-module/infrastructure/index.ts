@@ -8,15 +8,21 @@ export class DomainStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
-		const domainName = $config.DOMAIN_NAME;
+		const domainsName = [$config.DOMAIN_NAME, ...$config.OTHERS_DOMAIN_NAME];
 
+		domainsName.forEach((domainName) => {
+			this.addSesIdentity(domainName);
+		});
+	}
+
+	private addSesIdentity(domainName: string) {
 		// Lookup the hosted zone
-		const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+		const hostedZone = route53.HostedZone.fromLookup(this, `${domainName}HostedZone`, {
 			domainName: domainName
 		});
 
 		// Create SES domain identity
-		const sesDomainIdentity = new ses.EmailIdentity(this, 'SesDomainIdentity', {
+		const sesDomainIdentity = new ses.EmailIdentity(this, `${domainName}SesDomainIdentity`, {
 			identity: ses.Identity.domain(domainName),
 			dkimSigning: true
 		});
@@ -27,7 +33,7 @@ export class DomainStack extends cdk.Stack {
 			// and the hosted zone is y.example.com, the record that gets set is x.y.example.com.y.example.com. For now, we are
 			// manually creating the correct records.
 			// https://github.com/aws/aws-cdk/issues/21306
-			new route53.CfnRecordSet(this, `DkimRecord${index + 1}`, {
+			new route53.CfnRecordSet(this, `${domainName}DkimRecord${index + 1}`, {
 				hostedZoneName: hostedZone.zoneName + '.',
 				name: dkimRecord.name,
 				type: 'CNAME',

@@ -9,18 +9,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 /**
- * When deploying this stack from ground up or when the User Pool and its
- * corresponding CUSTOM DOMAIN have being removed, the Authentication UI Customization
- * method must be commented out, because it depends on the CUSTOM DOMAIN status
- * to be ACTIVE. Normally, after creating the domain, it will take about 10
- * minutes to become ACTIVE - the status can be checked in real time in the
- * AWS Console.
- * After the CUSTOM DOMAIN status is ACTIVE, the Authentication UI Customization
- * method can be uncommented and the stack can be updated.
+ * When deploying this stack from ground up you must perform a 2 step deploy:
+ * 1. commented customizeAuthUI
+ * 2. uncommented customizeAuthUI
  *
- * Nov, 28th, 2024: Currently, when this stack is removed/destroyed,
- * the Cognito User Pool remains in the AWS account. If required,
- * the user pool must be manually deleted.
+ * When changing the stack domain you must perform a 3 step deploy
+ * 1. commented customizeAuthUI and addCustomDomain
+ * 2. uncommented addCustomDomain
+ * 3. uncommented customizeAuthUI
+ *
+ * Note on destroy the stack the pool will remain in the AWS account, you must migrate it and delete it manually.
  */
 export class AuthzStack extends cdk.Stack {
 	public readonly userPool: cognito.IUserPool;

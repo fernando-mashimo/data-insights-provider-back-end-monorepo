@@ -1,14 +1,16 @@
 class Config {
 	public static AXIOS_REQUEST_TIMEOUT_SECONDS: number = 900;
 
-	public static DOMAIN_NAME: string = 'isdelta.com'; // This is the domain name that you have registered and hosted on Route 53,
+	public static DOMAIN_NAME: string = 'usedeltaai.com'; // This is the domain name that you have registered and hosted on Route 53,
+	public static OTHERS_DOMAIN_NAME: string[] = ['isdelta.com'];
+
 	public static AUTH_DOMAIN_NAME: string = `auth.${Config.DOMAIN_NAME}`; // Must be a subdomain of DOMAIN_NAME
 	public static APP_DOMAIN_NAME: string = `app.${Config.DOMAIN_NAME}`; // Must be a subdomain of DOMAIN_NAME
 	public static BI_DOMAIN_NAME: string = `bi.${Config.DOMAIN_NAME}`; // Must be a subdomain of DOMAIN_NAME
 	public static API_GATEWAY_DOMAIN_NAME: string = `api.${Config.DOMAIN_NAME}`;
 
 	public static NOREPLY_EMAIL: string = `no-reply@${Config.DOMAIN_NAME}`;
-	public static NOREPLY_EMAIL_NAME: string = 'IsDelta';
+	public static NOREPLY_EMAIL_NAME: string = 'Delta AI';
 	public static CONTACT_EMAIL: string = `contact@${Config.DOMAIN_NAME}`;
 
 	public static APPLICATION_LOGIN_URL_CALLBACKS: string[] = [
@@ -33,7 +35,7 @@ class Config {
 	public static BI_EMBED_URL_EXPIRATION_IN_MINUTES: number = 60;
 	public static BI_CACHE_REFRESH_EVERY_DAY_AT_HOUR: number = 12; // Gmt time
 
-	public static AWS_ADMIN_EMAIL: string = 'tecnologia@isdelta.com';
+	public static AWS_ADMIN_EMAIL: string = `tecnologia@${Config.DOMAIN_NAME}`;
 }
 
 export const $config = Config;
