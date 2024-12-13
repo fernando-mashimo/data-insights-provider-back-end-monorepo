@@ -54,7 +54,7 @@ export class MetabaseStack extends cdk.Stack {
 		this.updateDashboardCardsHandler = this.createUpdateDashboardCardsHandler();
 		this.updateDashboardCardsAsyncHandler = this.createUpdateDashboardCardsAsyncHandler();
 		this.scheduleUpdateDashboardCards();
-    this.setMetabaseLambdaFunctionsErrorsAlarm();
+		this.setMetabaseLambdaFunctionsErrorsAlarm();
 
 		/**
 		 * TODO - when cloudfront vpc origin become available through cdk
@@ -87,6 +87,16 @@ export class MetabaseStack extends cdk.Stack {
 		// allow ssh from connect console
 		securityGroup.addIngressRule(ec2.Peer.prefixList('pl-09f90e410b133fe9f'), ec2.Port.tcp(22));
 		securityGroup.addIngressRule(ec2.Peer.prefixList('pl-0e4bcff02b13bef1e'), ec2.Port.tcp(22));
+
+		// allow databricks worker to connect to metabase database service
+		securityGroup.addIngressRule(
+			ec2.Peer.securityGroupId('sg-05b18ebc79dcf0739'),
+			ec2.Port.tcp(5432)
+		);
+		securityGroup.addIngressRule(
+			ec2.Peer.securityGroupId('sg-0cb018fa306c5407b'),
+			ec2.Port.tcp(5432)
+		);
 
 		return securityGroup;
 	}
@@ -400,7 +410,11 @@ export class MetabaseStack extends cdk.Stack {
 				displayName: 'Metabase Stack Lambda Functions Execution Error Alarm Topic'
 			}
 		);
-		lambdaFunctionsErrorAlarmTopic.addSubscription(new subs.EmailSubscription($config.AWS_ADMIN_EMAIL));
-		lambdaFunctionsErrorAlarm.addAlarmAction(new cwActions.SnsAction(lambdaFunctionsErrorAlarmTopic));
+		lambdaFunctionsErrorAlarmTopic.addSubscription(
+			new subs.EmailSubscription($config.AWS_ADMIN_EMAIL)
+		);
+		lambdaFunctionsErrorAlarm.addAlarmAction(
+			new cwActions.SnsAction(lambdaFunctionsErrorAlarmTopic)
+		);
 	}
 }

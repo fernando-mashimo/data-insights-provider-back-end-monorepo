@@ -26,6 +26,8 @@ services:
     image: postgres:13 # be careful with the version to avoid compatibility issues on production
     container_name: metabase_db
     restart: always
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_DB: metabase
       POSTGRES_USER: metabase
