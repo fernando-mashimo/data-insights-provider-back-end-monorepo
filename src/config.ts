@@ -11,7 +11,7 @@ class Config {
 
 	public static NOREPLY_EMAIL: string = `no-reply@${Config.DOMAIN_NAME}`;
 	public static NOREPLY_EMAIL_NAME: string = 'Delta AI';
-	public static CONTACT_EMAIL: string = `contact@${Config.DOMAIN_NAME}`;
+	public static CONTACT_EMAIL: string = `contato@${Config.DOMAIN_NAME}`;
 
 	public static APPLICATION_LOGIN_URL_CALLBACKS: string[] = [
 		'http://localhost:5173/login-callback',
