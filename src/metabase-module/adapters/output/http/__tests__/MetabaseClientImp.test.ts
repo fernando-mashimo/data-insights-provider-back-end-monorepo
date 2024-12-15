@@ -17,7 +17,7 @@ beforeEach(() => {
 	spyOnJwtSign = jest.spyOn(jwt, 'sign').mockImplementation(() => 'any_token');
 });
 
-const dashboard = Dashboard.INTERNAL_LAWSUITS;
+const dashboard = Dashboard.TEST;
 const preFilters = {};
 
 describe('Should return a dashboard url', () => {

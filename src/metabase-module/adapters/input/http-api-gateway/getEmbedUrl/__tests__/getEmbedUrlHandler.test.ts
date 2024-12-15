@@ -34,7 +34,7 @@ beforeEach(() => {
 describe('Should return url', () => {
 	test('when provided inputs are valid', async () => {
 		const body: requestBody = {
-			dashboard: Dashboard.INTERNAL_LAWSUITS
+			dashboard: Dashboard.TEST
 		};
 
 		const event = structuredClone(baseEvent);
