@@ -11,7 +11,6 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
 interface ApiGatewayStackProps extends cdk.StackProps {
 	getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
-	updateDashboardCardsHandler: lambdaNodejs.NodejsFunction;
 	userPool: cognito.IUserPool;
 }
 
@@ -104,12 +103,5 @@ export class ApiGatewayStack extends cdk.Stack {
 			authorizer: authorizer,
 			authorizationType: apiGateway.AuthorizationType.COGNITO
 		});
-
-		// Adds resources for metabase/dashboard/cards endpoint for testing purposes
-		const cardsResource = dashboardResource.addResource('cards');
-		const updateDashboardCardsIntegration = new apiGateway.LambdaIntegration(
-			props.updateDashboardCardsHandler
-		);
-		cardsResource.addMethod('PUT', updateDashboardCardsIntegration);
 	}
 }

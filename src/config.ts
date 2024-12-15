@@ -33,9 +33,8 @@ class Config {
 	public static BI_EMBED_ENCODE_SECRET: string =
 		'55ff965c97be0be75a6208d62d9593ef7402365988cb5f0f63ccad11bfa0f66c';
 	public static BI_EMBED_URL_EXPIRATION_IN_MINUTES: number = 60;
-	public static BI_CACHE_REFRESH_EVERY_DAY_AT_HOUR: number = 12; // Gmt time
 
-	public static AWS_ADMIN_EMAIL: string = `tecnologia@${Config.DOMAIN_NAME}`;
+	public static ERROR_NOTIFICATION_EMAIL: string = `tecnologia@${Config.DOMAIN_NAME}`;
 }
 
 export const $config = Config;

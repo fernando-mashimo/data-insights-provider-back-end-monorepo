@@ -45,7 +45,6 @@ const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
 	},
 	description: 'Configure API Gateway for Delta AI',
 	getEmbedUrlHandler: metabaseStack.getEmbedUrlHandler,
-	updateDashboardCardsHandler: metabaseStack.updateDashboardCardsHandler,
 	userPool: authzStack.userPool
 });
 apiGatewayStack.addDependency(metabaseStack);
