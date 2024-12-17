@@ -25,5 +25,14 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "always"
 	},
-	"editor.formatOnSave": true
+	"editor.formatOnSave": true,
+	"cSpell.words": [
+		"BRIGHDATA",
+		"certificatemanager",
+		"databricks",
+		"gibibytes",
+		"linkedin",
+		"nofail",
+		"usermod"
+	]
 }

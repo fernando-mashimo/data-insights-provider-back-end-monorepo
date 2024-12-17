@@ -8,9 +8,12 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import { $config } from '$config';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as IAM from 'aws-cdk-lib/aws-iam';
 
 interface ApiGatewayStackProps extends cdk.StackProps {
 	getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
+	downloadExtractedLinkedinProfileQueue: sqs.Queue;
 	userPool: cognito.IUserPool;
 }
 
@@ -25,6 +28,8 @@ export class ApiGatewayStack extends cdk.Stack {
 		const authorizer = this.createAuthorizer(props.userPool);
 
 		this.addApiResources(api, authorizer, props);
+
+		this.addApiSqsResources(api, props);
 	}
 
 	private createApiGateway(): apiGateway.RestApi {
@@ -102,6 +107,57 @@ export class ApiGatewayStack extends cdk.Stack {
 		dashboardResource.addMethod('POST', getEmbedUrlIntegration, {
 			authorizer: authorizer,
 			authorizationType: apiGateway.AuthorizationType.COGNITO
+		});
+	}
+
+	private addApiSqsResources(api: apiGateway.RestApi, props: ApiGatewayStackProps) {
+		const dataExtractionResource = api.root.addResource('data-extraction', {
+			defaultCorsPreflightOptions: {
+				allowOrigins: $config.APPLICATION_ORIGINS,
+				allowMethods: apiGateway.Cors.ALL_METHODS,
+				allowHeaders: apiGateway.Cors.DEFAULT_HEADERS
+			}
+		});
+
+		// role
+		const integrationRole = new IAM.Role(this, 'integration-role', {
+			assumedBy: new IAM.ServicePrincipal('apigateway.amazonaws.com')
+		});
+
+		// grant sqs:SendMessage* to Api Gateway Role
+		props.downloadExtractedLinkedinProfileQueue.grantSendMessages(integrationRole);
+
+		const linkedinExtractionResource = dataExtractionResource.addResource('linkedin-extraction');
+		const notifyResource = linkedinExtractionResource.addResource('notify');
+		const downloadExtractedLinkedinProfileIntegration = new apiGateway.AwsIntegration({
+			service: 'sqs',
+			integrationHttpMethod: 'POST',
+			path: `${props.downloadExtractedLinkedinProfileQueue.queueName}`,
+			options: {
+				passthroughBehavior: apiGateway.PassthroughBehavior.NEVER,
+				credentialsRole: integrationRole,
+				requestParameters: {
+					'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'"
+				},
+				requestTemplates: {
+					'application/json': `Action=SendMessage&MessageBody=$util.urlEncode($input.body)`
+				},
+				integrationResponses: [
+					{
+						statusCode: '200',
+						responseTemplates: {
+							'application/json': '{}'
+						}
+					}
+				]
+			}
+		});
+		notifyResource.addMethod('POST', downloadExtractedLinkedinProfileIntegration, {
+			methodResponses: [
+				{
+					statusCode: '200'
+				}
+			]
 		});
 	}
 }

@@ -35,6 +35,22 @@ class Config {
 	public static BI_EMBED_URL_EXPIRATION_IN_MINUTES: number = 60;
 
 	public static ERROR_NOTIFICATION_EMAIL: string = `tecnologia@${Config.DOMAIN_NAME}`;
+
+	public static DATA_EXTRACTION_EVENTS_TABLE_NAME: string = 'extraction_events';
+	public static DATA_EXTRACTION_BUCKET_NAME: string = 'delta-ai-extraction-data';
+
+	public static PIPED_API_AUTH_URL: string = 'https://auth.piped.com.br/oauth/token';
+	public static PIPED_API_CLIENT_ID: string = '0FBD737E4DA2725C'; // TO DO: move to secrets
+	public static PIPED_API_CLIENT_SECRET: string = '4ff194c96b1e4fc269429c96e87a6cfa';
+	public static PIPED_API_BASE_URL: string = 'https://api.piped.com.br/v1';
+
+	public static BRIGHDATA_API_URL: string = 'https://api.brightdata.com';
+	public static BRIGHDATA_API_KEY: string =
+		'551b60e12eafe2ce224af4b5917261cf6c34653ad483bfd56c02ea06e1eb99ca';
+	public static LINKEDIN_EXTRACTION_API_DATASET_ID: string = 'gd_l1viktl72bvl7bjuj0';
+	public static LINKEDIN_EXTRACTION_API_NOTIFY_URL: string = `https://${Config.API_GATEWAY_DOMAIN_NAME}/data-extraction/linkedin-extraction/notify`;
+	public static LINKEDIN_EXTRACTION_WEBHOOK_AUTHORIZATION: string =
+		'a12b34c56d78e90f12g34h56i78j90k12l34m56n78o90p12q34r56s78t90u12v34w56x78y90z';
 }
 
 export const $config = Config;

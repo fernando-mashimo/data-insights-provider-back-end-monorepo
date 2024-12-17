@@ -30,6 +30,20 @@
 - `cdk diff` compare deployed stack with current state
 - `cdk synth` emits the synthesized CloudFormation template
 
+## Testing Locally
+As this stack is using many AWS services, it is recommended to test the stack in the AWS environment. However you can test the lambda functions locally connected to real AWS services, as long as you have the AWS CLI configured with permissions to access the services.
+
+As lambda handler are just node script, you can test it locally using jest tests.
+
+We recommend the following steps to test the "use cases" and "input/output adapters" locally:
+1. Get the AWS CLI environment variables credentials.
+2. Add them to the `.env` file in the root of the project.
+3. Create a new jest test, and test your real classes (call them, make expect of it, to easily rerun).
+4. Run the jest test normally.
+5. Delete or comment the test to avoid running it on production.
+
+After that you can make the deploy to the AWS environment, and test the infrastructure.
+
 ## Folder Structure
 
 ```bash
@@ -63,6 +77,7 @@ src/                # Main source code directory
     │       ├── sqs/               # Queue implementations using SQS
     │       ├── http/              # HTTP implementations
     │       └── core/              # Core output logic
+    ├── test-mock/   # Common test-mocking resources
     └── infrastructure/  # CDK infrastructure setup
         └── index/       # Entry point for CDK stack
 ```

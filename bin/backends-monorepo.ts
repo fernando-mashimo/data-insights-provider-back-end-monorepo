@@ -5,6 +5,7 @@ import { AuthzStack } from '../src/authz-module/infrastructure';
 import { DomainStack } from '../src/domain-module/infrastructure';
 import { ApiGatewayStack } from '../src/api-gateway-module/infrastructure';
 import { MetabaseStack } from '../src/metabase-module/infrastructure';
+import { DataExtractionStack } from '../src/data-extraction-module/infrastructure';
 
 const app = new cdk.App();
 
@@ -38,6 +39,14 @@ const metabaseStack = new MetabaseStack(app, 'MetabaseStack', {
 	description: 'Deploy Metabase and db on EC2 instance'
 });
 
+const dataExtractionStack = new DataExtractionStack(app, 'DataExtractionStack', {
+	env: prodEnv,
+	tags: {
+		module: 'data-extraction-module'
+	},
+	description: 'Configure data extraction resources for Delta AI'
+});
+
 const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
 	env: prodEnv,
 	tags: {
@@ -45,7 +54,9 @@ const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
 	},
 	description: 'Configure API Gateway for Delta AI',
 	getEmbedUrlHandler: metabaseStack.getEmbedUrlHandler,
+	downloadExtractedLinkedinProfileQueue: dataExtractionStack.downloadExtractedLinkedinProfileQueue,
 	userPool: authzStack.userPool
 });
 apiGatewayStack.addDependency(metabaseStack);
 apiGatewayStack.addDependency(authzStack);
+apiGatewayStack.addDependency(dataExtractionStack);
