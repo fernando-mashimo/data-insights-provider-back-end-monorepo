@@ -7,4 +7,10 @@ export interface EventExtractLinkedinRepository {
 	put(event: EventExtractLinkedin): Promise<void>;
 
 	getById(id: string): Promise<EventExtractLinkedin>;
+
+	getByNameAndLastExtractionDate(
+		firstName: string,
+		lastName: string,
+		lastUpdate: Date
+	): Promise<EventExtractLinkedin[]>;
 }

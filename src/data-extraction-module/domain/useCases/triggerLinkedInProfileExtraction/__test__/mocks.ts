@@ -9,4 +9,5 @@ export class LinkedinExtractorClientMock implements LinkedinExtractorClient {
 export class EventExtractLinkedinRepositoryMock implements EventExtractLinkedinRepository {
 	put = jest.fn();
 	getById = jest.fn().mockResolvedValue(undefined);
+	getByNameAndLastExtractionDate = jest.fn().mockResolvedValue([]);
 }
