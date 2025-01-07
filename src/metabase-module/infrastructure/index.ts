@@ -9,11 +9,11 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as cwActions from 'aws-cdk-lib/aws-cloudwatch-actions';
+import { LambdaBasic } from '$lib/infrastructure/constructors/lambda';
 
 /**
  * This stack creates a Metabase instance with a persistent EBS volume for DB data store.
@@ -259,20 +259,11 @@ export class MetabaseStack extends cdk.Stack {
 	}
 
 	private createGetEmbedUrlHandler(): lambdaNodejs.NodejsFunction {
-		return new lambdaNodejs.NodejsFunction(this, 'GetEmbedUrlFunction', {
-			functionName: 'GetEmbedUrlFunction',
-			description: 'Lambda function to handle Get Embed Url in Delta AI',
+		const { lambda } = new LambdaBasic(this, 'GetEmbedUrl', {
 			entry: 'src/metabase-module/adapters/input/http-api-gateway/getEmbedUrl/index.ts',
-			handler: 'handler',
-			runtime: lambda.Runtime.NODEJS_20_X,
-			memorySize: 128, // might require 512MB
-			timeout: cdk.Duration.seconds(10),
-			bundling: {
-				minify: true,
-				sourceMap: true
-			},
-			environment: {} // might require environment variables
+			handler: 'handler'
 		});
+		return lambda;
 	}
 
 	private setMetabaseLambdaFunctionsErrorsAlarm(): void {

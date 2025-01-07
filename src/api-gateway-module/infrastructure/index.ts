@@ -2,14 +2,14 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
 import * as cwLogs from 'aws-cdk-lib/aws-logs';
-import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { $config } from '$config';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
-import * as IAM from 'aws-cdk-lib/aws-iam';
+import { RestApiBuilder, DefaultConfigurations as apiConf } from './restApiBuilder';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 
 interface ApiGatewayStackProps extends cdk.StackProps {
 	getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
@@ -21,22 +21,9 @@ export class ApiGatewayStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props: ApiGatewayStackProps) {
 		super(scope, id, props);
 
-		const api = this.createApiGateway();
-
-		this.addApiGatewayCustomDomain(api);
-
-		const authorizer = this.createAuthorizer(props.userPool);
-
-		this.addApiResources(api, authorizer, props);
-
-		this.addApiSqsResources(api, props);
-	}
-
-	private createApiGateway(): apiGateway.RestApi {
 		const logGroup = new cwLogs.LogGroup(this, 'ApiGatewayLogs');
-		const api = new apiGateway.RestApi(this, 'DeltaApiGateway', {
-			restApiName: 'DeltaApiGateway',
-			description: 'API Gateway for Delta AI',
+		const api = RestApiBuilder.create(this, 'ApiGateway', {
+			userPool: props.userPool,
 			cloudWatchRole: true,
 			deployOptions: {
 				accessLogDestination: new apiGateway.LogGroupLogDestination(logGroup),
@@ -52,9 +39,18 @@ export class ApiGatewayStack extends cdk.Stack {
 					user: true
 				})
 			}
-		});
+		})
+			.post('/metabase/dashboard', props.getEmbedUrlHandler, [
+				apiConf.AUTHENTICATED,
+				apiConf.ENABLED_CORS
+			])
+			.post(
+				'/data-extraction/linkedin-extraction/notify',
+				props.downloadExtractedLinkedinProfileQueue
+			)
+			.build();
 
-		return api;
+		this.addApiGatewayCustomDomain(api);
 	}
 
 	private addApiGatewayCustomDomain(api: apiGateway.RestApi): void {
@@ -80,84 +76,6 @@ export class ApiGatewayStack extends cdk.Stack {
 			zone: hostedZone,
 			recordName: $config.API_GATEWAY_DOMAIN_NAME,
 			target: route53.RecordTarget.fromAlias(new targets.ApiGatewayDomain(apiGatewayDomain))
-		});
-	}
-
-	private createAuthorizer(userPool: cognito.IUserPool): apiGateway.CognitoUserPoolsAuthorizer {
-		return new apiGateway.CognitoUserPoolsAuthorizer(this, 'ApiGatewayAuthorizer', {
-			cognitoUserPools: [userPool]
-		});
-	}
-
-	private addApiResources(
-		api: apiGateway.RestApi,
-		authorizer: apiGateway.CognitoUserPoolsAuthorizer,
-		props: ApiGatewayStackProps
-	): void {
-		// Adds resources for metabase/dashboard endpoint
-		const metabaseResource = api.root.addResource('metabase', {
-			defaultCorsPreflightOptions: {
-				allowOrigins: $config.APPLICATION_ORIGINS,
-				allowMethods: apiGateway.Cors.ALL_METHODS,
-				allowHeaders: apiGateway.Cors.DEFAULT_HEADERS
-			}
-		});
-		const dashboardResource = metabaseResource.addResource('dashboard');
-		const getEmbedUrlIntegration = new apiGateway.LambdaIntegration(props.getEmbedUrlHandler);
-		dashboardResource.addMethod('POST', getEmbedUrlIntegration, {
-			authorizer: authorizer,
-			authorizationType: apiGateway.AuthorizationType.COGNITO
-		});
-	}
-
-	private addApiSqsResources(api: apiGateway.RestApi, props: ApiGatewayStackProps) {
-		const dataExtractionResource = api.root.addResource('data-extraction', {
-			defaultCorsPreflightOptions: {
-				allowOrigins: $config.APPLICATION_ORIGINS,
-				allowMethods: apiGateway.Cors.ALL_METHODS,
-				allowHeaders: apiGateway.Cors.DEFAULT_HEADERS
-			}
-		});
-
-		// role
-		const integrationRole = new IAM.Role(this, 'integration-role', {
-			assumedBy: new IAM.ServicePrincipal('apigateway.amazonaws.com')
-		});
-
-		// grant sqs:SendMessage* to Api Gateway Role
-		props.downloadExtractedLinkedinProfileQueue.grantSendMessages(integrationRole);
-
-		const linkedinExtractionResource = dataExtractionResource.addResource('linkedin-extraction');
-		const notifyResource = linkedinExtractionResource.addResource('notify');
-		const downloadExtractedLinkedinProfileIntegration = new apiGateway.AwsIntegration({
-			service: 'sqs',
-			integrationHttpMethod: 'POST',
-			path: `${props.downloadExtractedLinkedinProfileQueue.queueName}`,
-			options: {
-				passthroughBehavior: apiGateway.PassthroughBehavior.NEVER,
-				credentialsRole: integrationRole,
-				requestParameters: {
-					'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'"
-				},
-				requestTemplates: {
-					'application/json': `Action=SendMessage&MessageBody=$util.urlEncode($input.body)`
-				},
-				integrationResponses: [
-					{
-						statusCode: '200',
-						responseTemplates: {
-							'application/json': '{}'
-						}
-					}
-				]
-			}
-		});
-		notifyResource.addMethod('POST', downloadExtractedLinkedinProfileIntegration, {
-			methodResponses: [
-				{
-					statusCode: '200'
-				}
-			]
 		});
 	}
 }

@@ -4,37 +4,25 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { $config } from '$config';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
-import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as lambdaEventSource from 'aws-cdk-lib/aws-lambda-event-sources';
+import { EventListener } from '$lib/infrastructure/constructors/eventListener';
 
 export class DataExtractionStack extends cdk.Stack {
 	readonly downloadExtractedLinkedinProfileQueue: sqs.Queue;
+
+	private readonly ddbTable: dynamodb.Table;
+	private readonly bucket: s3.Bucket;
 
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
 		// create DynamoDB table to store data extraction events data (lawsuits and others, i.e., LinkedIn)
-		const ddbTable = this.createDataExtractionEventsTable();
+		this.ddbTable = this.createDataExtractionEventsTable();
 
 		// S3 bucket to store data extraction files
-		const bucket = this.createS3Bucket();
+		this.bucket = this.createS3Bucket();
 
-		const [extractLinkedinProfileByNameFunction] = this.createSQSAndLambda(
-			'extractLinkedinProfileByName',
-			'src/data-extraction-module/adapters/input/sqs/extractLinkedinProfileByName/index.ts',
-			'handler'
-		);
-		ddbTable.grantReadWriteData(extractLinkedinProfileByNameFunction);
-
-		const [downloadExtractedLinkedinProfileFunction, queue] = this.createSQSAndLambda(
-			'downloadExtractedLinkedinProfile',
-			'src/data-extraction-module/adapters/input/sqs/downloadExtractedLinkedinProfile/index.ts',
-			'handler'
-		);
-		this.downloadExtractedLinkedinProfileQueue = queue;
-		ddbTable.grantReadWriteData(downloadExtractedLinkedinProfileFunction);
-		bucket.grantReadWrite(downloadExtractedLinkedinProfileFunction);
+		this.downloadExtractedLinkedinProfileQueue = this.setUpDownloadExtractedLinkedinProfile();
+		this.setupExtractLinkedinProfileByName();
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -71,72 +59,42 @@ export class DataExtractionStack extends cdk.Stack {
 		const bucket = new s3.Bucket(this, 'DataExtractionBucket', {
 			bucketName: $config.DATA_EXTRACTION_BUCKET_NAME,
 			accessControl: s3.BucketAccessControl.PRIVATE,
-			removalPolicy: cdk.RemovalPolicy.DESTROY,
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
 			encryption: s3.BucketEncryption.S3_MANAGED
 		});
 
 		return bucket;
 	}
 
-	/**
-	 * create a SQS with a DLQ for a specific lambda function
-	 */
-	private createSQS(name: string): sqs.Queue {
-		const dlq = new sqs.Queue(this, `${name}DLQ`, {});
-
-		const queue = new sqs.Queue(this, `${name}Queue`, {
-			queueName: `${name}Queue`,
-			deadLetterQueue: {
-				maxReceiveCount: 1,
-				queue: dlq
+	private setUpDownloadExtractedLinkedinProfile(): sqs.Queue {
+		const { lambda, queue } = new EventListener(this, 'DownloadExtractedLinkedinProfile', {
+			lambdaProps: {
+				entry:
+					'src/data-extraction-module/adapters/input/sqs/downloadExtractedLinkedinProfile/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1,
+				maxBatchingWindow: cdk.Duration.seconds(30)
 			}
 		});
+		this.ddbTable.grantReadWriteData(lambda);
+		this.bucket.grantReadWrite(lambda);
 
 		return queue;
 	}
 
-	/**
-	 * create a nodeJS 20.x lambda function
-	 * with default configurations
-	 */
-	private createLambda(name: string, entry: string, handler: string): lambdaNodejs.NodejsFunction {
-		return new lambdaNodejs.NodejsFunction(this, `${name}Function`, {
-			functionName: `${name}Function`,
-			description: '',
-			entry: entry,
-			handler: handler,
-			runtime: lambda.Runtime.NODEJS_20_X,
-			memorySize: 128,
-			timeout: cdk.Duration.seconds(30),
-			bundling: {
-				minify: true,
-				sourceMap: true
+	private setupExtractLinkedinProfileByName() {
+		const { lambda } = new EventListener(this, 'ExtractLinkedinProfileByName', {
+			lambdaProps: {
+				entry:
+					'src/data-extraction-module/adapters/input/sqs/extractLinkedinProfileByName/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1
 			}
 		});
-	}
-
-	/**
-	 * create a nodeJS 20.x lambda function
-	 * triggered by a SQS queue with a DLQ
-	 * with default configurations
-	 */
-	private createSQSAndLambda(
-		name: string,
-		entry: string,
-		handler: string
-	): [lambdaNodejs.NodejsFunction, sqs.Queue] {
-		const queue = this.createSQS(name);
-		const lambda = this.createLambda(name, entry, handler);
-
-		lambda.addEventSource(
-			new lambdaEventSource.SqsEventSource(queue, {
-				batchSize: 1,
-				enabled: true,
-				maxBatchingWindow: cdk.Duration.seconds(30)
-			})
-		);
-
-		queue.grantConsumeMessages(lambda);
-		return [lambda, queue];
+		this.ddbTable.grantReadWriteData(lambda);
 	}
 }

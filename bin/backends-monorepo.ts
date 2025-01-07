@@ -44,7 +44,7 @@ const dataExtractionStack = new DataExtractionStack(app, 'DataExtractionStack', 
 	tags: {
 		module: 'data-extraction-module'
 	},
-	description: 'Configure data extraction resources for Delta AI'
+	description: 'Configure data extraction resources'
 });
 
 const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
@@ -52,7 +52,7 @@ const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
 	tags: {
 		module: 'api-gateway-module'
 	},
-	description: 'Configure API Gateway for Delta AI',
+	description: 'Configure API Gateway',
 	getEmbedUrlHandler: metabaseStack.getEmbedUrlHandler,
 	downloadExtractedLinkedinProfileQueue: dataExtractionStack.downloadExtractedLinkedinProfileQueue,
 	userPool: authzStack.userPool

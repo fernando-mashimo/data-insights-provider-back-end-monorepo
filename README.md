@@ -1,4 +1,4 @@
-# Welcome to delta backend monorepo
+# Welcome to DeltaAI backend monorepo
 
 ## Requirements
 
@@ -48,6 +48,7 @@ After that you can make the deploy to the AWS environment, and test the infrastr
 
 ```bash
 bin/                # Contains cdk executable scripts
+lib/                # Contains common infrastructure and lambda useful classes, like: constructors, helpers, etc.
 src/                # Main source code directory
 └── <name>-module/  # Specific module for the project
     ├── domain/     # Domain layer containing business logic, and interfaces
@@ -62,21 +63,18 @@ src/                # Main source code directory
     ├── adapters/   # Adapters for different input/output interfaces
     │   ├── input/          # Input adapters
     │   │   ├── helpers/            # Helper functions for input
-    │   │   ├── types/              # Common type definitions for input
     │   │   ├── http-api-gateway/   # HTTP API Gateway handlers
     │   │   ├── async/              # Async request handlers (cron)
     │   │   ├── sns/                # SNS handlers
     │   │   ├── sqs/                # SQS handlers
-    │   │   ├── schedule/           # Schedule handlers
-    │   │   └── core/               # Core input classes to be extended
+    │   │   └── schedule/           # Schedule handlers
     │   └── output/         # Output adapters
     │       ├── helpers/           # Helper functions for output
     │       ├── database/          # Database access implementations
     │       ├── file/              # File system access implementations
     │       ├── sns/               # Message producer implementations using SNS
     │       ├── sqs/               # Queue implementations using SQS
-    │       ├── http/              # HTTP implementations
-    │       └── core/              # Core output logic
+    │       └── http/              # HTTP implementations
     ├── test-mock/   # Common test-mocking resources
     └── infrastructure/  # CDK infrastructure setup
         └── index/       # Entry point for CDK stack
