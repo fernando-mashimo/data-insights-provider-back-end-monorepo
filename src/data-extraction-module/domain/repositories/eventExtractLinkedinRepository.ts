@@ -11,6 +11,6 @@ export interface EventExtractLinkedinRepository {
 	getByNameAndLastExtractionDate(
 		firstName: string,
 		lastName: string,
-		lastUpdate: Date
+		lastExtractionDate: Date
 	): Promise<EventExtractLinkedin[]>;
 }

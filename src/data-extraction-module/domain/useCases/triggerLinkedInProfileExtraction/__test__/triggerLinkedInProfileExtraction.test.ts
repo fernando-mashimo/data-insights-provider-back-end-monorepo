@@ -136,7 +136,7 @@ it('Should filter name variations already searched on the last 90 days', async (
 			searchedLastName: 'doe smith',
 			status: EventExtractLinkedinStatus.PENDING,
 			snapshotId: 'snapshot_id'
-		},
+		}
 	];
 
 	await useCase.execute(input);
@@ -149,43 +149,43 @@ it('Should filter name variations already searched on the last 90 days', async (
 	);
 });
 
-it('Should not start linkedin extraction when all name variations are already searched on the last 90 days', async () => {
-  const input: TriggerLinkedInProfileExtractionUseCaseInput = {
-    name: 'John Doe Smith'
-  };
+it('Should not start linkedin extraction when all name variations have been searched in the last 90 days', async () => {
+	const input: TriggerLinkedInProfileExtractionUseCaseInput = {
+		name: 'John Doe Smith'
+	};
 
-  const eventRepositoryGetByNameAndLastExtractionDateMockedResult = [
-    {
-      requestedName: 'John Doe Smith',
-      searchedFirstName: 'john',
-      searchedLastName: 'smith',
-      status: EventExtractLinkedinStatus.PENDING,
-      snapshotId: 'snapshot_id'
-    },
-    {
-      requestedName: 'John Doe Smith',
-      searchedFirstName: 'john',
-      searchedLastName: 'doe',
-      status: EventExtractLinkedinStatus.PENDING,
-      snapshotId: 'snapshot_id'
-    },
-    {
-      requestedName: 'John Doe Smith',
-      searchedFirstName: 'john',
-      searchedLastName: 'doe smith',
-      status: EventExtractLinkedinStatus.PENDING,
-      snapshotId: 'snapshot_id'
-    }
-  ];
+	const eventRepositoryGetByNameAndLastExtractionDateMockedResult = [
+		{
+			requestedName: 'John Doe Smith',
+			searchedFirstName: 'john',
+			searchedLastName: 'smith',
+			status: EventExtractLinkedinStatus.PENDING,
+			snapshotId: 'snapshot_id'
+		},
+		{
+			requestedName: 'John Doe Smith',
+			searchedFirstName: 'john',
+			searchedLastName: 'doe',
+			status: EventExtractLinkedinStatus.PENDING,
+			snapshotId: 'snapshot_id'
+		},
+		{
+			requestedName: 'John Doe Smith',
+			searchedFirstName: 'john',
+			searchedLastName: 'doe smith',
+			status: EventExtractLinkedinStatus.PENDING,
+			snapshotId: 'snapshot_id'
+		}
+	];
 
-  eventRepository.getByNameAndLastExtractionDate = jest
+	eventRepository.getByNameAndLastExtractionDate = jest
 		.fn()
 		.mockResolvedValueOnce(eventRepositoryGetByNameAndLastExtractionDateMockedResult)
 		.mockResolvedValueOnce(eventRepositoryGetByNameAndLastExtractionDateMockedResult)
 		.mockResolvedValueOnce(eventRepositoryGetByNameAndLastExtractionDateMockedResult);
 
-  await useCase.execute(input);
+	await useCase.execute(input);
 
-  expect(linkedinExtractorClient.triggerProfileExtractByName).not.toHaveBeenCalled();
-  expect(eventRepository.put).not.toHaveBeenCalled();
+	expect(linkedinExtractorClient.triggerProfileExtractByName).not.toHaveBeenCalled();
+	expect(eventRepository.put).not.toHaveBeenCalled();
 });

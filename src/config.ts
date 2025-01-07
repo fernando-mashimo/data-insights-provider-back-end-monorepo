@@ -51,6 +51,7 @@ class Config {
 	public static LINKEDIN_EXTRACTION_API_NOTIFY_URL: string = `https://${Config.API_GATEWAY_DOMAIN_NAME}/data-extraction/linkedin-extraction/notify`;
 	public static LINKEDIN_EXTRACTION_WEBHOOK_AUTHORIZATION: string =
 		'a12b34c56d78e90f12g34h56i78j90k12l34m56n78o90p12q34r56s78t90u12v34w56x78y90z';
+  public static LINKEDIN_EXTRACTION_MAX_TIME_WINDOW_DAYS: number = 90;
 }
 
 export const $config = Config;

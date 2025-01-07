@@ -1,3 +1,4 @@
+import { $config } from '$config';
 import { EventExtractLinkedin } from '../../entities/eventExtractLinkedin';
 import { EventExtractLinkedinRepository } from '../../repositories/eventExtractLinkedinRepository';
 import { LinkedinExtractorClient } from '../../services/linkedinExtractorClient';
@@ -19,7 +20,12 @@ export class TriggerLinkedInProfileExtractionUseCase
 		const nameVariations = getNameVariations(cleanedName);
 		const namesToExtract = await this.filterNamesWithoutRecentExtraction(nameVariations);
 
-		if (!namesToExtract.length) return;
+		if (!namesToExtract.length) {
+			console.info(
+				`No new extractions needed for ${fullName} - last extraction executed less than ${$config.LINKEDIN_EXTRACTION_MAX_TIME_WINDOW_DAYS} days ago`
+			);
+			return;
+		}
 
 		const promises = namesToExtract.map(async (name) => {
 			const snapshotId = await this.linkedinExtractorClient.triggerProfileExtractByName([name]);
@@ -42,11 +48,13 @@ export class TriggerLinkedInProfileExtractionUseCase
 		const filteredNames = [];
 
 		for (const name of names) {
-			const lastExtractedAt = new Date(new Date().getDate() - 90); // Hardcoded 90-day window to check for profile extractions - if the last extraction was more than 90 days ago, a new extraction will be triggered now
+			const extractionTimeWindow = new Date(
+				new Date().getDate() - $config.LINKEDIN_EXTRACTION_MAX_TIME_WINDOW_DAYS
+			); // If the last extraction was executed more than N days ago, a new extraction will be triggered now
 			const event = await this.repository.getByNameAndLastExtractionDate(
 				name.firstName,
 				name.lastName,
-				lastExtractedAt
+				extractionTimeWindow
 			);
 
 			if (!event || !event.length) {
