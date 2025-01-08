@@ -4,7 +4,7 @@ import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as IAM from 'aws-cdk-lib/aws-iam';
-import { EventListener } from '$lib/infrastructure/constructors/eventListener';
+import { LambdaBasic } from '$lib/infrastructure/constructors/lambda';
 
 export type RestApiBuilderProps = apiGateway.RestApiProps & {
 	userPool: cognito.IUserPool;
@@ -158,16 +158,14 @@ export class RestApiBuilder {
 			resourceOptions = {};
 		} else if (handler instanceof sqs.Queue) {
 			// creation of supporting lambda function to handle request authorization
-			const authorizerFunction = new EventListener(this.scope, 'AuthorizerFunction', {
-        lambdaProps: {
-          entry: 'src/api-gateway-module/infrastructure/helpers/authorizer.ts',
-          handler: 'handler'
-        }
-      });
+			const authorizerFunction = new LambdaBasic(this.scope, 'AuthorizerFunction', {
+				entry: 'src/api-gateway-module/infrastructure/helpers/authorizer.ts',
+				handler: 'handler'
+			});
 			// create authorizer
 			const authorizer = new apiGateway.TokenAuthorizer(this.scope, 'Authorizer', {
-        handler: authorizerFunction.lambda,
-      })
+				handler: authorizerFunction.lambda
+			});
 
 			integration = this.createSqsIntegration(handler);
 			resourceOptions = {};
