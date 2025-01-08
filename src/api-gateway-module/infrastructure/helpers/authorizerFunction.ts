@@ -1,9 +1,5 @@
-import { $config } from '$config';
-
 export const handler = async (event: AuthEvent): Promise<AuthResponse> => {
-	const endpoint: string = event.methodArn.split('/prod/')[1];
-
-	const isRequestAuthorized = verifyRequestAuthorization(event, endpoint); // verify if the request is authorized - this function must be updated when new endpoints/webhooks are added
+	const isRequestAuthorized = event.authorizationToken === process.env.AUTHORIZATION_KEY;
 
 	if (!isRequestAuthorized) {
     console.info('Request unauthorized');
@@ -11,13 +7,6 @@ export const handler = async (event: AuthEvent): Promise<AuthResponse> => {
   }
 
 	return response('Authorized', event.methodArn);
-};
-
-const verifyRequestAuthorization = (event: AuthEvent, endpoint: string): boolean => {
-	if (endpoint === 'POST/data-extraction/linkedin-extraction/notify')
-		return event.authorizationToken === $config.LINKEDIN_EXTRACTION_WEBHOOK_AUTHORIZATION;
-
-	return false;
 };
 
 const response = (requestStatus: 'Authorized' | 'Unauthorized', eventMethodArn: string): AuthResponse => ({
