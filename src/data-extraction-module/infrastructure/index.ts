@@ -23,6 +23,7 @@ export class DataExtractionStack extends cdk.Stack {
 
 		this.downloadExtractedLinkedinProfileQueue = this.setUpDownloadExtractedLinkedinProfile();
 		this.setupExtractLinkedinProfileByName();
+		this.setupExtractLawsuitData();
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -96,5 +97,20 @@ export class DataExtractionStack extends cdk.Stack {
 			}
 		});
 		this.ddbTable.grantReadWriteData(lambda);
+	}
+
+	private setupExtractLawsuitData() {
+		const { lambda } = new EventListener(this, 'ExtractLawsuitData', {
+			lambdaProps: {
+				entry: 'src/data-extraction-module/adapters/input/sqs/extractLawsuitData/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1,
+				maxBatchingWindow: cdk.Duration.seconds(300)
+			}
+		});
+		this.ddbTable.grantReadWriteData(lambda);
+		this.bucket.grantReadWrite(lambda);
 	}
 }
