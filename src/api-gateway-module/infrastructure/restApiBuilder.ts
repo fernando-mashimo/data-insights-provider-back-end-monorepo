@@ -159,7 +159,6 @@ export class RestApiBuilder {
 			integration = this.createSqsIntegration(handler);
 			resourceOptions = {};
 			methodOptions = {
-				...(options instanceof Array ? {} : options?.methodOptions),
 				methodResponses: [
 					{
 						statusCode: '200'

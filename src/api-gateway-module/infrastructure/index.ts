@@ -10,7 +10,7 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { RestApiBuilder, DefaultConfigurations as apiConf } from './restApiBuilder';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
-import { HeaderAuthorizerBuilder } from './headerAuthorizerBuilder';
+import { HeaderAuthorizer } from './headerAuthorizerBuilder';
 
 interface ApiGatewayStackProps extends cdk.StackProps {
 	getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
@@ -50,7 +50,7 @@ export class ApiGatewayStack extends cdk.Stack {
 				props.downloadExtractedLinkedinProfileQueue,
 				{
 					methodOptions: {
-						authorizer: new HeaderAuthorizerBuilder(this, 'LinkedinDataExtractionAuthorizer', {
+						authorizer: new HeaderAuthorizer(this, 'LinkedinDataExtractionAuthorizer', {
 							authorizationHeaderValue: $config.LINKEDIN_EXTRACTION_WEBHOOK_AUTHORIZATION
 						}).authorizer,
 						authorizationType: apiGateway.AuthorizationType.CUSTOM
