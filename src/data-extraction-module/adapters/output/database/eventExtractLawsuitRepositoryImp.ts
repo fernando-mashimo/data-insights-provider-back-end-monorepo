@@ -39,7 +39,7 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 			KeyConditionExpression: 'gsi1pk = :gsi1pk AND gsi1sk >= :gsi1sk',
       ExpressionAttributeValues: {
         ':gsi1pk': cnpj,
-        ':gsi1sk': lastExtractionDate?.toISOString() || new Date(0).toISOString()
+        ':gsi1sk': lastExtractionDate?.toISOString()
       }
 		};
 
@@ -70,7 +70,7 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			endDate: entity.endDate?.toISOString(),
+			endDate: entity.endDate?.toISOString() ?? EMPTY_DDB_ATTRIBUTE,
 			totalPages: entity.totalPages?.toString(),
 			pagesDownloaded: entity.pagesDownloaded?.toString(),
 			nextPageUrl: entity.nextPageUrl ?? EMPTY_DDB_ATTRIBUTE

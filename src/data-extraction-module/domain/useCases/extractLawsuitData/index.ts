@@ -40,13 +40,18 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 			extractionTimeWindow
 		);
 
-		// se retornar algo, verificar a "situação da consulta" e fazer o tratamento adequado
-
 		// se retornar vazio, fazer nova consulta
 		if (!existingEvents || !existingEvents.length) {
 			let hasNextPage: boolean = true;
 			let page: number = 1;
 			let nextPageUrl: string | null = null;
+			const event = new EventExtractLawsuits(
+				input.cnpj,
+				cleanCnpj,
+				EventExtractLawsuitsStatus.PENDING,
+				new Date()
+			);
+			await this.eventExtractLawsuitRepository.put(event);
 
 			while (hasNextPage) {
 				const lawsuitsData: LawsuitDataExtractionResponse =
@@ -54,19 +59,9 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 
 				await this.persistLawsuitsData(cleanCnpj, 'main', lawsuitsData.lawsuits);
 
-				const event = new EventExtractLawsuits(
-					input.cnpj,
-					cleanCnpj,
-					lawsuitsData.totalPages > page
-						? EventExtractLawsuitsStatus.PENDING
-						: EventExtractLawsuitsStatus.FINISHED,
-					new Date()
-				);
-				event.endDate =
-					event.status === EventExtractLawsuitsStatus.FINISHED ? new Date() : undefined;
 				event.totalPages = lawsuitsData.totalPages;
 				event.pagesDownloaded = page;
-        event.nextPageUrl = lawsuitsData.nextPageUrl;
+				event.nextPageUrl = lawsuitsData.nextPageUrl;
 				await this.eventExtractLawsuitRepository.put(event);
 
 				// TO DO: segregar para fila
@@ -92,10 +87,17 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				// }
 
 				if (!lawsuitsData.hasNext) hasNextPage = false;
-				else nextPageUrl = lawsuitsData.nextPageUrl;
-				page += 1;
+				else {
+					nextPageUrl = lawsuitsData.nextPageUrl;
+					page += 1;
+				}
 			}
+      event.status = EventExtractLawsuitsStatus.FINISHED;
+      event.endDate = new Date();
+      await this.eventExtractLawsuitRepository.put(event);
 		}
+
+		// se retornar algo, verificar a "situação da consulta" e fazer o tratamento adequado
 	}
 
 	private async persistLawsuitsData(
