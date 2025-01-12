@@ -5,11 +5,13 @@ import { ExtractLawsuitDataUseCase } from '../../../../domain/useCases/extractLa
 import { EventExtractLawsuitRepositoryImp } from '../../../output/database/eventExtractLawsuitRepositoryImp';
 import { FileManagementClientImp } from '../../../output/file/fileManagementClient';
 import { LawsuitDataExtractorClientImp } from '../../../output/http/lawsuitDataExtractorClientImp';
+import { LawsuitsTimelineDataExtractionQueueImp } from '../../../output/sqs/lawsuitsTimelineDataExtractionQueueImp';
 
 const useCase = new ExtractLawsuitDataUseCase(
   new LawsuitDataExtractorClientImp(),
   new FileManagementClientImp(),
-  new EventExtractLawsuitRepositoryImp()
+  new EventExtractLawsuitRepositoryImp(),
+  new LawsuitsTimelineDataExtractionQueueImp()
 );
 
 export const handler = async (event: SQSEvent): Promise<void> => {

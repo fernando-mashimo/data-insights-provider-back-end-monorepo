@@ -23,7 +23,8 @@ export class DataExtractionStack extends cdk.Stack {
 
 		this.downloadExtractedLinkedinProfileQueue = this.setUpDownloadExtractedLinkedinProfile();
 		this.setupExtractLinkedinProfileByName();
-		this.setupExtractLawsuitData();
+		const extractLawsuitsTimelineDataQueue = this.setupExtractLawsuitsTimelineData();
+		this.setupExtractLawsuitData(extractLawsuitsTimelineDataQueue);
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -99,10 +100,29 @@ export class DataExtractionStack extends cdk.Stack {
 		this.ddbTable.grantReadWriteData(lambda);
 	}
 
-	private setupExtractLawsuitData() {
+	private setupExtractLawsuitData(timelineExtractionQueue: sqs.Queue) {
 		const { lambda } = new EventListener(this, 'ExtractLawsuitData', {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/extractLawsuitData/index.ts',
+				handler: 'handler',
+        environment: {
+          TIMELINE_EXTRACTION_QUEUE_URL: timelineExtractionQueue.queueUrl
+        }
+			},
+			sqsEventSourceProps: {
+				batchSize: 1,
+				maxBatchingWindow: cdk.Duration.seconds(300)
+			}
+		});
+		this.ddbTable.grantReadWriteData(lambda);
+		this.bucket.grantReadWrite(lambda);
+    timelineExtractionQueue.grantSendMessages(lambda);
+	}
+
+	private setupExtractLawsuitsTimelineData() {
+		const { lambda, queue } = new EventListener(this, 'ExtractLawsuitTimelineData', {
+			lambdaProps: {
+				entry: 'src/data-extraction-module/adapters/input/sqs/extractLawsuitTimelineData/index.ts',
 				handler: 'handler'
 			},
 			sqsEventSourceProps: {
@@ -112,5 +132,7 @@ export class DataExtractionStack extends cdk.Stack {
 		});
 		this.ddbTable.grantReadWriteData(lambda);
 		this.bucket.grantReadWrite(lambda);
+
+		return queue;
 	}
 }

@@ -31,7 +31,7 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 
 	public async getByCnpjAndLastExtractionDate(
 		cnpj: string,
-		lastExtractionDate?: Date
+		extractionTimeWindow?: Date
 	): Promise<EventExtractLawsuits[]> {
 		const params: QueryCommandInput = {
 			TableName: $config.DATA_EXTRACTION_EVENTS_TABLE_NAME,
@@ -39,7 +39,7 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 			KeyConditionExpression: 'gsi1pk = :gsi1pk AND gsi1sk >= :gsi1sk',
       ExpressionAttributeValues: {
         ':gsi1pk': cnpj,
-        ':gsi1sk': lastExtractionDate?.toISOString()
+        ':gsi1sk': extractionTimeWindow?.toISOString()
       }
 		};
 
@@ -57,7 +57,8 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 			startDate: new Date(item.startDate),
 			endDate: item.endDate ? new Date(item.endDate) : undefined,
 			totalPages: item.totalPages ? parseInt(item.totalPages) : undefined,
-			pagesDownloaded: item.pagesDownloaded ? parseInt(item.pagesDownloaded) : undefined
+			pagesDownloaded: item.pagesDownloaded ? parseInt(item.pagesDownloaded) : undefined,
+      nextPageUrl: item.nextPageUrl !== EMPTY_DDB_ATTRIBUTE ? item.nextPageUrl : null
 		};
 	}
 

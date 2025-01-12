@@ -5,12 +5,12 @@ export enum EventExtractLawsuitTimelineStatus {
 }
 
 export class EventExtractLawsuitTimeline {
-  constructor(
-    public searchedCnj: string,
-    public status: EventExtractLawsuitTimelineStatus,
-    public startDate: Date,
-    public endDate?: Date,
-    public totalPages?: number,
-    public pagesDownloaded?: number,
-  ) {};
+	constructor(
+		public searchedCnj: string,
+		public status: EventExtractLawsuitTimelineStatus,
+		public startDate: Date,
+		public endDate?: Date,
+		public pagesDownloaded?: number,
+		public nextPageUrl?: string | null
+	) {}
 }

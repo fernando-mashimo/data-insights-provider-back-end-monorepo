@@ -1,11 +1,11 @@
 import { $config } from '$config';
 import axios, { Axios } from 'axios';
 import {
-	LawsuitDataExtractionResponse,
-	LawsuitDataExtractorClient,
-} from '../../../domain/services/lawsuitDataExtractorClient';
+	LawsuitTimelineDataExtractionResponse,
+  LawsuitTimelineDataExtractorClient
+} from '../../../domain/services/lawsuitTimelineDataExtractorClient';
 
-export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient {
+export class LawsuitTimelineDataExtractorClientImp implements LawsuitTimelineDataExtractorClient {
 	private client: Axios;
   private pageSize: number = 50;
 
@@ -15,18 +15,17 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 		});
 	}
 
-	public async getLawsuits(
-		cnpj: string,
+	public async getLawsuitTimeline(
+		cnj: string,
 		nextPageUrl?: string | null
-	): Promise<LawsuitDataExtractionResponse> {
+	): Promise<LawsuitTimelineDataExtractionResponse> {
 		let url;
 
 		if (nextPageUrl) {
 			url = nextPageUrl;
 		} else {
 			url = new URL($config.ESCAVADOR_API_URL);
-			url.pathname = 'api/v2/envolvido/processos';
-			url.searchParams.append('cpf_cnpj', cnpj);
+			url.pathname = `api/v2/processos/numero_cnj/${cnj}/movimentacoes`;
 			url.searchParams.append('limit', this.pageSize.toString());
 		}
 
@@ -36,14 +35,11 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 
 		const { data } = await this.client.get(url.toString(), { headers });
 
-		const { items, links, envolvido_encontrado: { quantidade_processos } } = data;
-
-    const totalPages = Math.ceil(quantidade_processos / this.pageSize);
+		const { items, links } = data;
 
 		return {
-			lawsuits: items,
+			timeline: items,
 			hasNext: !!links.next,
-      totalPages,
 			nextPageUrl: links.next
 		};
 	}

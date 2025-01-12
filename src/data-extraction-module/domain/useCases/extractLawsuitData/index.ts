@@ -13,20 +13,24 @@ import {
 	EventExtractLawsuits,
 	EventExtractLawsuitsStatus
 } from '../../entities/eventExtractLawsuits';
+import { LawsuitsTimelineDataExtractionQueue } from '../../queues/lawsuitTimelineDataExtractionQueue';
 
 export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseCaseInput, void> {
 	private lawsuitDataExtractorClient: LawsuitDataExtractorClient;
 	private fileManagementClient: FileManagementClient;
 	private eventExtractLawsuitRepository: EventExtractLawsuitRepository;
+	private lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue;
 
 	constructor(
 		lawsuitDataExtractorClient: LawsuitDataExtractorClient,
 		fileManagementClient: FileManagementClient,
-		eventExtractLawsuitRepository: EventExtractLawsuitRepository
+		eventExtractLawsuitRepository: EventExtractLawsuitRepository,
+		lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue
 	) {
 		this.lawsuitDataExtractorClient = lawsuitDataExtractorClient;
 		this.fileManagementClient = fileManagementClient;
 		this.eventExtractLawsuitRepository = eventExtractLawsuitRepository;
+		this.lawsuitsTimelineDataExtractionQueue = lawsuitsTimelineDataExtractionQueue;
 	}
 
 	public async execute(input: ExtractLawsuitDataUseCaseInput): Promise<void> {
@@ -35,78 +39,97 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 			new Date().getDate() - $config.ESCAVADOR_EXTRACTION_MAX_TIME_WINDOW_DAYS
 		);
 
-		const existingEvents = await this.eventExtractLawsuitRepository.getByCnpjAndLastExtractionDate(
-			cleanCnpj,
-			extractionTimeWindow
-		);
+		try {
+			const existingEvents =
+				await this.eventExtractLawsuitRepository.getByCnpjAndLastExtractionDate(
+					cleanCnpj,
+					extractionTimeWindow
+				);
 
-		// se retornar vazio, fazer nova consulta
-		if (!existingEvents || !existingEvents.length) {
-			let hasNextPage: boolean = true;
-			let page: number = 1;
-			let nextPageUrl: string | null = null;
-			const event = new EventExtractLawsuits(
-				input.cnpj,
-				cleanCnpj,
-				EventExtractLawsuitsStatus.PENDING,
-				new Date()
-			);
-			await this.eventExtractLawsuitRepository.put(event);
-
-			while (hasNextPage) {
-				const lawsuitsData: LawsuitDataExtractionResponse =
-					await this.lawsuitDataExtractorClient.getLawsuits(cleanCnpj, nextPageUrl);
-
-				await this.persistLawsuitsData(cleanCnpj, 'main', lawsuitsData.lawsuits);
-
-				event.totalPages = lawsuitsData.totalPages;
-				event.pagesDownloaded = page;
-				event.nextPageUrl = lawsuitsData.nextPageUrl;
+			if (!existingEvents || !existingEvents.length) {
+				const event = new EventExtractLawsuits(
+					input.cnpj,
+					cleanCnpj,
+					EventExtractLawsuitsStatus.PENDING,
+					new Date()
+				);
 				await this.eventExtractLawsuitRepository.put(event);
 
-				// TO DO: segregar para fila
-				// // fazer consulta por timelines para cada processo
-				// // persistir os dados no S3 - nome arquivo: "cnpj_${timestamp}.json" - pasta timeline
-				// for (const lawsuit of lawsuitsData.lawsuits) {
-				// 	let timelineHasNextPage: boolean = true;
-				// 	let timelinePage: number = 1;
-				// 	let timelineNextPageUrl: string | null = null;
+				await this.getLawsuitsDataAndPersist(cleanCnpj, event, 1, null);
 
-				// 	while (timelineHasNextPage) {
-				// 		const lawsuitTimelineData = await this.lawsuitDataExtractorClient.getLawsuitTimeline(
-				// 			lawsuit,
-				// 			timelineNextPageUrl
-				// 		);
-
-				// 		await this.persistLawsuitsData(cleanCnpj, 'timeline', lawsuitTimelineData.timeline);
-
-				// 		if (!lawsuitTimelineData.hasNext) timelineHasNextPage = false;
-				// 		else timelineNextPageUrl = lawsuitTimelineData.nextPageUrl;
-				// 		timelinePage += 1;
-				// 	}
-				// }
-
-				if (!lawsuitsData.hasNext) hasNextPage = false;
-				else {
-					nextPageUrl = lawsuitsData.nextPageUrl;
-					page += 1;
-				}
+				return;
 			}
-      event.status = EventExtractLawsuitsStatus.FINISHED;
-      event.endDate = new Date();
-      await this.eventExtractLawsuitRepository.put(event);
+
+			// Recent extraction events were found
+			// If the most recent event is already finished, there is no need to extract data again
+			const recentlyFinishedEvents = existingEvents.filter(
+				(event) => event.status === EventExtractLawsuitsStatus.FINISHED
+			);
+			if (recentlyFinishedEvents.length) {
+				console.info(`Lawsuits data for CNPJ ${cleanCnpj} recently extracted`);
+				return;
+			}
+
+			// If the most recent event is still pending, we need to continue the extraction from where it stopped
+			if (!recentlyFinishedEvents.length) {
+				const event = existingEvents[0];
+				const page = event.pagesDownloaded ? event.pagesDownloaded + 1 : 1;
+				const nextPageUrl = event.nextPageUrl ?? null;
+
+				await this.getLawsuitsDataAndPersist(cleanCnpj, event, page, nextPageUrl);
+
+				return;
+			}
+		} catch (error) {
+			console.error(`Error extracting lawsuits data for CNPJ ${cleanCnpj}`);
+			throw error;
+		}
+	}
+
+	private async getLawsuitsDataAndPersist(
+		cleanCnpj: string,
+		event: EventExtractLawsuits,
+		startPage: number,
+		startNextPageUrl: string | null
+	): Promise<void> {
+		let hasNextPage: boolean = true;
+		let page: number = startPage;
+		let nextPageUrl: string | null = startNextPageUrl;
+
+		while (hasNextPage) {
+			const lawsuitsData: LawsuitDataExtractionResponse =
+				await this.lawsuitDataExtractorClient.getLawsuits(cleanCnpj, nextPageUrl);
+
+			await this.persistLawsuitsData(cleanCnpj, lawsuitsData.lawsuits);
+
+			event.totalPages = lawsuitsData.totalPages;
+			event.pagesDownloaded = page;
+			event.nextPageUrl = lawsuitsData.nextPageUrl;
+			await this.eventExtractLawsuitRepository.put(event);
+
+			if (!lawsuitsData.hasNext) hasNextPage = false;
+			else {
+				nextPageUrl = lawsuitsData.nextPageUrl;
+				page += 1;
+			}
+
+			// Send message to lawsuits' timeline extraction queue
+			await this.lawsuitsTimelineDataExtractionQueue.sendExtractDataMessage({
+				lawsuits: lawsuitsData.lawsuits
+			});
 		}
 
-		// se retornar algo, verificar a "situação da consulta" e fazer o tratamento adequado
+		event.status = EventExtractLawsuitsStatus.FINISHED;
+		event.endDate = new Date();
+		await this.eventExtractLawsuitRepository.put(event);
 	}
 
 	private async persistLawsuitsData(
 		cnpj: string,
-		dataType: 'main' | 'timeline',
 		lawsuitsData: GenericExtractedData[]
 	): Promise<void> {
 		const filePath = path.join(
-			`lawsuits/${dataType}/escavador`,
+			`lawsuits/main/escavador`,
 			`${cnpj}_${new Date().toISOString()}.json`
 		);
 
