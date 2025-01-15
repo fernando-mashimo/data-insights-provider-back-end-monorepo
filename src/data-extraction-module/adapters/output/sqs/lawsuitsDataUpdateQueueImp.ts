@@ -12,7 +12,7 @@ export class LawsuitsDataUpdateQueueImp implements LawsuitsDataUpdateQueue {
 	}
 
 	public async sendUpdateDataMessages(input: LawsuitsDataUpdateQueueInput): Promise<void> {
-		const lawsuitsCnjs = input.lawsuits.map((lawsuit) => lawsuit.numero_cnj);
+		const lawsuitsCnjs = input.lawsuits.map((lawsuit) => lawsuit.numero_cnj ?? lawsuit.cnj);
 
 		const sendMessagesPromises = [];
 

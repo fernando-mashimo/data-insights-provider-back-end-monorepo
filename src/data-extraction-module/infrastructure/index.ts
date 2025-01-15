@@ -5,6 +5,10 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import { $config } from '$config';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { EventListener } from '$lib/infrastructure/constructors/eventListener';
+import { LambdaBasic } from '$lib/infrastructure/constructors/lambda';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import { EventRuleBasic } from '$lib/infrastructure/constructors/eventRule';
 
 export class DataExtractionStack extends cdk.Stack {
 	readonly downloadExtractedLinkedinProfileQueue: sqs.Queue;
@@ -26,6 +30,9 @@ export class DataExtractionStack extends cdk.Stack {
 		const extractLawsuitsTimelineDataQueue = this.setupExtractLawsuitsTimelineData();
 		const updateLawsuitDataQueue = this.setupUpdateLawsuitData();
 		this.setupExtractLawsuitData(extractLawsuitsTimelineDataQueue, updateLawsuitDataQueue);
+		const triggerUpdateLawsuitDataFunction =
+			this.setupTriggerUpdateLawsuitData(updateLawsuitDataQueue);
+		this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -111,7 +118,7 @@ export class DataExtractionStack extends cdk.Stack {
 				handler: 'handler',
 				environment: {
 					TIMELINE_EXTRACTION_QUEUE_URL: timelineExtractionQueue.queueUrl,
-          UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl
+					UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl
 				}
 			},
 			sqsEventSourceProps: {
@@ -122,7 +129,7 @@ export class DataExtractionStack extends cdk.Stack {
 		this.ddbTable.grantReadWriteData(lambda);
 		this.bucket.grantReadWrite(lambda);
 		timelineExtractionQueue.grantSendMessages(lambda);
-    updateLawsuitDataQueue.grantSendMessages(lambda);
+		updateLawsuitDataQueue.grantSendMessages(lambda);
 	}
 
 	private setupExtractLawsuitsTimelineData() {
@@ -157,5 +164,29 @@ export class DataExtractionStack extends cdk.Stack {
 		this.bucket.grantReadWrite(lambda);
 
 		return queue;
+	}
+
+	private setupTriggerUpdateLawsuitData(
+		updateLawsuitDataQueue: sqs.Queue
+	): lambdaNodejs.NodejsFunction {
+		const { lambda } = new LambdaBasic(this, 'TriggerUpdateLawsuitData', {
+			timeout: cdk.Duration.seconds(300),
+			entry: 'src/data-extraction-module/adapters/input/schedule/triggerUpdateLawsuitData/index.ts',
+			handler: 'handler',
+			environment: {
+				UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl
+			}
+		});
+		updateLawsuitDataQueue.grantSendMessages(lambda);
+
+		return lambda;
+	}
+
+	private setupDailyTriggerForUpdateLawsuitData(
+		triggerUpdateLawsuitDataLambda: lambdaNodejs.NodejsFunction
+	) {
+		const { eventRule } = new EventRuleBasic(this, 'EventRuleUpdateLawsuitData', {});
+
+		eventRule.addTarget(new targets.LambdaFunction(triggerUpdateLawsuitDataLambda));
 	}
 }

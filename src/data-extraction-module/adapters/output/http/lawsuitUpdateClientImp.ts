@@ -3,6 +3,7 @@ import {
 	GenericExtractedData,
 	LawsuitDataUpdateClient,
 	LawsuitSubscriptionExternalResponse,
+	UnsyncedLawsuitSubscription,
 	UpdatedLawsuitData
 } from '../../../domain/services/lawsuitDataUpdateClient';
 import { $config } from '$config';
@@ -16,7 +17,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		});
 	}
 
-	public async getLawsuitSubscription(
+	public async getLawsuitSubscriptionMetadataByCnj(
 		cnj: string
 	): Promise<LawsuitSubscriptionExternalResponse | undefined> {
 		const accessToken = await this.getAccessToken();
@@ -38,7 +39,29 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 
 			return lawsuitSubscription;
 		} catch (error) {
-			console.error(`Error retrieving lawsuit subscription for CNJ ${cnj}`, error);
+			console.error(`Error retrieving lawsuit subscription metadata for CNJ ${cnj}`, error);
+			throw error;
+		}
+	}
+
+	public async getLawsuitSubscriptionMetadataById(
+		id: string
+	): Promise<LawsuitSubscriptionExternalResponse> {
+		const accessToken = await this.getAccessToken();
+
+		const url = new URL($config.PIPED_API_BASE_URL);
+		url.pathname = `/v1/subscriptions/${id}`;
+
+		const headers = {
+			Authorization: `Bearer ${accessToken}`
+		};
+
+		try {
+			const { data } = await this.client.get(url.toString(), { headers });
+
+			return data.data;
+		} catch (error) {
+			console.error(`Error retrieving lawsuit subscription metadata for id ${id}`, error);
 			throw error;
 		}
 	}
@@ -81,6 +104,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 
 			const urlConfirmSynced = new URL($config.PIPED_API_BASE_URL);
 			urlConfirmSynced.pathname = `/v1/subscriptions/${subscriptionId}/sync`;
+			await this.client.get(urlConfirmSynced.toString(), { headers });
 			await this.client.post(urlConfirmSynced.toString(), {}, { headers });
 
 			const documentsUrls: string[] = data.data.map(
@@ -93,6 +117,26 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 				`Error retrieving updated lawsuit data for subscription ${subscriptionId}`,
 				error
 			);
+			throw error;
+		}
+	}
+
+	public async getUnsyncedLawsuitsSubscriptions(): Promise<UnsyncedLawsuitSubscription[]> {
+		const accessToken = await this.getAccessToken();
+
+		const url = new URL($config.PIPED_API_BASE_URL);
+		url.pathname = '/v1/subscriptions/unsynced';
+
+		const headers = {
+			Authorization: `Bearer ${accessToken}`
+		};
+
+		try {
+			const { data } = await this.client.get(url.toString(), { headers });
+
+			return data.data;
+		} catch (error) {
+			console.error('Error retrieving unsynced lawsuits', error);
 			throw error;
 		}
 	}

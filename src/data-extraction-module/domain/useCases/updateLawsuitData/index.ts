@@ -26,18 +26,17 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 
 	public async execute(input: UpdateLawsuitDataUseCaseInput): Promise<void> {
 		try {
-      let event: EventUpdateLawsuit;
+			let event: EventUpdateLawsuit;
 			const existingEvents = await this.eventUpdateLawsuitRepository.getByCnjAndStatus(
-        input.cnj,
+				input.cnj,
 				EventUpdateLawsuitStatus.PENDING
 			);
 			if (!existingEvents.length)
 				event = new EventUpdateLawsuit(input.cnj, EventUpdateLawsuitStatus.PENDING, new Date());
-      else event = existingEvents[0];
+			else event = existingEvents[0];
 
-      const lawsuitSubscriptionData = await this.lawsuitDataUpdateClient.getLawsuitSubscription(
-        input.cnj
-      );
+			const lawsuitSubscriptionData =
+				await this.lawsuitDataUpdateClient.getLawsuitSubscriptionMetadataByCnj(input.cnj);
 			if (!lawsuitSubscriptionData) {
 				await this.lawsuitDataUpdateClient.createLawsuitSubscription(input.cnj);
 				await this.eventUpdateLawsuitRepository.put(event);
@@ -57,7 +56,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 			await this.downloadLawsuitDocumentsAndPersist(
 				updatedLawsuitDataAndDocumentsUrl.documentsUrls,
 				input.cnj
-			);
+			); // TO DO: estratégia para salvar documentos únicos, evitando duplicidade de arquivos com mesmo conteúdo
 
 			event.status = EventUpdateLawsuitStatus.FINISHED;
 			event.endDate = new Date();
