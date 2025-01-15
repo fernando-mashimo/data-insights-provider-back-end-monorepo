@@ -8,6 +8,7 @@ import {
 	LawsuitDataUpdateClient
 } from '../../services/lawsuitDataUpdateClient';
 import { EventUpdateLawsuitRepository } from '../../repositories/eventUpdateLawsuitRepository';
+import { createHash } from 'node:crypto';
 
 export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCaseInput, void> {
 	private lawsuitDataUpdateClient: LawsuitDataUpdateClient;
@@ -87,14 +88,23 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 		for (const documentUrl of documentsUrls) {
 			if (documentUrl) {
 				const documentData = await this.fileManagementClient.downloadPdfFile(documentUrl);
+				const hashedDocumentDataString = this.hashData(documentData);
 
 				const filePath = path.join(
 					`lawsuits/documents/piped`,
-					`${cnj}_${new Date().toISOString()}.pdf`
+					`${cnj}_${hashedDocumentDataString}.pdf`
 				);
 
 				await this.fileManagementClient.uploadFile(filePath, 'application/pdf', documentData);
 			}
 		}
+	}
+
+	private hashData(data: Buffer): string {
+		const hash = createHash('sha256');
+
+		hash.update(data);
+
+		return hash.digest('hex');
 	}
 }
