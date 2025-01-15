@@ -26,16 +26,18 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 
 	public async execute(input: UpdateLawsuitDataUseCaseInput): Promise<void> {
 		try {
-			const lawsuitSubscriptionData = await this.lawsuitDataUpdateClient.getLawsuitSubscription(
-				input.cnj
+      let event: EventUpdateLawsuit;
+			const existingEvents = await this.eventUpdateLawsuitRepository.getByCnjAndStatus(
+        input.cnj,
+				EventUpdateLawsuitStatus.PENDING
 			);
+			if (!existingEvents.length)
+				event = new EventUpdateLawsuit(input.cnj, EventUpdateLawsuitStatus.PENDING, new Date());
+      else event = existingEvents[0];
 
-			const event: EventUpdateLawsuit = new EventUpdateLawsuit(
-				input.cnj,
-				EventUpdateLawsuitStatus.PENDING,
-				new Date()
-			);
-
+      const lawsuitSubscriptionData = await this.lawsuitDataUpdateClient.getLawsuitSubscription(
+        input.cnj
+      );
 			if (!lawsuitSubscriptionData) {
 				await this.lawsuitDataUpdateClient.createLawsuitSubscription(input.cnj);
 				await this.eventUpdateLawsuitRepository.put(event);
