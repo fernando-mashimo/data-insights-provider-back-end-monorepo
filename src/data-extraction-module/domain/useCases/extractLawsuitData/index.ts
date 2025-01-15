@@ -14,23 +14,27 @@ import {
 	EventExtractLawsuitsStatus
 } from '../../entities/eventExtractLawsuits';
 import { LawsuitsTimelineDataExtractionQueue } from '../../queues/lawsuitTimelineDataExtractionQueue';
+import { LawsuitsDataUpdateQueue } from '../../queues/lawsuitDataUpdateQueue';
 
 export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseCaseInput, void> {
 	private lawsuitDataExtractorClient: LawsuitDataExtractorClient;
 	private fileManagementClient: FileManagementClient;
 	private eventExtractLawsuitRepository: EventExtractLawsuitRepository;
 	private lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue;
+	private lawsuitsDataUpdateQueue: LawsuitsDataUpdateQueue;
 
 	constructor(
 		lawsuitDataExtractorClient: LawsuitDataExtractorClient,
 		fileManagementClient: FileManagementClient,
 		eventExtractLawsuitRepository: EventExtractLawsuitRepository,
-		lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue
+		lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue,
+		lawsuitsDataUpdateQueue: LawsuitsDataUpdateQueue
 	) {
 		this.lawsuitDataExtractorClient = lawsuitDataExtractorClient;
 		this.fileManagementClient = fileManagementClient;
 		this.eventExtractLawsuitRepository = eventExtractLawsuitRepository;
 		this.lawsuitsTimelineDataExtractionQueue = lawsuitsTimelineDataExtractionQueue;
+		this.lawsuitsDataUpdateQueue = lawsuitsDataUpdateQueue;
 	}
 
 	public async execute(input: ExtractLawsuitDataUseCaseInput): Promise<void> {
@@ -113,10 +117,15 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				page += 1;
 			}
 
-			// Send message to lawsuits' timeline extraction queue
-			await this.lawsuitsTimelineDataExtractionQueue.sendExtractDataMessage({
-				lawsuits: lawsuitsData.lawsuits
-			});
+			// Send messages to lawsuits' timeline extraction and lawsuits' data update queues
+			await Promise.all([
+				this.lawsuitsTimelineDataExtractionQueue.sendExtractDataMessages({
+					lawsuits: lawsuitsData.lawsuits
+				}),
+				this.lawsuitsDataUpdateQueue.sendUpdateDataMessages({
+					lawsuits: lawsuitsData.lawsuits
+				})
+			]);
 		}
 
 		event.status = EventExtractLawsuitsStatus.FINISHED;

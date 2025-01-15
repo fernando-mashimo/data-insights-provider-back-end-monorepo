@@ -24,7 +24,8 @@ export class DataExtractionStack extends cdk.Stack {
 		this.downloadExtractedLinkedinProfileQueue = this.setUpDownloadExtractedLinkedinProfile();
 		this.setupExtractLinkedinProfileByName();
 		const extractLawsuitsTimelineDataQueue = this.setupExtractLawsuitsTimelineData();
-		this.setupExtractLawsuitData(extractLawsuitsTimelineDataQueue);
+		const updateLawsuitDataQueue = this.setupUpdateLawsuitData();
+		this.setupExtractLawsuitData(extractLawsuitsTimelineDataQueue, updateLawsuitDataQueue);
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -100,14 +101,18 @@ export class DataExtractionStack extends cdk.Stack {
 		this.ddbTable.grantReadWriteData(lambda);
 	}
 
-	private setupExtractLawsuitData(timelineExtractionQueue: sqs.Queue) {
+	private setupExtractLawsuitData(
+		timelineExtractionQueue: sqs.Queue,
+		updateLawsuitDataQueue: sqs.Queue
+	) {
 		const { lambda } = new EventListener(this, 'ExtractLawsuitData', {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/extractLawsuitData/index.ts',
 				handler: 'handler',
-        environment: {
-          TIMELINE_EXTRACTION_QUEUE_URL: timelineExtractionQueue.queueUrl
-        }
+				environment: {
+					TIMELINE_EXTRACTION_QUEUE_URL: timelineExtractionQueue.queueUrl,
+          UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl
+				}
 			},
 			sqsEventSourceProps: {
 				batchSize: 1,
@@ -116,13 +121,31 @@ export class DataExtractionStack extends cdk.Stack {
 		});
 		this.ddbTable.grantReadWriteData(lambda);
 		this.bucket.grantReadWrite(lambda);
-    timelineExtractionQueue.grantSendMessages(lambda);
+		timelineExtractionQueue.grantSendMessages(lambda);
+    updateLawsuitDataQueue.grantSendMessages(lambda);
 	}
 
 	private setupExtractLawsuitsTimelineData() {
 		const { lambda, queue } = new EventListener(this, 'ExtractLawsuitTimelineData', {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/extractLawsuitTimelineData/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1,
+				maxBatchingWindow: cdk.Duration.seconds(300)
+			}
+		});
+		this.ddbTable.grantReadWriteData(lambda);
+		this.bucket.grantReadWrite(lambda);
+
+		return queue;
+	}
+
+	private setupUpdateLawsuitData() {
+		const { lambda, queue } = new EventListener(this, 'UpdateLawsuitData', {
+			lambdaProps: {
+				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitData/index.ts',
 				handler: 'handler'
 			},
 			sqsEventSourceProps: {

@@ -1,13 +1,24 @@
 import { $config } from '$config';
+import axios, { Axios } from 'axios';
 import { FileManagementClient } from '../../../domain/services/fileManagementClient';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 export class FileManagementClientImp implements FileManagementClient {
-	private client: S3Client;
+	private s3Client: S3Client;
+  private axiosClient: Axios;
 
 	constructor() {
-		this.client = new S3Client({});
+		this.s3Client = new S3Client({});
+    this.axiosClient = axios.create({
+      timeout: $config.AXIOS_REQUEST_TIMEOUT_SECONDS * 1000
+    });
 	}
+
+  public async downloadPdfFile(fileUrl: string): Promise<Buffer> {
+    const { data } = await this.axiosClient.get(fileUrl, { responseType: 'arraybuffer' });
+
+    return Buffer.from(data);
+  }
 
 	public async uploadFile(path: string, contentType: string, content: Buffer): Promise<void> {
 		const command = new PutObjectCommand({
@@ -17,6 +28,7 @@ export class FileManagementClientImp implements FileManagementClient {
 			ContentType: contentType
 		});
 
-		await this.client.send(command);
+		await this.s3Client.send(command);
 	}
+
 }

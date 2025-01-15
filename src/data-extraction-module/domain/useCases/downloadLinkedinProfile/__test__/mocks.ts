@@ -27,6 +27,7 @@ export class EventExtractLinkedinRepositoryMock implements EventExtractLinkedinR
 
 export class FileManagementClientMock implements FileManagementClient {
 	uploadFile = jest.fn();
+  downloadPdfFile = jest.fn();
 }
 
 export class LinkedinExtractorClientMock implements LinkedinExtractorClient {

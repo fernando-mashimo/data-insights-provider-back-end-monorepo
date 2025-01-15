@@ -39,10 +39,10 @@ class Config {
 	public static DATA_EXTRACTION_EVENTS_TABLE_NAME: string = 'extraction_events';
 	public static DATA_EXTRACTION_BUCKET_NAME: string = 'delta-ai-extraction-data';
 
-	public static PIPED_API_AUTH_URL: string = 'https://auth.piped.com.br/oauth/token';
+	public static PIPED_API_AUTH_URL: string = 'https://auth.piped.com.br';
 	public static PIPED_API_CLIENT_ID: string = '0FBD737E4DA2725C'; // TO DO: move to secrets
 	public static PIPED_API_CLIENT_SECRET: string = '4ff194c96b1e4fc269429c96e87a6cfa';
-	public static PIPED_API_BASE_URL: string = 'https://api.piped.com.br/v1';
+	public static PIPED_API_BASE_URL: string = 'https://api.piped.com.br';
 
 	public static BRIGHDATA_API_URL: string = 'https://api.brightdata.com';
 	public static BRIGHDATA_API_KEY: string =

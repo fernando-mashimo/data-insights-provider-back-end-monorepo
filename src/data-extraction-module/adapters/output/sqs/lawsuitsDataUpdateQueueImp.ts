@@ -1,26 +1,24 @@
-import {
-	LawsuitsTimelineDataExtractionQueue,
-	LawsuitsTimelineDataExtractionQueueInput
-} from '../../../domain/queues/lawsuitTimelineDataExtractionQueue';
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
+import {
+	LawsuitsDataUpdateQueue,
+	LawsuitsDataUpdateQueueInput
+} from '../../../domain/queues/lawsuitDataUpdateQueue';
 
-export class LawsuitsTimelineDataExtractionQueueImp implements LawsuitsTimelineDataExtractionQueue {
+export class LawsuitsDataUpdateQueueImp implements LawsuitsDataUpdateQueue {
 	private sqsClient: SQSClient;
 
 	constructor() {
 		this.sqsClient = new SQSClient({});
 	}
 
-	public async sendExtractDataMessages(
-		input: LawsuitsTimelineDataExtractionQueueInput
-	): Promise<void> {
+	public async sendUpdateDataMessages(input: LawsuitsDataUpdateQueueInput): Promise<void> {
 		const lawsuitsCnjs = input.lawsuits.map((lawsuit) => lawsuit.numero_cnj);
 
 		const sendMessagesPromises = [];
 
 		for (const cnj of lawsuitsCnjs) {
 			const parameters: SendMessageCommandInput = {
-				QueueUrl: process.env.TIMELINE_EXTRACTION_QUEUE_URL,
+				QueueUrl: process.env.UPDATE_LAWSUIT_DATA_QUEUE_URL,
 				MessageBody: JSON.stringify({
 					cnj
 				})

@@ -1,8 +1,8 @@
 export interface LawsuitsTimelineDataExtractionQueue {
-	sendExtractDataMessage(input: LawsuitTimelineDataExtractionQueueInput): Promise<void>;
+	sendExtractDataMessages(input: LawsuitsTimelineDataExtractionQueueInput): Promise<void>;
 }
 
-export type LawsuitTimelineDataExtractionQueueInput = {
+export type LawsuitsTimelineDataExtractionQueueInput = {
 	lawsuits: GenericLawsuitData[];
 };
 
