@@ -10,6 +10,9 @@ import {
 } from '../../../services/linkedinExtractorClient';
 
 export class EventExtractLinkedinRepositoryMock implements EventExtractLinkedinRepository {
+	getByNameAndLastExtractionDate(): Promise<EventExtractLinkedin[]> {
+		throw new Error('Method not implemented.');
+	}
 	put = jest.fn();
 	getById = jest.fn<Promise<EventExtractLinkedin>, [string]>().mockResolvedValue({
 		requestedName: 'FirstName LastName',
@@ -27,7 +30,7 @@ export class EventExtractLinkedinRepositoryMock implements EventExtractLinkedinR
 
 export class FileManagementClientMock implements FileManagementClient {
 	uploadFile = jest.fn();
-  downloadPdfFile = jest.fn();
+	downloadPdfFile = jest.fn();
 }
 
 export class LinkedinExtractorClientMock implements LinkedinExtractorClient {
