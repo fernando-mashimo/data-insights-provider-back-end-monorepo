@@ -7,6 +7,15 @@ import { GenericExtractedData, LawsuitTimelineDataExtractionResponse, LawsuitTim
 import { UseCase } from '../UseCase';
 import { ExtractLawsuitTimelineDataUseCaseInput } from './input';
 
+/**
+ * Use case to extract lawsuit timeline data from external source (currently Escavador API)
+ *
+ * The use case is responsible for:
+ * - Extracting lawsuit timeline data from Escavador API
+ * - Persisting lawsuit timeline data on S3
+ * - Updating event status on EventExtractLawsuitTimelineRepository
+ *
+ */
 export class ExtractLawsuitTimelineDataUseCase
 	implements UseCase<ExtractLawsuitTimelineDataUseCaseInput, void>
 {

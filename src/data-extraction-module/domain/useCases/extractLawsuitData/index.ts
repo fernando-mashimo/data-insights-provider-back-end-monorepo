@@ -16,6 +16,20 @@ import {
 import { LawsuitsTimelineDataExtractionQueue } from '../../queues/lawsuitTimelineDataExtractionQueue';
 import { LawsuitsDataUpdateQueue } from '../../queues/lawsuitDataUpdateQueue';
 
+/**
+ * Use case to extract lawsuit data from external source (currently Escavador API)
+ *
+ * The use case is responsible for:
+ * - Extracting lawsuit data from Escavador API
+ * - Persisting lawsuit data on S3
+ * - Sending messages to SQS queues for further processing
+ *    - Creating lawsuit timeline data extraction messages
+ *      - The lawsuit timeline data extraction messages will trigger the extraction of lawsuit timeline data
+ *    - Creating lawsuit data update messages
+ *      - The lawsuit data update messages will trigger the update of lawsuit data
+ * - Updating event status on EventExtractLawsuitRepository
+ *
+ */
 export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseCaseInput, void> {
 	private lawsuitDataExtractorClient: LawsuitDataExtractorClient;
 	private fileManagementClient: FileManagementClient;

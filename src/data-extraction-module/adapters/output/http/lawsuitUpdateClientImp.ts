@@ -2,7 +2,7 @@ import axios, { Axios } from 'axios';
 import {
 	GenericExtractedData,
 	LawsuitDataUpdateClient,
-	LawsuitSubscriptionExternalResponse,
+	LawsuitSubscription,
 	UnsyncedLawsuitSubscription,
 	UpdatedLawsuitData
 } from '../../../domain/services/lawsuitDataUpdateClient';
@@ -17,9 +17,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		});
 	}
 
-	public async getLawsuitSubscriptionMetadataByCnj(
-		cnj: string
-	): Promise<LawsuitSubscriptionExternalResponse | undefined> {
+	public async getLawsuitSubscriptionByCnj(cnj: string): Promise<LawsuitSubscription | undefined> {
 		const accessToken = await this.getAccessToken();
 
 		const url = new URL($config.PIPED_API_BASE_URL);
@@ -33,8 +31,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 			const { data } = await this.client.get(url.toString(), { headers });
 
 			const lawsuitSubscription = data.data.find(
-				(subscription: LawsuitSubscriptionExternalResponse) =>
-					subscription.value.replace(/\D/g, '') === cnj
+				(subscription: LawsuitSubscription) => subscription.value.replace(/\D/g, '') === cnj
 			);
 
 			return lawsuitSubscription;
@@ -44,9 +41,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		}
 	}
 
-	public async getLawsuitSubscriptionMetadataById(
-		id: string
-	): Promise<LawsuitSubscriptionExternalResponse> {
+	public async getLawsuitSubscriptionById(id: string): Promise<LawsuitSubscription> {
 		const accessToken = await this.getAccessToken();
 
 		const url = new URL($config.PIPED_API_BASE_URL);

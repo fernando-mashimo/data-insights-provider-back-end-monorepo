@@ -10,6 +10,18 @@ import {
 import { EventUpdateLawsuitRepository } from '../../repositories/eventUpdateLawsuitRepository';
 import { createHash } from 'node:crypto';
 
+/**
+ * Use case to update / fetch additional lawsuit data from external source (currently PIPED API)
+ *
+ * The use case is responsible for:
+ * - Fetching lawsuit subscription data from PIPED API
+ * - Fetching updated lawsuit data from PIPED API
+ * - Persisting updated lawsuit data on S3
+ * - Downloading and persisting lawsuit documents on S3 (hashed content as part of persisted file name)
+ * - Updating event status on EventUpdateLawsuitRepository
+ * - Creating lawsuit subscription on PIPED API if it does not exist
+ *
+ */
 export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCaseInput, void> {
 	private lawsuitDataUpdateClient: LawsuitDataUpdateClient;
 	private fileManagementClient: FileManagementClient;
@@ -37,7 +49,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 			else event = existingEvents[0];
 
 			const lawsuitSubscriptionData =
-				await this.lawsuitDataUpdateClient.getLawsuitSubscriptionMetadataByCnj(input.cnj);
+				await this.lawsuitDataUpdateClient.getLawsuitSubscriptionByCnj(input.cnj);
 			if (!lawsuitSubscriptionData) {
 				await this.lawsuitDataUpdateClient.createLawsuitSubscription(input.cnj);
 				await this.eventUpdateLawsuitRepository.put(event);
@@ -57,7 +69,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 			await this.downloadLawsuitDocumentsAndPersist(
 				updatedLawsuitDataAndDocumentsUrl.documentsUrls,
 				input.cnj
-			); // TO DO: estratégia para salvar documentos únicos, evitando duplicidade de arquivos com mesmo conteúdo
+			);
 
 			event.status = EventUpdateLawsuitStatus.FINISHED;
 			event.endDate = new Date();
@@ -92,7 +104,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 
 				const filePath = path.join(
 					`lawsuits/documents/piped`,
-					`${cnj}_${hashedDocumentDataString}.pdf`
+					`${cnj}_${hashedDocumentDataString}.pdf` // TO DO: necessário agregar nome original do documento na fonte
 				);
 
 				await this.fileManagementClient.uploadFile(filePath, 'application/pdf', documentData);

@@ -1,8 +1,6 @@
 export interface LawsuitDataUpdateClient {
-	getLawsuitSubscriptionMetadataByCnj(
-		cnj: string
-	): Promise<LawsuitSubscriptionExternalResponse | undefined>;
-	getLawsuitSubscriptionMetadataById(id: string): Promise<LawsuitSubscriptionExternalResponse>;
+	getLawsuitSubscriptionByCnj(cnj: string): Promise<LawsuitSubscription | undefined>;
+	getLawsuitSubscriptionById(id: string): Promise<LawsuitSubscription>;
 	createLawsuitSubscription(cnj: string): Promise<void>;
 	getUpdatedLawsuitData(subscriptionId: string): Promise<UpdatedLawsuitData>;
 	getUnsyncedLawsuitsSubscriptions(): Promise<UnsyncedLawsuitSubscription[]>;
@@ -17,7 +15,7 @@ export type UpdatedLawsuitData = {
 	documentsUrls: string[];
 };
 
-export type LawsuitSubscriptionExternalResponse = {
+export type LawsuitSubscription = {
 	id: string;
 	type: string;
 	value: string;
