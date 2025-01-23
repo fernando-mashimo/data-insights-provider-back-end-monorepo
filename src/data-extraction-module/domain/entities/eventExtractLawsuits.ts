@@ -5,6 +5,8 @@ export enum EventExtractLawsuitsStatus {
 }
 
 export class EventExtractLawsuits {
+  public id: string;
+
   constructor(
     public requestedCnpj: string, // original requested cnpj
     public searchedCnpj: string, // cleared cnpj searched
@@ -14,5 +16,7 @@ export class EventExtractLawsuits {
     public totalPages?: number,
     public pagesDownloaded?: number,
     public nextPageUrl?: string | null,
-  ) {};
+  ) {
+    this.id = `${startDate.toISOString()}`;
+  };
 }

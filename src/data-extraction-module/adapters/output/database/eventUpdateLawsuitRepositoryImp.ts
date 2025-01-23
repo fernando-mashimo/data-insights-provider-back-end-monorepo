@@ -59,6 +59,7 @@ export class EventUpdateLawsuitRepositoryImp implements EventUpdateLawsuitReposi
 			cnj: item.cnj,
 			status: item.status as EventUpdateLawsuitStatus,
 			startDate: new Date(item.startDate),
+      id: item.id,
 			endDate: item.endDate ? new Date(item.endDate) : undefined
 		};
 	}
@@ -66,7 +67,7 @@ export class EventUpdateLawsuitRepositoryImp implements EventUpdateLawsuitReposi
 	private entityToDdbItem(entity: EventUpdateLawsuit): DDBItem {
 		return {
 			pk: `EventUpdateLawsuit#${entity.cnj}`,
-			sk: entity.startDate.toISOString(),
+			sk: entity.id,
 			gsi1pk: entity.cnj,
 			gsi1sk: entity.status,
 

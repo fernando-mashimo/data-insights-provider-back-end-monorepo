@@ -55,6 +55,7 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 			searchedCnpj: item.searchedCnpj,
 			status: item.status as EventExtractLawsuitsStatus,
 			startDate: new Date(item.startDate),
+      id: item.id,
 			endDate: item.endDate ? new Date(item.endDate) : undefined,
 			totalPages: item.totalPages ? parseInt(item.totalPages) : undefined,
 			pagesDownloaded: item.pagesDownloaded ? parseInt(item.pagesDownloaded) : undefined,
@@ -65,7 +66,7 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 	private entityToDdbItem(entity: EventExtractLawsuits): DDBItem {
 		return {
 			pk: `EventExtractLawsuits#${entity.searchedCnpj}`,
-			sk: EMPTY_DDB_ATTRIBUTE,
+			sk: entity.id,
 			gsi1pk: entity.searchedCnpj,
 			gsi1sk: entity.startDate.toISOString(),
 

@@ -56,6 +56,7 @@ export class EventExtractLawsuitTimelineRepositoryImp
 			searchedCnj: item.searchedCnj,
 			status: item.status as EventExtractLawsuitTimelineStatus,
 			startDate: new Date(item.startDate),
+      id: item.id,
 			endDate: item.endDate ? new Date(item.endDate) : undefined,
 			pagesDownloaded: item.pagesDownloaded ? parseInt(item.pagesDownloaded) : undefined,
 			nextPageUrl: item.nextPageUrl !== EMPTY_DDB_ATTRIBUTE ? item.nextPageUrl : null
@@ -65,7 +66,7 @@ export class EventExtractLawsuitTimelineRepositoryImp
 	private entityToDdbItem(entity: EventExtractLawsuitTimeline): DDBItem {
 		return {
 			pk: `EventExtractLawsuitTimeline#${entity.searchedCnj}`,
-			sk: EMPTY_DDB_ATTRIBUTE,
+			sk: entity.id,
 			gsi1pk: entity.searchedCnj,
 			gsi1sk: entity.startDate.toISOString(),
 
