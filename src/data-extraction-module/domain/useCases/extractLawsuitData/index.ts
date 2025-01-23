@@ -14,7 +14,6 @@ import {
 	EventExtractLawsuitsStatus
 } from '../../entities/eventExtractLawsuits';
 import { LawsuitsTimelineDataExtractionQueue } from '../../queues/lawsuitTimelineDataExtractionQueue';
-import { LawsuitsDataUpdateQueue } from '../../queues/lawsuitDataUpdateQueue';
 
 /**
  * Use case to extract lawsuit data from external source (currently Escavador API)
@@ -35,20 +34,17 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 	private fileManagementClient: FileManagementClient;
 	private eventExtractLawsuitRepository: EventExtractLawsuitRepository;
 	private lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue;
-	private lawsuitsDataUpdateQueue: LawsuitsDataUpdateQueue;
 
 	constructor(
 		lawsuitDataExtractorClient: LawsuitDataExtractorClient,
 		fileManagementClient: FileManagementClient,
 		eventExtractLawsuitRepository: EventExtractLawsuitRepository,
 		lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue,
-		lawsuitsDataUpdateQueue: LawsuitsDataUpdateQueue
 	) {
 		this.lawsuitDataExtractorClient = lawsuitDataExtractorClient;
 		this.fileManagementClient = fileManagementClient;
 		this.eventExtractLawsuitRepository = eventExtractLawsuitRepository;
 		this.lawsuitsTimelineDataExtractionQueue = lawsuitsTimelineDataExtractionQueue;
-		this.lawsuitsDataUpdateQueue = lawsuitsDataUpdateQueue;
 	}
 
 	public async execute(input: ExtractLawsuitDataUseCaseInput): Promise<void> {
