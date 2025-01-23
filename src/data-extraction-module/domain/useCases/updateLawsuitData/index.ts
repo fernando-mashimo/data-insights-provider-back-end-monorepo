@@ -71,7 +71,11 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 				input.cnj
 			);
 
-			event.status = EventUpdateLawsuitStatus.FINISHED;
+			const hasDocuments = !updatedLawsuitDataAndDocumentsUrl.documentsUrls[0] ? false : true;
+
+			event.status = hasDocuments
+				? EventUpdateLawsuitStatus.FINISHED
+				: EventUpdateLawsuitStatus.FINISHED_WITHOUT_DOCUMENTS;
 			event.endDate = new Date();
 			await this.eventUpdateLawsuitRepository.put(event);
 		} catch (error) {
@@ -94,7 +98,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 	}
 
 	private async downloadLawsuitDocumentsAndPersist(
-		documentsUrls: string[],
+		documentsUrls: string[] | undefined[],
 		cnj: string
 	): Promise<void> {
 		for (const documentUrl of documentsUrls) {
@@ -104,7 +108,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 
 				const filePath = path.join(
 					`lawsuits/documents/piped`,
-					`${cnj}_${hashedDocumentDataString}.pdf` // TO DO: necessário agregar nome original do documento na fonte
+					`${cnj}_documents_${hashedDocumentDataString}.pdf` // TO DO: necessário agregar nome original do documento na fonte
 				);
 
 				await this.fileManagementClient.uploadFile(filePath, 'application/pdf', documentData);

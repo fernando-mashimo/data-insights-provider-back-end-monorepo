@@ -96,6 +96,30 @@ test('Should update lawsuit data and download document and persist them at S3', 
 	);
 });
 
+test('`Should set final event status as FINISHED_WITHOUT_DOCUMENTS and not persist any document at S3 if no lawsuit documents are returned by external API', async () => {
+	jest
+		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getUpdatedLawsuitData')
+		.mockImplementation(() =>
+			Promise.resolve({
+				updatedData: [
+					{
+						anyKey: 'anyValue'
+					}
+				],
+				documentsUrls: [undefined]
+			})
+		);
+
+  await useCase.execute(baseInput);
+
+  expect(fileManagementClient.downloadPdfFile).not.toHaveBeenCalled();
+  expect(eventUpdateLawsuitRepository.put).toHaveBeenCalledWith(
+    expect.objectContaining<Partial<EventUpdateLawsuit>>({
+      status: EventUpdateLawsuitStatus.FINISHED_WITHOUT_DOCUMENTS
+    })
+  );
+});
+
 test('Should create an event with current date as start date if no events with status PENDING are found in the database', async () => {
 	jest
 		.spyOn(EventUpdateLawsuitRepositoryMock.prototype, 'getByCnjAndStatus')

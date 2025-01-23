@@ -12,7 +12,7 @@ export type GenericExtractedData = {
 
 export type UpdatedLawsuitData = {
 	updatedData: GenericExtractedData[];
-	documentsUrls: string[];
+	documentsUrls: string[] | undefined[];
 };
 
 export type LawsuitSubscription = {
