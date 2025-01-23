@@ -131,15 +131,10 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				page += 1;
 			}
 
-			// Send messages to lawsuits' timeline extraction and lawsuits' data update queues
-			await Promise.all([
-				this.lawsuitsTimelineDataExtractionQueue.sendExtractDataMessages({
-					lawsuits: lawsuitsData.lawsuits
-				}),
-				this.lawsuitsDataUpdateQueue.sendUpdateDataMessages({
-					lawsuits: lawsuitsData.lawsuits
-				})
-			]);
+			// Send messages to lawsuits' timeline extraction
+			await this.lawsuitsTimelineDataExtractionQueue.sendExtractDataMessages({
+				lawsuits: lawsuitsData.lawsuits
+			});
 		}
 
 		event.status = EventExtractLawsuitsStatus.FINISHED;
