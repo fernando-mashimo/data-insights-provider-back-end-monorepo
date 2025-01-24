@@ -2,7 +2,7 @@ export interface LinkedinExtractorClient {
 	triggerProfileExtractByName: (
 		profiles: { firstName: string; lastName: string }[]
 	) => Promise<string>;
-	getExtractedProfile: (snapshotId: string) => Promise<GenericDataSetExtractionResponse>;
+	getExtractedProfile: (snapshotId: string) => Promise<GenericDataSetExtractionResponse[]>;
 }
 
 export type GenericDataSetExtractionResponse = {

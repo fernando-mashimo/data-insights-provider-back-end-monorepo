@@ -32,7 +32,7 @@ export class DownloadLinkedinProfileUseCase
 			return;
 		}
 
-		let profileData: GenericDataSetExtractionResponse;
+		let profileData: GenericDataSetExtractionResponse[];
 
 		try {
 			profileData = await this.linkedInProfileExtractionClient.getExtractedProfile(

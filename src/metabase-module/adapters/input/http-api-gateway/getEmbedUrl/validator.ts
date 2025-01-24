@@ -3,7 +3,7 @@ import { BadRequestError } from '../../helpers/http/httpErrors';
 import { requestBody } from './input';
 
 export function validateBody(body: requestBody): void {
-	if (!body.dashboard) {
+	if (body?.dashboard == undefined) {
 		throw new BadRequestError('Missing required field: dashboard');
 	}
 
