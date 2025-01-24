@@ -36,6 +36,6 @@ export class FileManagementClientMock implements FileManagementClient {
 export class LinkedinExtractorClientMock implements LinkedinExtractorClient {
 	triggerProfileExtractByName = jest.fn();
 	getExtractedProfile = jest
-		.fn<Promise<GenericDataSetExtractionResponse>, [string]>()
-		.mockResolvedValue({});
+		.fn<Promise<GenericDataSetExtractionResponse[]>, [string]>()
+		.mockResolvedValue([{}]);
 }

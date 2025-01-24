@@ -46,7 +46,7 @@ class Config {
 
 	public static BRIGHDATA_API_URL: string = 'https://api.brightdata.com';
 	public static BRIGHDATA_API_KEY: string =
-		'551b60e12eafe2ce224af4b5917261cf6c34653ad483bfd56c02ea06e1eb99ca';
+		'89aada210ec53f7e34492c0d7caf04cfe56dbd26b06dd58a05620a70fd5eaa9d';
 	public static LINKEDIN_EXTRACTION_API_DATASET_ID: string = 'gd_l1viktl72bvl7bjuj0';
 	public static LINKEDIN_EXTRACTION_API_NOTIFY_URL: string = `https://${Config.API_GATEWAY_DOMAIN_NAME}/data-extraction/linkedin-extraction/notify`;
 	public static LINKEDIN_EXTRACTION_WEBHOOK_AUTHORIZATION: string =

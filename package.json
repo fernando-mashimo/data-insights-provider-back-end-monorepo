@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "tsc",
 		"watch": "tsc -w",
-		"test": "dotenv -e .env -- jest",
+		"test": "dotenv -e .env -- jest --silent -w 1",
 		"test:watch": "npm run test --watch",
 		"cdk": "cdk",
 		"format": "prettier --write .",

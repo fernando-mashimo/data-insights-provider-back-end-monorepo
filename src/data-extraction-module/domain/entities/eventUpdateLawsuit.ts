@@ -10,10 +10,10 @@ export class EventUpdateLawsuit {
 
 	constructor(
 		public cnj: string,
-		public status: EventUpdateLawsuitStatus,
-		public startDate: Date,
+		public status = EventUpdateLawsuitStatus.PENDING,
+		public startDate = new Date(),
 		public endDate?: Date
 	) {
-		this.id = `${startDate.toISOString()}`;
+		this.id = `${cnj}#${startDate.toISOString()}`;
 	}
 }

@@ -24,9 +24,7 @@ describe('Should return a dashboard url', () => {
 	test('when provided inputs are valid', async () => {
 		const result = metabaseClientImp.getEmbedDashboardUrl(dashboard, preFilters);
 
-		expect(result).toEqual(
-			'http://bi.isdelta.com/embed/dashboard/any_token#bordered=true&titled=true'
-		);
+		expect(result).toEqual('http://bi.isdelta.com/embed/dashboard/any_token');
 		expect(spyOnJwtSign).toHaveBeenCalledWith(
 			expect.objectContaining({
 				resource: { dashboard },

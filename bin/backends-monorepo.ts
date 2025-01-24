@@ -6,7 +6,7 @@ import { DomainStack } from '../src/domain-module/infrastructure';
 import { ApiGatewayStack } from '../src/api-gateway-module/infrastructure';
 import { MetabaseStack } from '../src/metabase-module/infrastructure';
 import { DataExtractionStack } from '../src/data-extraction-module/infrastructure';
-
+import { GlobalAlarmsModule } from '../src/global-alarms-module/infrastructure';
 const app = new cdk.App();
 
 const prodEnv: cdk.Environment = {
@@ -20,6 +20,14 @@ const domainStack = new DomainStack(app, 'DomainStack', {
 		module: 'domain-module'
 	},
 	description: 'Configure SES domain identity, DKIM records, and others related to domain'
+});
+
+new GlobalAlarmsModule(app, 'GlobalAlarmsStack', {
+	env: prodEnv,
+	tags: {
+		module: 'global-alarms-module'
+	},
+	description: 'Configure metrics and alarms for aws services at global level.'
 });
 
 const authzStack = new AuthzStack(app, 'AuthzStack', {
