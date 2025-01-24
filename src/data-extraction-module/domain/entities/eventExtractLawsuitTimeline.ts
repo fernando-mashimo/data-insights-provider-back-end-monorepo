@@ -5,16 +5,16 @@ export enum EventExtractLawsuitTimelineStatus {
 }
 
 export class EventExtractLawsuitTimeline {
-  public id: string;
+	public id: string;
 
 	constructor(
 		public searchedCnj: string,
-		public status: EventExtractLawsuitTimelineStatus,
-		public startDate: Date,
+		public status = EventExtractLawsuitTimelineStatus.PENDING,
+		public startDate = new Date(),
 		public endDate?: Date,
 		public pagesDownloaded?: number,
 		public nextPageUrl?: string | null
 	) {
-    this.id = `${startDate.toISOString()}`;
-  }
+		this.id = `${searchedCnj}#${startDate.toISOString()}`;
+	}
 }
