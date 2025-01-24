@@ -16,7 +16,6 @@ export class FileManagementClientImp implements FileManagementClient {
 
   public async downloadPdfFile(fileUrl: string): Promise<Buffer> {
     const { data } = await this.axiosClient.get(fileUrl, { responseType: 'arraybuffer' });
-
     return Buffer.from(data);
   }
 

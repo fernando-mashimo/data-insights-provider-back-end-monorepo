@@ -15,11 +15,11 @@ import { createHash } from 'node:crypto';
  *
  * The use case is responsible for:
  * - Fetching lawsuit subscription data from PIPED API
+ *   - If no subscription is found, it sends a request to create a new one and finishes the process
  * - Fetching updated lawsuit data from PIPED API
  * - Persisting updated lawsuit data on S3
  * - Downloading and persisting lawsuit documents on S3 (hashed content as part of persisted file name)
  * - Updating event status on EventUpdateLawsuitRepository
- * - Creating lawsuit subscription on PIPED API if it does not exist
  *
  */
 export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCaseInput, void> {
@@ -60,22 +60,28 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 			const updatedLawsuitDataAndDocumentsUrl =
 				await this.lawsuitDataUpdateClient.getUpdatedLawsuitData(lawsuitSubscriptionData.id);
 
-			// persist updated lawsuit data on S3
+			// persists updated lawsuit data on S3
 			await this.persistUpdatedLawsuitData(
 				input.cnj,
 				updatedLawsuitDataAndDocumentsUrl.updatedData
 			);
-			// download and persist lawsuit documents on S3
-			await this.downloadLawsuitDocumentsAndPersist(
-				updatedLawsuitDataAndDocumentsUrl.documentsUrls,
-				input.cnj
-			);
 
-			const hasDocuments = !updatedLawsuitDataAndDocumentsUrl.documentsUrls[0] ? false : true;
+      // checks if lawsuit documents have been found
+			const hasDocuments = updatedLawsuitDataAndDocumentsUrl.documentsUrls.find(
+				(documentUrl) => !!documentUrl
+			)
+				? true
+				: false;
+			if (hasDocuments) {
+        // downloads and persists lawsuit documents on S3
+				await this.downloadLawsuitDocumentsAndPersist(
+					updatedLawsuitDataAndDocumentsUrl.documentsUrls,
+					input.cnj
+				);
 
-			event.status = hasDocuments
-				? EventUpdateLawsuitStatus.FINISHED
-				: EventUpdateLawsuitStatus.FINISHED_WITHOUT_DOCUMENTS;
+        event.status = EventUpdateLawsuitStatus.FINISHED;
+			} else event.status = EventUpdateLawsuitStatus.FINISHED_WITHOUT_DOCUMENTS;
+
 			event.endDate = new Date();
 			await this.eventUpdateLawsuitRepository.put(event);
 		} catch (error) {
@@ -108,7 +114,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 
 				const filePath = path.join(
 					`lawsuits/documents/piped`,
-					`${cnj}_documents_${hashedDocumentDataString}.pdf` // TO DO: necessário agregar nome original do documento na fonte
+					`${cnj}_${hashedDocumentDataString}.pdf` // TO DO: necessário agregar nome original do documento na fonte
 				);
 
 				await this.fileManagementClient.uploadFile(filePath, 'application/pdf', documentData);

@@ -153,7 +153,8 @@ export class DataExtractionStack extends cdk.Stack {
 		const { lambda, queue } = new EventListener(this, 'UpdateLawsuitData', {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitData/index.ts',
-				handler: 'handler'
+				handler: 'handler',
+        memorySize: 256
 			},
 			sqsEventSourceProps: {
 				batchSize: 1,

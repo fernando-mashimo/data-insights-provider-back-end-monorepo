@@ -24,8 +24,6 @@ import { LawsuitsTimelineDataExtractionQueue } from '../../queues/lawsuitTimelin
  * - Sending messages to SQS queues for further processing
  *    - Creating lawsuit timeline data extraction messages
  *      - The lawsuit timeline data extraction messages will trigger the extraction of lawsuit timeline data
- *    - Creating lawsuit data update messages
- *      - The lawsuit data update messages will trigger the update of lawsuit data
  * - Updating event status on EventExtractLawsuitRepository
  *
  */
