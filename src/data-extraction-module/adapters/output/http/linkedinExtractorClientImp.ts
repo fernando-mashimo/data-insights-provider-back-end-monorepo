@@ -41,7 +41,9 @@ export class LinkedinExtractorClientImp implements LinkedinExtractorClient {
 		return data.snapshot_id;
 	}
 
-	public async getExtractedProfile(snapshotId: string): Promise<GenericDataSetExtractionResponse> {
+	public async getExtractedProfile(
+		snapshotId: string
+	): Promise<GenericDataSetExtractionResponse[]> {
 		const url = new URL($config.BRIGHDATA_API_URL);
 		url.pathname = `/datasets/v3/snapshot/${snapshotId}`;
 		const headers = {

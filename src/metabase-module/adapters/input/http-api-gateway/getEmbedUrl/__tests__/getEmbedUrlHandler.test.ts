@@ -26,7 +26,7 @@ beforeEach(() => {
 
 	jest.spyOn(GetEmbedUrlUseCase.prototype, 'execute').mockImplementation(() =>
 		Promise.resolve({
-			url: 'http://bi.isdelta.com/embed/dashboard/any_token#bordered=true&titled=true'
+			url: 'http://bi.isdelta.com/embed/dashboard/any_token'
 		})
 	);
 });
@@ -44,7 +44,7 @@ describe('Should return url', () => {
 
 		expect(result).toEqual(
 			LambdaHttpResponse.success({
-				url: 'http://bi.isdelta.com/embed/dashboard/any_token#bordered=true&titled=true'
+				url: 'http://bi.isdelta.com/embed/dashboard/any_token'
 			})
 		);
 	});

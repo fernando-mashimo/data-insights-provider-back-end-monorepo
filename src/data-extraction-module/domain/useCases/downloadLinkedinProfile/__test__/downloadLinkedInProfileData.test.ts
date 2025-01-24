@@ -49,12 +49,12 @@ it('Should receive and save linkedin profile data when provided input is valid',
 			startDate: expect.any(Date),
 			endDate: expect.any(Date),
 			id: 'snapshot_id',
-			numberOfProfilesFounded: undefined
+			numberOfProfilesFounded: 1
 		})
 	);
 	expect(linkedinExtractorClient.getExtractedProfile).toHaveBeenCalledWith('snapshot_id');
 	expect(fileManagementClient.uploadFile).toHaveBeenCalledWith(
-		'snapshot_id',
+		'linkedin/profile/brightdata/snapshot_id.json',
 		'application/json',
 		expect.any(Buffer)
 	);
