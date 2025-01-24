@@ -9,10 +9,6 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as cw from 'aws-cdk-lib/aws-cloudwatch';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as cwActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { LambdaBasic } from '$lib/infrastructure/constructors/lambda';
 
 /**
@@ -47,7 +43,6 @@ export class MetabaseStack extends cdk.Stack {
 
 		// metabase integration
 		this.getEmbedUrlHandler = this.createGetEmbedUrlHandler();
-		this.setMetabaseLambdaFunctionsErrorsAlarm();
 
 		/**
 		 * TODO - when cloudfront vpc origin become available through cdk
@@ -264,34 +259,5 @@ export class MetabaseStack extends cdk.Stack {
 			handler: 'handler'
 		});
 		return lambda;
-	}
-
-	private setMetabaseLambdaFunctionsErrorsAlarm(): void {
-		const lambdaFunctionsErrorAlarm = new cw.Alarm(
-			this,
-			'MetabaseLambdaFunctionsExecutionErrorAlarm',
-			{
-				metric: lambdaNodejs.NodejsFunction.metricAllErrors(),
-				evaluationPeriods: 1,
-				threshold: 1,
-				comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				alarmName: 'MetabaseLambdaFunctionsExecutionErrorAlarm',
-				actionsEnabled: true
-			}
-		);
-		const lambdaFunctionsErrorAlarmTopic = new sns.Topic(
-			this,
-			'MetabaseLambdaFunctionsExecutionErrorAlarmTopic',
-			{
-				topicName: 'MetabaseLambdaFunctionsExecutionErrorAlarmTopic',
-				displayName: 'Metabase Stack Lambda Functions Execution Error Alarm Topic'
-			}
-		);
-		lambdaFunctionsErrorAlarmTopic.addSubscription(
-			new subs.EmailSubscription($config.ERROR_NOTIFICATION_EMAIL)
-		);
-		lambdaFunctionsErrorAlarm.addAlarmAction(
-			new cwActions.SnsAction(lambdaFunctionsErrorAlarmTopic)
-		);
 	}
 }
