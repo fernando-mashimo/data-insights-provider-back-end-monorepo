@@ -14,6 +14,7 @@ import {
 	EventExtractLawsuitsStatus
 } from '../../entities/eventExtractLawsuits';
 import { LawsuitsTimelineDataExtractionQueue } from '../../queues/lawsuitTimelineDataExtractionQueue';
+import { CompanyMonitoringQueue } from '../../queues/companyMonitoringQueue';
 
 /**
  * Use case to extract lawsuit data from external source (currently Escavador API)
@@ -24,6 +25,8 @@ import { LawsuitsTimelineDataExtractionQueue } from '../../queues/lawsuitTimelin
  * - Sending messages to SQS queues for further processing
  *    - Creating lawsuit timeline data extraction messages
  *      - The lawsuit timeline data extraction messages will trigger the extraction of lawsuit timeline data
+ * - Sending message to company monitoring queue
+ *    - The company monitoring queue will trigger the creation of a monitoring for the provided CNPJ
  * - Updating event status on EventExtractLawsuitRepository
  *
  */
@@ -32,17 +35,20 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 	private fileManagementClient: FileManagementClient;
 	private eventExtractLawsuitRepository: EventExtractLawsuitRepository;
 	private lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue;
+	private companyMonitoringQueue: CompanyMonitoringQueue;
 
 	constructor(
 		lawsuitDataExtractorClient: LawsuitDataExtractorClient,
 		fileManagementClient: FileManagementClient,
 		eventExtractLawsuitRepository: EventExtractLawsuitRepository,
 		lawsuitsTimelineDataExtractionQueue: LawsuitsTimelineDataExtractionQueue,
+		companyMonitoringQueue: CompanyMonitoringQueue
 	) {
 		this.lawsuitDataExtractorClient = lawsuitDataExtractorClient;
 		this.fileManagementClient = fileManagementClient;
 		this.eventExtractLawsuitRepository = eventExtractLawsuitRepository;
 		this.lawsuitsTimelineDataExtractionQueue = lawsuitsTimelineDataExtractionQueue;
+		this.companyMonitoringQueue = companyMonitoringQueue;
 	}
 
 	public async execute(input: ExtractLawsuitDataUseCaseInput): Promise<void> {
@@ -68,6 +74,7 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				await this.eventExtractLawsuitRepository.put(event);
 
 				await this.getLawsuitsDataAndPersist(cleanCnpj, event, 1, null);
+				await this.companyMonitoringQueue.sendCreateCompanyMonitoringMessage({ cnpj: input.cnpj }); // It is important to send the CNPJ in its raw format to the queue
 
 				return;
 			}
@@ -89,6 +96,7 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				const nextPageUrl = event.nextPageUrl ?? null;
 
 				await this.getLawsuitsDataAndPersist(cleanCnpj, event, page, nextPageUrl);
+				await this.companyMonitoringQueue.sendCreateCompanyMonitoringMessage({ cnpj: input.cnpj }); // It is important to send the CNPJ in its raw format to the queue
 
 				return;
 			}

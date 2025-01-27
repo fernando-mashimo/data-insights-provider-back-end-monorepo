@@ -29,7 +29,12 @@ export class DataExtractionStack extends cdk.Stack {
 		this.setupExtractLinkedinProfileByName();
 		const extractLawsuitsTimelineDataQueue = this.setupExtractLawsuitsTimelineData();
 		const updateLawsuitDataQueue = this.setupUpdateLawsuitData();
-		this.setupExtractLawsuitData(extractLawsuitsTimelineDataQueue, updateLawsuitDataQueue);
+		const createCompanyMonitoringQueue = this.setupCreateCompanyMonitoring();
+		this.setupExtractLawsuitData(
+			extractLawsuitsTimelineDataQueue,
+			updateLawsuitDataQueue,
+			createCompanyMonitoringQueue
+		);
 		const triggerUpdateLawsuitDataFunction =
 			this.setupTriggerUpdateLawsuitData(updateLawsuitDataQueue);
 		this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
@@ -110,7 +115,8 @@ export class DataExtractionStack extends cdk.Stack {
 
 	private setupExtractLawsuitData(
 		timelineExtractionQueue: sqs.Queue,
-		updateLawsuitDataQueue: sqs.Queue
+		updateLawsuitDataQueue: sqs.Queue,
+		createCompanyMonitoringQueue: sqs.Queue
 	) {
 		const { lambda } = new EventListener(this, 'ExtractLawsuitData', {
 			lambdaProps: {
@@ -118,7 +124,8 @@ export class DataExtractionStack extends cdk.Stack {
 				handler: 'handler',
 				environment: {
 					TIMELINE_EXTRACTION_QUEUE_URL: timelineExtractionQueue.queueUrl,
-					UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl
+					UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl,
+          CREATE_COMPANY_MONITORING_QUEUE_URL: createCompanyMonitoringQueue.queueUrl
 				}
 			},
 			sqsEventSourceProps: {
@@ -130,6 +137,7 @@ export class DataExtractionStack extends cdk.Stack {
 		this.bucket.grantReadWrite(lambda);
 		timelineExtractionQueue.grantSendMessages(lambda);
 		updateLawsuitDataQueue.grantSendMessages(lambda);
+		createCompanyMonitoringQueue.grantSendMessages(lambda);
 	}
 
 	private setupExtractLawsuitsTimelineData() {
@@ -154,7 +162,7 @@ export class DataExtractionStack extends cdk.Stack {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitData/index.ts',
 				handler: 'handler',
-        memorySize: 256
+				memorySize: 256
 			},
 			sqsEventSourceProps: {
 				batchSize: 1,
@@ -189,5 +197,21 @@ export class DataExtractionStack extends cdk.Stack {
 		const { eventRule } = new EventRuleBasic(this, 'EventRuleUpdateLawsuitData', {});
 
 		eventRule.addTarget(new targets.LambdaFunction(triggerUpdateLawsuitDataLambda));
+	}
+
+	private setupCreateCompanyMonitoring() {
+		const { lambda, queue } = new EventListener(this, 'CreateCompanyMonitoring', {
+			lambdaProps: {
+				entry: 'src/data-extraction-module/adapters/input/sqs/createCompanyMonitoring/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1
+			}
+		});
+
+		this.ddbTable.grantReadWriteData(lambda);
+
+		return queue;
 	}
 }

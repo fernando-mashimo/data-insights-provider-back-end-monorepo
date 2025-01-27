@@ -1,13 +1,16 @@
 import { $config } from '$config';
 import axios, { Axios } from 'axios';
 import {
+	GetMonitoredTermResponse,
+	CreateTermMonitoringBody,
 	LawsuitDataExtractionResponse,
 	LawsuitDataExtractorClient,
+	MonitoredTerm
 } from '../../../domain/services/lawsuitDataExtractorClient';
 
 export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient {
 	private client: Axios;
-  private pageSize: number = 50;
+	private pageSize: number = 50;
 
 	constructor() {
 		this.client = axios.create({
@@ -36,15 +39,63 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 
 		const { data } = await this.client.get(url.toString(), { headers });
 
-		const { items, links, envolvido_encontrado: { quantidade_processos } } = data;
+		const {
+			items,
+			links,
+			envolvido_encontrado: { quantidade_processos }
+		} = data;
 
-    const totalPages = Math.ceil(quantidade_processos / this.pageSize);
+		const totalPages = Math.ceil(quantidade_processos / this.pageSize);
 
 		return {
 			lawsuits: items,
 			hasNext: !!links.next,
-      totalPages,
+			totalPages,
 			nextPageUrl: links.next
+		};
+	}
+
+	public async verifyIfTermIsAlreadyMonitored(term: string): Promise<boolean> {
+		const url = new URL($config.ESCAVADOR_API_URL);
+		url.pathname = 'api/v2/monitoramentos/novos-processos';
+
+		const headers = {
+			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
+		};
+
+		const { data } = await this.client.get(url.toString(), { headers });
+
+		if (!data.items || data.items.length === 0) return false;
+
+		const items = data.items as GetMonitoredTermResponse[];
+
+		const monitoredTerms = items.flatMap((item: GetMonitoredTermResponse) => [
+			item.termo,
+			...item.variacoes
+		]);
+
+		return monitoredTerms.includes(term);
+	}
+
+	public async createTermMonitoring(term: string): Promise<MonitoredTerm> {
+		const url = new URL($config.ESCAVADOR_API_URL);
+		url.pathname = 'api/v2/monitoramentos/novos-processos';
+
+		const headers = {
+			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
+		};
+
+		const payload: CreateTermMonitoringBody = {
+			termo: term,
+			variacoes: [term.replace(/\D/g, '')]
+		};
+
+		const { data } = await this.client.post(url.toString(), payload, { headers });
+
+		return {
+			term: data.termo,
+			variationTerm: data.variacoes[0],
+			externalId: data.id.toString()
 		};
 	}
 }
