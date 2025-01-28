@@ -151,9 +151,8 @@ export class MetabaseStack extends cdk.Stack {
 
 		const instance = new ec2.Instance(this, 'MetabaseInstance', {
 			instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3A, ec2.InstanceSize.MEDIUM),
-			machineImage: new ec2.AmazonLinuxImage({
-				generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-				cpuType: ec2.AmazonLinuxCpuType.X86_64 // NOTE metabase does not support ARM
+			machineImage: ec2.MachineImage.genericLinux({
+				'us-east-1': 'ami-097705bd69072a34d' // Fixed Amazon Linux 2 AMI ID for us-east-1
 			}),
 			vpc,
 			associatePublicIpAddress: true,
