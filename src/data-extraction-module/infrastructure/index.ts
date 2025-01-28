@@ -12,6 +12,7 @@ import { EventRuleBasic } from '$lib/infrastructure/constructors/eventRule';
 
 export class DataExtractionStack extends cdk.Stack {
 	readonly downloadExtractedLinkedinProfileQueue: sqs.Queue;
+	readonly handleCompanyMonitoringReceivedDataQueue: sqs.Queue;
 
 	private readonly ddbTable: dynamodb.Table;
 	private readonly bucket: s3.Bucket;
@@ -38,6 +39,7 @@ export class DataExtractionStack extends cdk.Stack {
 		const triggerUpdateLawsuitDataFunction =
 			this.setupTriggerUpdateLawsuitData(updateLawsuitDataQueue);
 		this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
+		this.handleCompanyMonitoringReceivedDataQueue = this.setupHandleCompanyMonitoringReceivedData();
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -125,7 +127,7 @@ export class DataExtractionStack extends cdk.Stack {
 				environment: {
 					TIMELINE_EXTRACTION_QUEUE_URL: timelineExtractionQueue.queueUrl,
 					UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl,
-          CREATE_COMPANY_MONITORING_QUEUE_URL: createCompanyMonitoringQueue.queueUrl
+					CREATE_COMPANY_MONITORING_QUEUE_URL: createCompanyMonitoringQueue.queueUrl
 				}
 			},
 			sqsEventSourceProps: {
@@ -203,6 +205,23 @@ export class DataExtractionStack extends cdk.Stack {
 		const { lambda, queue } = new EventListener(this, 'CreateCompanyMonitoring', {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/createCompanyMonitoring/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1
+			}
+		});
+
+		this.ddbTable.grantReadWriteData(lambda);
+
+		return queue;
+	}
+
+	private setupHandleCompanyMonitoringReceivedData() {
+		const { lambda, queue } = new EventListener(this, 'HandleCompanyMonitoringReceivedData', {
+			lambdaProps: {
+				entry:
+					'src/data-extraction-module/adapters/input/sqs/handleCompanyMonitoringReceivedData/index.ts',
 				handler: 'handler'
 			},
 			sqsEventSourceProps: {

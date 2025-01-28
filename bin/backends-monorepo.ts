@@ -63,6 +63,7 @@ const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
 	description: 'Configure API Gateway',
 	getEmbedUrlHandler: metabaseStack.getEmbedUrlHandler,
 	downloadExtractedLinkedinProfileQueue: dataExtractionStack.downloadExtractedLinkedinProfileQueue,
+  handleCompanyMonitoringReceivedDataQueue: dataExtractionStack.handleCompanyMonitoringReceivedDataQueue,
 	userPool: authzStack.userPool
 });
 apiGatewayStack.addDependency(metabaseStack);

@@ -15,6 +15,7 @@ import { HeaderAuthorizer } from './headerAuthorizerBuilder';
 interface ApiGatewayStackProps extends cdk.StackProps {
 	getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
 	downloadExtractedLinkedinProfileQueue: sqs.Queue;
+	handleCompanyMonitoringReceivedDataQueue: sqs.Queue;
 	userPool: cognito.IUserPool;
 }
 
@@ -52,6 +53,19 @@ export class ApiGatewayStack extends cdk.Stack {
 					methodOptions: {
 						authorizer: new HeaderAuthorizer(this, 'LinkedinDataExtractionAuthorizer', {
 							authorizationHeaderValue: $config.LINKEDIN_EXTRACTION_WEBHOOK_AUTHORIZATION
+						}).authorizer,
+						authorizationType: apiGateway.AuthorizationType.CUSTOM
+					}
+				}
+			)
+			.post(
+				'/data-extraction/company-new-lawsuits-data/receive',
+				props.handleCompanyMonitoringReceivedDataQueue,
+				{
+					methodOptions: {
+						authorizer: new HeaderAuthorizer(this, 'CompanyMonitoringReceivedDataAuthorizer', {
+							authorizationHeaderValue:
+								$config.ESCAVADOR_COMPANY_MONITORING_RECEIVED_DATA_WEBHOOK_AUTHORIZATION
 						}).authorizer,
 						authorizationType: apiGateway.AuthorizationType.CUSTOM
 					}
