@@ -1,9 +1,16 @@
 import { $config } from '$config';
 import * as path from 'path';
-import { EventExtractLawsuitTimeline, EventExtractLawsuitTimelineStatus } from '../../entities/eventExtractLawsuitTimeline';
+import {
+	EventExtractLawsuitTimeline,
+	EventExtractLawsuitTimelineStatus
+} from '../../entities/eventExtractLawsuitTimeline';
 import { EventExtractLawsuitTimelineRepository } from '../../repositories/eventExtractLawsuitTimelineRepository';
 import { FileManagementClient } from '../../services/fileManagementClient';
-import { GenericExtractedData, LawsuitTimelineDataExtractionResponse, LawsuitTimelineDataExtractorClient } from '../../services/lawsuitTimelineDataExtractorClient';
+import {
+	GenericExtractedData,
+	LawsuitTimelineDataExtractionResponse,
+	LawsuitTimelineDataExtractorClient
+} from '../../services/lawsuitTimelineDataExtractorClient';
 import { UseCase } from '../UseCase';
 import { ExtractLawsuitTimelineDataUseCaseInput } from './input';
 
@@ -76,7 +83,7 @@ export class ExtractLawsuitTimelineDataUseCase
 				return;
 			}
 		} catch (error) {
-			console.error(`Error extracting lawsuit timeline data for CNJ ${input.cnj}`, error);
+			console.error(`Cannot extract lawsuit timeline data for CNJ ${input.cnj}`, error);
 			throw error;
 		}
 	}

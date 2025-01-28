@@ -38,7 +38,7 @@ export class CreateCompanyMonitoringUseCase
       );
       await this.eventCompanyMonitoringRepository.put(event);
 		} catch (error) {
-			console.error(`Cannot setup monitoring for CNPJ ${input.cnpj}`, error);
+			console.error(`Cannot create monitoring for CNPJ ${input.cnpj}`, error);
 			throw error;
 		}
 	}

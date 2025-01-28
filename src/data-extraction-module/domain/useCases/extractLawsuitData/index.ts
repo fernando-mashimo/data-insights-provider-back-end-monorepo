@@ -101,7 +101,7 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				return;
 			}
 		} catch (error) {
-			console.error(`Error extracting lawsuits data for CNPJ ${cleanCnpj}`);
+			console.error(`Cannot extract lawsuits data for CNPJ ${cleanCnpj}`);
 			throw error;
 		}
 	}

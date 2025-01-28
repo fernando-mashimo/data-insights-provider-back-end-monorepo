@@ -1,13 +1,13 @@
 import { $config } from '$config';
-import axios, { Axios } from 'axios';
+import axios, { Axios, AxiosError } from 'axios';
 import {
 	LawsuitTimelineDataExtractionResponse,
-  LawsuitTimelineDataExtractorClient
+	LawsuitTimelineDataExtractorClient
 } from '../../../domain/services/lawsuitTimelineDataExtractorClient';
 
 export class LawsuitTimelineDataExtractorClientImp implements LawsuitTimelineDataExtractorClient {
 	private client: Axios;
-  private pageSize: number = 50;
+	private pageSize: number = 50;
 
 	constructor() {
 		this.client = axios.create({
@@ -33,14 +33,23 @@ export class LawsuitTimelineDataExtractorClientImp implements LawsuitTimelineDat
 			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
 		};
 
-		const { data } = await this.client.get(url.toString(), { headers });
+		try {
+			const { data } = await this.client.get(url.toString(), { headers });
 
-		const { items, links } = data;
+			const { items, links } = data;
 
-		return {
-			timeline: items,
-			hasNext: !!links.next,
-			nextPageUrl: links.next
-		};
+			return {
+				timeline: items,
+				hasNext: !!links.next,
+				nextPageUrl: links.next
+			};
+		} catch (error) {
+			console.error(`Error extracting lawsuit timeline data for CNJ ${cnj}`);
+			if (error instanceof AxiosError) {
+				if (error.status === 404) throw new Error('Lawsuit timeline not found at Escavador');
+				if (error.status === 422) throw new Error('Invalid CNJ format');
+			}
+			throw error;
+		}
 	}
 }
