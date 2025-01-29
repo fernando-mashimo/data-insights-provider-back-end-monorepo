@@ -7,7 +7,7 @@ import {
 	LawsuitDataExtractorClient
 } from '../../services/lawsuitDataExtractorClient';
 import { UseCase } from '../UseCase';
-import { ExtractLawsuitDataUseCaseInput as ExtractLawsuitDataUseCaseInput } from './input';
+import { ExtractLawsuitDataUseCaseInput } from './input';
 import { EventExtractLawsuitRepository } from '../../repositories/eventExtractLawsuitRepository';
 import {
 	EventExtractLawsuits,

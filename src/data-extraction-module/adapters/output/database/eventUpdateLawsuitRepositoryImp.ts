@@ -73,7 +73,7 @@ export class EventUpdateLawsuitRepositoryImp implements EventUpdateLawsuitReposi
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			endDate: entity.endDate?.toISOString() ?? EMPTY_DDB_ATTRIBUTE
+			endDate: entity.endDate ? entity.endDate.toISOString() : EMPTY_DDB_ATTRIBUTE
 		};
 	}
 }

@@ -1,4 +1,9 @@
-import { DynamoDBDocument, PutCommand, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import {
+	DynamoDBDocument,
+	PutCommand,
+	QueryCommand,
+	QueryCommandInput
+} from '@aws-sdk/lib-dynamodb';
 import {
 	EventExtractLawsuitTimeline,
 	EventExtractLawsuitTimelineStatus
@@ -35,7 +40,7 @@ export class EventExtractLawsuitTimelineRepositoryImp
 		cnj: string,
 		extractionTimeWindow?: Date
 	): Promise<EventExtractLawsuitTimeline[]> {
-    const params: QueryCommandInput = {
+		const params: QueryCommandInput = {
 			TableName: $config.DATA_EXTRACTION_EVENTS_TABLE_NAME,
 			IndexName: 'gsi-overloaded-1',
 			KeyConditionExpression: 'gsi1pk = :gsi1pk AND gsi1sk >= :gsi1sk',
@@ -45,10 +50,10 @@ export class EventExtractLawsuitTimelineRepositoryImp
 			}
 		};
 
-    const command = new QueryCommand(params);
-    const response = await this.databaseClient.send(command);
+		const command = new QueryCommand(params);
+		const response = await this.databaseClient.send(command);
 
-    return response.Items?.map((item) => this.ddbItemToEntity(item as DDBItem)) ?? [];
+		return response.Items?.map((item) => this.ddbItemToEntity(item as DDBItem)) ?? [];
 	}
 
 	private ddbItemToEntity(item: DDBItem): EventExtractLawsuitTimeline {
@@ -56,7 +61,7 @@ export class EventExtractLawsuitTimelineRepositoryImp
 			searchedCnj: item.searchedCnj,
 			status: item.status as EventExtractLawsuitTimelineStatus,
 			startDate: new Date(item.startDate),
-      id: item.id,
+			id: item.id,
 			endDate: item.endDate ? new Date(item.endDate) : undefined,
 			pagesDownloaded: item.pagesDownloaded ? parseInt(item.pagesDownloaded) : undefined,
 			nextPageUrl: item.nextPageUrl !== EMPTY_DDB_ATTRIBUTE ? item.nextPageUrl : null
@@ -72,7 +77,7 @@ export class EventExtractLawsuitTimelineRepositoryImp
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			endDate: entity.endDate?.toISOString() ?? EMPTY_DDB_ATTRIBUTE,
+			endDate: entity.endDate ? entity.endDate.toISOString() : EMPTY_DDB_ATTRIBUTE,
 			pagesDownloaded: entity.pagesDownloaded?.toString(),
 			nextPageUrl: entity.nextPageUrl ?? EMPTY_DDB_ATTRIBUTE
 		};

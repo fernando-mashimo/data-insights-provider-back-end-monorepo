@@ -11,7 +11,7 @@ export class EventExtractLawsuitTimeline {
 		public searchedCnj: string,
 		public status = EventExtractLawsuitTimelineStatus.PENDING,
 		public startDate = new Date(),
-		public endDate?: Date,
+		public endDate?: Date | undefined,
 		public pagesDownloaded?: number,
 		public nextPageUrl?: string | null
 	) {
