@@ -1,3 +1,5 @@
 export type sqsEventBody = {
-  cnpj: string;
+	cnpj: string;
+	// extractTimeline: boolean;
+	// keepCompanyMonitoring: boolean;
 };

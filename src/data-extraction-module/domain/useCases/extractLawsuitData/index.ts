@@ -74,7 +74,7 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				await this.eventExtractLawsuitRepository.put(event);
 
 				await this.getLawsuitsDataAndPersist(cleanCnpj, event, 1, null);
-				await this.companyMonitoringQueue.sendCreateCompanyMonitoringMessage({ cnpj: input.cnpj }); // It is important to send the CNPJ in its raw format to the queue
+				// await this.companyMonitoringQueue.sendCreateCompanyMonitoringMessage({ cnpj: input.cnpj }); // It is important to send the CNPJ in its raw format to the queue
 
 				return;
 			}
@@ -96,7 +96,7 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 				const nextPageUrl = event.nextPageUrl ?? null;
 
 				await this.getLawsuitsDataAndPersist(cleanCnpj, event, page, nextPageUrl);
-				await this.companyMonitoringQueue.sendCreateCompanyMonitoringMessage({ cnpj: input.cnpj }); // It is important to send the CNPJ in its raw format to the queue
+				// await this.companyMonitoringQueue.sendCreateCompanyMonitoringMessage({ cnpj: input.cnpj }); // It is important to send the CNPJ in its raw format to the queue
 
 				return;
 			}
@@ -134,9 +134,9 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 			}
 
 			// Send messages to lawsuits' timeline extraction
-			await this.lawsuitsTimelineDataExtractionQueue.sendExtractDataMessages({
-				lawsuits: lawsuitsData.lawsuits
-			});
+			// await this.lawsuitsTimelineDataExtractionQueue.sendExtractDataMessages({
+			// 	lawsuits: lawsuitsData.lawsuits
+			// });
 		}
 
 		event.status = EventExtractLawsuitsStatus.FINISHED;
