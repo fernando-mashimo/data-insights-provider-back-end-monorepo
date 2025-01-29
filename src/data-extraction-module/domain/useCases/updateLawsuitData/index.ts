@@ -48,10 +48,23 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 				event = new EventUpdateLawsuit(input.cnj, EventUpdateLawsuitStatus.PENDING, new Date());
 			else event = existingEvents[0];
 
+      // checks if CNJ has a monitoring subscription at external source
+      // if not, creates a new subscription and finishes the process
 			const lawsuitSubscriptionData =
 				await this.lawsuitDataUpdateClient.getLawsuitSubscriptionByCnj(input.cnj);
 			if (!lawsuitSubscriptionData) {
 				await this.lawsuitDataUpdateClient.createLawsuitSubscription(input.cnj);
+				await this.eventUpdateLawsuitRepository.put(event);
+
+				return;
+			}
+
+      // checks if lawsuit data has already been updated
+      // if so, finishes the process
+			const isLawsuitDataAlreadyUpdated = await this.verifyIfLawsuitDataIsAlreadyUpdated(input.cnj);
+			if (isLawsuitDataAlreadyUpdated) {
+				event.status = EventUpdateLawsuitStatus.FINISHED_ALREADY_UPDATED;
+				event.endDate = new Date();
 				await this.eventUpdateLawsuitRepository.put(event);
 
 				return;
@@ -66,20 +79,20 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 				updatedLawsuitDataAndDocumentsUrl.updatedData
 			);
 
-      // checks if lawsuit documents have been found
+			// checks if lawsuit documents have been found
 			const hasDocuments = updatedLawsuitDataAndDocumentsUrl.documentsUrls.find(
 				(documentUrl) => !!documentUrl
 			)
 				? true
 				: false;
 			if (hasDocuments) {
-        // downloads and persists lawsuit documents on S3
+				// downloads and persists lawsuit documents on S3
 				await this.downloadLawsuitDocumentsAndPersist(
 					updatedLawsuitDataAndDocumentsUrl.documentsUrls,
 					input.cnj
 				);
 
-        event.status = EventUpdateLawsuitStatus.FINISHED;
+				event.status = EventUpdateLawsuitStatus.FINISHED;
 			} else event.status = EventUpdateLawsuitStatus.FINISHED_WITHOUT_DOCUMENTS;
 
 			event.endDate = new Date();
@@ -90,11 +103,32 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 		}
 	}
 
+	private async verifyIfLawsuitDataIsAlreadyUpdated(cnj: string): Promise<boolean> {
+		const unsyncedLawsuitSubscriptions =
+			await this.lawsuitDataUpdateClient.getUnsyncedLawsuitsSubscriptions();
+
+		if (!unsyncedLawsuitSubscriptions || !unsyncedLawsuitSubscriptions.length) return true;
+
+		for (const unsyncedLawsuitSubscription of unsyncedLawsuitSubscriptions) {
+			const unsyncedSubscriptionData = await this.lawsuitDataUpdateClient.getLawsuitSubscriptionById(
+				unsyncedLawsuitSubscription.id
+			);
+
+			const unsyncedLawsuitCnj = unsyncedSubscriptionData.value.replace(/\D/g, '');
+			if (unsyncedLawsuitCnj === cnj) return false;
+		}
+
+    return true;
+	}
+
 	private async persistUpdatedLawsuitData(
 		cnj: string,
 		updatedLawsuitData: GenericExtractedData[]
 	): Promise<void> {
-		const filePath = path.join(`lawsuits/update/piped`, `${cnj}_${new Date().toISOString()}.json`);
+		const hashedLawsuitDataString = this.hashDataAndConvertToString(
+			Buffer.from(JSON.stringify(updatedLawsuitData))
+		);
+		const filePath = path.join(`lawsuits/update/piped`, `${cnj}_${hashedLawsuitDataString}.json`);
 
 		await this.fileManagementClient.uploadFile(
 			filePath,
@@ -110,7 +144,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 		for (const documentUrl of documentsUrls) {
 			if (documentUrl) {
 				const documentData = await this.fileManagementClient.downloadPdfFile(documentUrl);
-				const hashedDocumentDataString = this.hashData(documentData);
+				const hashedDocumentDataString = this.hashDataAndConvertToString(documentData);
 
 				const filePath = path.join(
 					`lawsuits/documents/piped`,
@@ -122,7 +156,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 		}
 	}
 
-	private hashData(data: Buffer): string {
+	private hashDataAndConvertToString(data: Buffer): string {
 		const hash = createHash('sha256');
 
 		hash.update(data);

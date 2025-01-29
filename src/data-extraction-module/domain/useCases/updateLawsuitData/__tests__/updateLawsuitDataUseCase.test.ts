@@ -15,7 +15,7 @@ const useCase = new UpdateLawsuitDataUseCase(
 );
 
 const baseInput = {
-	cnj: 'inputCnj'
+	cnj: '123456'
 };
 
 beforeEach(() => {
@@ -42,6 +42,26 @@ beforeEach(() => {
 	jest
 		.spyOn(LawsuitDataUpdateClientMock.prototype, 'createLawsuitSubscription')
 		.mockImplementation(() => Promise.resolve());
+
+	jest
+		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getUnsyncedLawsuitsSubscriptions')
+		.mockImplementation(() =>
+			Promise.resolve([{ id: '123', value: 'cnj', type: 'someType', updatedAt: 'someDate' }])
+		);
+
+	jest
+		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getLawsuitSubscriptionById')
+		.mockImplementation(() =>
+			Promise.resolve({
+				id: 'someId',
+				type: 'someType',
+				value: '123-456',
+				status: 'someStatus',
+				availability: 'someAvailability',
+				createdAt: 'someDate',
+				updatedAt: 'someOtherDate'
+			})
+		);
 
 	jest
 		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getUpdatedLawsuitData')
@@ -110,14 +130,14 @@ test('`Should set final event status as FINISHED_WITHOUT_DOCUMENTS and not persi
 			})
 		);
 
-  await useCase.execute(baseInput);
+	await useCase.execute(baseInput);
 
-  expect(fileManagementClient.downloadPdfFile).not.toHaveBeenCalled();
-  expect(eventUpdateLawsuitRepository.put).toHaveBeenCalledWith(
-    expect.objectContaining<Partial<EventUpdateLawsuit>>({
-      status: EventUpdateLawsuitStatus.FINISHED_WITHOUT_DOCUMENTS
-    })
-  );
+	expect(fileManagementClient.downloadPdfFile).not.toHaveBeenCalled();
+	expect(eventUpdateLawsuitRepository.put).toHaveBeenCalledWith(
+		expect.objectContaining<Partial<EventUpdateLawsuit>>({
+			status: EventUpdateLawsuitStatus.FINISHED_WITHOUT_DOCUMENTS
+		})
+	);
 });
 
 test('Should create an event with current date as start date if no events with status PENDING are found in the database', async () => {
@@ -149,4 +169,22 @@ test('Should create a lawsuit/CNJ subscription in the external API service if no
 	expect(lawsuitDataUpdateClient.getUpdatedLawsuitData).not.toHaveBeenCalled();
 	expect(fileManagementClient.uploadFile).not.toHaveBeenCalled();
 	expect(fileManagementClient.downloadPdfFile).not.toHaveBeenCalled();
+});
+
+test('Should not update lawsuit data if it is already updated', async () => {
+	jest
+		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getUnsyncedLawsuitsSubscriptions')
+		.mockImplementation(() => Promise.resolve([]));
+
+	await useCase.execute(baseInput);
+
+	expect(eventUpdateLawsuitRepository.put).toHaveBeenCalledWith(
+		expect.objectContaining<Partial<EventUpdateLawsuit>>({
+			status: EventUpdateLawsuitStatus.FINISHED_ALREADY_UPDATED,
+			endDate: expect.any(Date)
+		})
+	);
+	expect(lawsuitDataUpdateClient.getUpdatedLawsuitData).not.toHaveBeenCalled();
+  expect(fileManagementClient.uploadFile).not.toHaveBeenCalled();
+  expect(fileManagementClient.downloadPdfFile).not.toHaveBeenCalled();
 });
