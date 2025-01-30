@@ -77,7 +77,7 @@ export class EventExtractLawsuitTimelineRepositoryImp
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			endDate: entity.endDate ? entity.endDate.toISOString() : EMPTY_DDB_ATTRIBUTE,
+			endDate: entity.endDate?.toISOString(),
 			pagesDownloaded: entity.pagesDownloaded?.toString(),
 			nextPageUrl: entity.nextPageUrl ?? EMPTY_DDB_ATTRIBUTE
 		};

@@ -128,7 +128,8 @@ export class DataExtractionStack extends cdk.Stack {
 					TIMELINE_EXTRACTION_QUEUE_URL: timelineExtractionQueue.queueUrl,
 					UPDATE_LAWSUIT_DATA_QUEUE_URL: updateLawsuitDataQueue.queueUrl,
 					CREATE_COMPANY_MONITORING_QUEUE_URL: createCompanyMonitoringQueue.queueUrl
-				}
+				},
+        timeout: cdk.Duration.seconds(900)
 			},
 			sqsEventSourceProps: {
 				batchSize: 1,

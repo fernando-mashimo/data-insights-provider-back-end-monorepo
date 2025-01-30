@@ -113,10 +113,8 @@ export class EventExtractLinkedinRepositoryImp implements EventExtractLinkedinRe
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			endDate: entity.endDate ? entity.endDate.toISOString() : EMPTY_DDB_ATTRIBUTE,
-			numberOfProfilesFounded: entity.numberOfProfilesFounded
-				? entity.numberOfProfilesFounded.toString()
-				: EMPTY_DDB_ATTRIBUTE
+			endDate: entity.endDate?.toISOString(),
+			numberOfProfilesFounded: entity.numberOfProfilesFounded?.toString()
 		};
 	}
 }

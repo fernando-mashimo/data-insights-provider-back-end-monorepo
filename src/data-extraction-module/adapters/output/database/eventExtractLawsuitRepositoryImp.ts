@@ -77,11 +77,9 @@ export class EventExtractLawsuitRepositoryImp implements EventExtractLawsuitRepo
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			endDate: entity.endDate ? entity.endDate.toISOString() : EMPTY_DDB_ATTRIBUTE,
-			totalPages: entity.totalPages ? entity.totalPages.toString() : EMPTY_DDB_ATTRIBUTE,
-			pagesDownloaded: entity.pagesDownloaded
-				? entity.pagesDownloaded.toString()
-				: EMPTY_DDB_ATTRIBUTE,
+			endDate: entity.endDate?.toISOString(),
+			totalPages: entity.totalPages?.toString(),
+			pagesDownloaded: entity.pagesDownloaded?.toString(),
 			nextPageUrl: entity.nextPageUrl ?? EMPTY_DDB_ATTRIBUTE
 		};
 	}

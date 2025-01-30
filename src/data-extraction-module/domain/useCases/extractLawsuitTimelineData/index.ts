@@ -106,7 +106,6 @@ export class ExtractLawsuitTimelineDataUseCase
 
 			event.pagesDownloaded = page;
 			event.nextPageUrl = timelineData.nextPageUrl;
-      event.endDate = undefined;
 			await this.eventExtractLawsuitTimelineRepository.put(event);
 
 			if (!timelineData.hasNext) hasNextPage = false;
