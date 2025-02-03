@@ -48,6 +48,9 @@ export class LawsuitTimelineDataExtractorClientImp implements LawsuitTimelineDat
 			if (error instanceof AxiosError) {
 				if (error.status === 404) throw new Error('Lawsuit timeline not found at Escavador');
 				if (error.status === 422) throw new Error('Invalid CNJ format');
+				if (error.status && error.status < 500)
+					throw new Error('Some error ocurred - verify input data');
+				if (error.status && error.status >= 500) throw new Error('Internal server error');
 			}
 			throw error;
 		}

@@ -1,4 +1,4 @@
-import axios, { Axios } from 'axios';
+import axios, { Axios, AxiosError } from 'axios';
 import {
 	GenericExtractedData,
 	LawsuitDataUpdateClient,
@@ -37,6 +37,11 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 			return lawsuitSubscription;
 		} catch (error) {
 			console.error(`Error retrieving lawsuit subscription metadata for CNJ ${cnj}`, error);
+      if (error instanceof AxiosError) {
+				if (error.status && error.status < 500)
+					throw new Error('Some error ocurred - verify input data');
+				if (error.status && error.status >= 500) throw new Error('Internal server error');
+      }
 			throw error;
 		}
 	}

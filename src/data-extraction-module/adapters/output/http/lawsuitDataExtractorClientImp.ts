@@ -37,30 +37,33 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
 		};
 
-    try {
-      const { data } = await this.client.get(url.toString(), { headers });
+		try {
+			const { data } = await this.client.get(url.toString(), { headers });
 
-      const {
-        items,
-        links,
-        envolvido_encontrado: { quantidade_processos }
-      } = data;
+			const {
+				items,
+				links,
+				envolvido_encontrado: { quantidade_processos }
+			} = data;
 
-      const totalPages = Math.ceil(quantidade_processos / this.pageSize);
+			const totalPages = Math.ceil(quantidade_processos / this.pageSize);
 
-      return {
-        lawsuits: items,
-        hasNext: !!links.next,
-        totalPages,
-        nextPageUrl: links.next
-      };
-    } catch (error) {
-      console.error(`Error extracting lawsuit data for CNPJ ${cnpj}`);
-      if (error instanceof AxiosError) {
-        if (error.status === 422) throw new Error('Invalid CNPJ format');
-      }
-      throw error;
-    }
+			return {
+				lawsuits: items,
+				hasNext: !!links.next,
+				totalPages,
+				nextPageUrl: links.next
+			};
+		} catch (error) {
+			console.error(`Error extracting lawsuit data for CNPJ ${cnpj}`);
+			if (error instanceof AxiosError) {
+				if (error.status === 422) throw new Error('Invalid CNPJ format');
+				if (error.status && error.status < 500)
+					throw new Error('Some error ocurred - verify input data');
+				if (error.status && error.status >= 500) throw new Error('Internal server error');
+			}
+			throw error;
+		}
 	}
 
 	public async verifyIfTermIsAlreadyMonitored(term: string): Promise<boolean> {
