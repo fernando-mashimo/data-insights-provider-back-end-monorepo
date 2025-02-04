@@ -26,7 +26,7 @@ beforeEach(() => {
 		.mockImplementation(() => Promise.resolve([EventUpdateLawsuitMock]));
 
 	jest
-		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getLawsuitSubscriptionByCnj')
+		.spyOn(LawsuitDataUpdateClientMock.prototype, 'createLawsuitSubscription')
 		.mockImplementation(() =>
 			Promise.resolve({
 				id: '123',
@@ -38,10 +38,6 @@ beforeEach(() => {
 				updatedAt: 'anyUpdatedAt'
 			})
 		);
-
-	jest
-		.spyOn(LawsuitDataUpdateClientMock.prototype, 'createLawsuitSubscription')
-		.mockImplementation(() => Promise.resolve());
 
 	jest
 		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getUnsyncedLawsuitsSubscriptions')
@@ -185,6 +181,6 @@ test('Should not update lawsuit data if it is already updated', async () => {
 		})
 	);
 	expect(lawsuitDataUpdateClient.getUpdatedLawsuitData).not.toHaveBeenCalled();
-  expect(fileManagementClient.uploadFile).not.toHaveBeenCalled();
-  expect(fileManagementClient.downloadPdfFile).not.toHaveBeenCalled();
+	expect(fileManagementClient.uploadFile).not.toHaveBeenCalled();
+	expect(fileManagementClient.downloadPdfFile).not.toHaveBeenCalled();
 });

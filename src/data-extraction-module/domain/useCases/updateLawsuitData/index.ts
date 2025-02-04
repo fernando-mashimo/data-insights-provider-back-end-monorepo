@@ -48,19 +48,25 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 				event = new EventUpdateLawsuit(input.cnj, EventUpdateLawsuitStatus.PENDING, new Date());
 			else event = existingEvents[0];
 
-      // checks if CNJ has a monitoring subscription at external source
-      // if not, creates a new subscription and finishes the process
-			const lawsuitSubscriptionData =
-				await this.lawsuitDataUpdateClient.getLawsuitSubscriptionByCnj(input.cnj);
+			// checks if CNJ has a monitoring subscription at external source
+			// if not, creates a new subscription and finishes the process
+			let lawsuitSubscriptionData;
+			if (event.externalId)
+				lawsuitSubscriptionData = await this.lawsuitDataUpdateClient.getLawsuitSubscriptionById(
+					event.externalId
+				);
 			if (!lawsuitSubscriptionData) {
-				await this.lawsuitDataUpdateClient.createLawsuitSubscription(input.cnj);
+				const newLawsuitSubscription = await this.lawsuitDataUpdateClient.createLawsuitSubscription(
+					input.cnj
+				);
+				event.externalId = newLawsuitSubscription.id;
 				await this.eventUpdateLawsuitRepository.put(event);
 
 				return;
 			}
 
-      // checks if lawsuit data has already been updated
-      // if so, finishes the process
+			// checks if lawsuit data has already been updated
+			// if so, finishes the process
 			const isLawsuitDataAlreadyUpdated = await this.verifyIfLawsuitDataIsAlreadyUpdated(input.cnj);
 			if (isLawsuitDataAlreadyUpdated) {
 				event.status = EventUpdateLawsuitStatus.FINISHED_ALREADY_UPDATED;
@@ -110,15 +116,16 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 		if (!unsyncedLawsuitSubscriptions || !unsyncedLawsuitSubscriptions.length) return true;
 
 		for (const unsyncedLawsuitSubscription of unsyncedLawsuitSubscriptions) {
-			const unsyncedSubscriptionData = await this.lawsuitDataUpdateClient.getLawsuitSubscriptionById(
-				unsyncedLawsuitSubscription.id
-			);
+			const unsyncedSubscriptionData =
+				await this.lawsuitDataUpdateClient.getLawsuitSubscriptionById(
+					unsyncedLawsuitSubscription.id
+				);
 
 			const unsyncedLawsuitCnj = unsyncedSubscriptionData.value.replace(/\D/g, '');
 			if (unsyncedLawsuitCnj === cnj) return false;
 		}
 
-    return true;
+		return true;
 	}
 
 	private async persistUpdatedLawsuitData(

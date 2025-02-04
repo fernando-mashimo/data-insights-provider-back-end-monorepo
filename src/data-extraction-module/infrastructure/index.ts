@@ -182,7 +182,7 @@ export class DataExtractionStack extends cdk.Stack {
 		updateLawsuitDataQueue: sqs.Queue
 	): lambdaNodejs.NodejsFunction {
 		const { lambda } = new LambdaBasic(this, 'TriggerUpdateLawsuitData', {
-			timeout: cdk.Duration.seconds(300),
+			timeout: cdk.Duration.seconds(900),
 			entry: 'src/data-extraction-module/adapters/input/schedule/triggerUpdateLawsuitData/index.ts',
 			handler: 'handler',
 			environment: {

@@ -3,7 +3,7 @@ export enum EventUpdateLawsuitStatus {
 	ERROR = 'ERROR',
 	FINISHED = 'FINISHED',
 	FINISHED_WITHOUT_DOCUMENTS = 'FINISHED_WITHOUT_DOCUMENTS',
-  FINISHED_ALREADY_UPDATED = 'FINISHED_ALREADY_UPDATED'
+	FINISHED_ALREADY_UPDATED = 'FINISHED_ALREADY_UPDATED'
 }
 
 export class EventUpdateLawsuit {
@@ -13,7 +13,8 @@ export class EventUpdateLawsuit {
 		public cnj: string,
 		public status = EventUpdateLawsuitStatus.PENDING,
 		public startDate = new Date(),
-		public endDate?: Date
+		public endDate?: Date,
+		public externalId?: string
 	) {
 		this.id = `${cnj}#${startDate.toISOString()}`;
 	}

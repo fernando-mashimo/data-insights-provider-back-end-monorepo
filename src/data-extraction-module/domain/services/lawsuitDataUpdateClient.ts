@@ -1,7 +1,6 @@
 export interface LawsuitDataUpdateClient {
-	getLawsuitSubscriptionByCnj(cnj: string): Promise<LawsuitSubscription | undefined>;
 	getLawsuitSubscriptionById(id: string): Promise<LawsuitSubscription>;
-	createLawsuitSubscription(cnj: string): Promise<void>;
+	createLawsuitSubscription(cnj: string): Promise<LawsuitSubscription>;
 	getUpdatedLawsuitData(subscriptionId: string): Promise<UpdatedLawsuitData>;
 	getUnsyncedLawsuitsSubscriptions(): Promise<UnsyncedLawsuitSubscription[]>;
 }

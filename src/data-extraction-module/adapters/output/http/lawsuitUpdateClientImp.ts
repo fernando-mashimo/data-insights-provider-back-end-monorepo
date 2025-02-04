@@ -1,4 +1,4 @@
-import axios, { Axios, AxiosError } from 'axios';
+import axios, { Axios } from 'axios';
 import {
 	GenericExtractedData,
 	LawsuitDataUpdateClient,
@@ -15,35 +15,6 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		this.client = axios.create({
 			timeout: $config.AXIOS_REQUEST_TIMEOUT_SECONDS * 1000
 		});
-	}
-
-	public async getLawsuitSubscriptionByCnj(cnj: string): Promise<LawsuitSubscription | undefined> {
-		const accessToken = await this.getAccessToken();
-
-		const url = new URL($config.PIPED_API_BASE_URL);
-		url.pathname = '/v1/subscriptions';
-
-		const headers = {
-			Authorization: `Bearer ${accessToken}`
-		};
-
-		try {
-			const { data } = await this.client.get(url.toString(), { headers });
-
-			const lawsuitSubscription = data.data.find(
-				(subscription: LawsuitSubscription) => subscription.value.replace(/\D/g, '') === cnj
-			);
-
-			return lawsuitSubscription;
-		} catch (error) {
-			console.error(`Error retrieving lawsuit subscription metadata for CNJ ${cnj}`, error);
-      if (error instanceof AxiosError) {
-				if (error.status && error.status < 500)
-					throw new Error('Some error ocurred - verify input data');
-				if (error.status && error.status >= 500) throw new Error('Internal server error');
-      }
-			throw error;
-		}
 	}
 
 	public async getLawsuitSubscriptionById(id: string): Promise<LawsuitSubscription> {
@@ -66,7 +37,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		}
 	}
 
-	public async createLawsuitSubscription(cnj: string): Promise<void> {
+	public async createLawsuitSubscription(cnj: string): Promise<LawsuitSubscription> {
 		const accessToken = await this.getAccessToken();
 
 		const url = new URL($config.PIPED_API_BASE_URL);
@@ -82,7 +53,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		};
 
 		try {
-			await this.client.post(url.toString(), payload, { headers });
+			return await this.client.post(url.toString(), payload, { headers });
 		} catch (error) {
 			console.error(`Error creating lawsuit subscription for CNJ ${cnj}`, error);
 			throw error;
@@ -132,9 +103,28 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		};
 
 		try {
-			const { data } = await this.client.get(url.toString(), { headers });
+			let hasNextPage = true;
+			let page = 1;
+			url.searchParams.set('page', page.toString());
+      const unsyncedLawsuitsSubscriptions = [];
 
-			return data.data;
+      while (hasNextPage) {
+        const { data } = await this.client.get(url.toString(), { headers });
+
+        if (!data.data || !data.data.length) return [];
+
+        const totalAmountPages = Math.ceil(data.total / data.limit);
+
+        unsyncedLawsuitsSubscriptions.push(...data.data);
+
+				if (page === totalAmountPages) hasNextPage = false;
+				else {
+					page += 1;
+					url.searchParams.set('page', page.toString());
+				}
+      }
+
+			return unsyncedLawsuitsSubscriptions;
 		} catch (error) {
 			console.error('Error retrieving unsynced lawsuits', error);
 			throw error;
@@ -142,7 +132,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 	}
 
 	private async getAccessToken(): Promise<string> {
-		const url = new URL($config.PIPED_API_AUTH_URL);
+		const url = new URL($config.PIPED_API_AUTH_URL);;
 		url.pathname = '/oauth/token';
 
 		const payload = {
