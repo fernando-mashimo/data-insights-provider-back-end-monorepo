@@ -20,11 +20,11 @@ export class ExtractPersonDataUseCase implements UseCase<ExtractPersonDataUseCas
 	private fileManagementClient: FileManagementClient;
 
 	constructor(
-		eventExtractPersonBasicDataRepository: EventExtractPersonDataRepository,
+		eventExtractPersonDataRepository: EventExtractPersonDataRepository,
 		personDataExtractorClient: PersonDataExtractorClient,
 		fileManagementClient: FileManagementClient
 	) {
-		this.eventExtractPersonDataRepository = eventExtractPersonBasicDataRepository;
+		this.eventExtractPersonDataRepository = eventExtractPersonDataRepository;
 		this.personDataExtractorClient = personDataExtractorClient;
 		this.fileManagementClient = fileManagementClient;
 	}
