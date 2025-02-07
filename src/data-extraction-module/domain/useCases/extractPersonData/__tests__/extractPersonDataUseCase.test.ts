@@ -54,17 +54,17 @@ test('Should extract person data and persist at S3 and register an Event in the 
 	await useCase.execute(baseInput);
 
 	expect(fileManagementClient.uploadFile).toHaveBeenCalledWith(
-		expect.stringContaining(`persons/basic/big-data-corp/${baseInput.cpf}`),
+		expect.stringContaining(`people/basic/big-data-corp/${baseInput.cpf}`),
 		'application/json',
 		expect.any(Buffer)
 	);
 	expect(fileManagementClient.uploadFile).toHaveBeenCalledWith(
-		expect.stringContaining(`persons/financial/big-data-corp/${baseInput.cpf}`),
+		expect.stringContaining(`people/financial/big-data-corp/${baseInput.cpf}`),
 		'application/json',
 		expect.any(Buffer)
 	);
 	expect(fileManagementClient.uploadFile).toHaveBeenCalledWith(
-		expect.stringContaining(`persons/lawsuits/big-data-corp/${baseInput.cpf}`),
+		expect.stringContaining(`people/lawsuits/big-data-corp/${baseInput.cpf}`),
 		'application/json',
 		expect.any(Buffer)
 	);

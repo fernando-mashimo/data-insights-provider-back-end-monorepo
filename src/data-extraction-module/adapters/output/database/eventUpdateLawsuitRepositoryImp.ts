@@ -9,7 +9,7 @@ import {
 	EventUpdateLawsuitStatus
 } from '../../../domain/entities/eventUpdateLawsuit';
 import { EventUpdateLawsuitRepository } from '../../../domain/repositories/eventUpdateLawsuitRepository';
-import { BaseDdbTableType } from './baseDdbTableTable';
+import { BaseDdbTableType, EMPTY_DDB_ATTRIBUTE } from './baseDdbTableTable';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { $config } from '$config';
 
@@ -60,7 +60,8 @@ export class EventUpdateLawsuitRepositoryImp implements EventUpdateLawsuitReposi
 			status: item.status as EventUpdateLawsuitStatus,
 			startDate: new Date(item.startDate),
 			id: item.id,
-			endDate: item.endDate ? new Date(item.endDate) : undefined
+			endDate: item.endDate ? new Date(item.endDate) : undefined,
+      externalId: item.externalId !== EMPTY_DDB_ATTRIBUTE ? item.externalId : undefined
 		};
 	}
 
@@ -73,7 +74,8 @@ export class EventUpdateLawsuitRepositoryImp implements EventUpdateLawsuitReposi
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			endDate: entity.endDate?.toISOString()
+			endDate: entity.endDate?.toISOString(),
+			externalId: entity.externalId ?? EMPTY_DDB_ATTRIBUTE
 		};
 	}
 }

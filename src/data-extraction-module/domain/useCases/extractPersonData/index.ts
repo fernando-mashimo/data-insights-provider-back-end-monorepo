@@ -81,7 +81,7 @@ export class ExtractPersonDataUseCase implements UseCase<ExtractPersonDataUseCas
 		data: GenericExtractedData
 	): Promise<void> {
 		const hashedDataString = this.hashDataAndConvertToString(Buffer.from(JSON.stringify(data)));
-		const filePath = path.join(`persons/${type}/big-data-corp`, `${cpf}_${hashedDataString}.json`);
+		const filePath = path.join(`people/${type}/big-data-corp`, `${cpf}_${hashedDataString}.json`);
 
 		await this.fileManagementClient.uploadFile(
 			filePath,

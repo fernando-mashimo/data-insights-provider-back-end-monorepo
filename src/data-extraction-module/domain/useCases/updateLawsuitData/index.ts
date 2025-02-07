@@ -61,8 +61,9 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 				);
 				event.externalId = newLawsuitSubscription.id;
 				await this.eventUpdateLawsuitRepository.put(event);
+        console.info(`New lawsuit subscription created for CNJ ${input.cnj}`);
 
-				return;
+        return;
 			}
 
 			// checks if lawsuit data has already been updated

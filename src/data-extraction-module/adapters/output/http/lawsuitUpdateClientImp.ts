@@ -53,7 +53,9 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		};
 
 		try {
-			return await this.client.post(url.toString(), payload, { headers });
+			const { data } = await this.client.post(url.toString(), payload, { headers });
+
+      return data.data;
 		} catch (error) {
 			console.error(`Error creating lawsuit subscription for CNJ ${cnj}`, error);
 			throw error;
