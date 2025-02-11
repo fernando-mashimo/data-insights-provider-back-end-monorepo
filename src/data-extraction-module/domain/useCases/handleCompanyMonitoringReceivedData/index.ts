@@ -5,7 +5,7 @@ import { FileManagementClient } from '../../services/fileManagementClient';
 import { EventCompanyMonitoringReceivedDataRepository } from '../../repositories/eventCompanyMonitoringReceivedDataRepository';
 import { EventCompanyMonitoringReceivedData } from '../../entities/eventCompanyMonitoringReceivedData';
 
-export class HandleCompanyReceivedDataUseCase
+export class HandleCompanyMonitoringReceivedDataUseCase
 	implements UseCase<HandleCompanyMonitoringReceivedDataUseCaseInput, void>
 {
 	private fileManagementClient: FileManagementClient;

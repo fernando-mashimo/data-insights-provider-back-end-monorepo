@@ -7,7 +7,8 @@ import {
 	LawsuitDataExtractorClient,
 	MonitoredTerm,
 	LawsuitUpdateAsyncProcess,
-	CreateLawsuitUpdateAsyncProcessBody
+	CreateLawsuitUpdateAsyncProcessBody,
+	GenericExtractedData
 } from '../../../domain/services/lawsuitDataExtractorClient';
 
 export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient {
@@ -20,7 +21,7 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 		});
 	}
 
-	public async getLawsuits(
+	public async getLawsuitsByCnpj(
 		cnpj: string,
 		nextPageUrl?: string | null
 	): Promise<LawsuitDataExtractionResponse> {
@@ -139,8 +140,34 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 		} catch (error) {
 			console.error(`Error creating async lawsuit update process for CNJ ${cnj}`);
 			if (error instanceof AxiosError) {
-				if (error.status === 422) // TO DO: refinar tratamento erro 422 - CNJ inválido ou já processado
+				if (error.status === 422)
+					// TO DO: refinar tratamento erro 422 - CNJ inválido ou já processado
 					throw new Error('Invalid CNJ format or CNJ already processed in the same day'); // Invalid CNJ format or CNJ already processed in the same day
+				if (error.status && error.status < 500)
+					throw new Error('Some error ocurred - verify input data');
+				if (error.status && error.status >= 500) throw new Error('Internal server error');
+			}
+			throw error;
+		}
+	}
+
+	public async getLawsuitDataByCnj(cnj: string): Promise<GenericExtractedData> {
+		const url = new URL($config.ESCAVADOR_API_URL);
+		url.pathname = `api/v2/processos/numero_cnj/${cnj}`;
+
+		const headers = {
+			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
+		};
+
+		try {
+			const { data } = await this.client.get(url.toString(), { headers });
+
+			return data;
+		} catch (error) {
+			console.error(`Error extracting lawsuit data for CNJ ${cnj}`);
+			if (error instanceof AxiosError) {
+				if (error.status === 404) throw new Error(`Lawsuit with cnj ${cnj} not found at Escavador`);
+				if (error.status === 422) throw new Error('Invalid CNJ format');
 				if (error.status && error.status < 500)
 					throw new Error('Some error ocurred - verify input data');
 				if (error.status && error.status >= 500) throw new Error('Internal server error');

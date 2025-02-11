@@ -1,8 +1,12 @@
 export interface LawsuitDataExtractorClient {
-	getLawsuits(cnpj: string, nextPageUrl?: string | null): Promise<LawsuitDataExtractionResponse>;
+	getLawsuitsByCnpj(
+		cnpj: string,
+		nextPageUrl?: string | null
+	): Promise<LawsuitDataExtractionResponse>;
 	verifyIfTermIsAlreadyMonitored(term: string): Promise<boolean>;
 	createTermMonitoring(term: string): Promise<MonitoredTerm>;
-  createLawsuitUpdateAsyncProcess(cnj: string): Promise<LawsuitUpdateAsyncProcess>;
+	createLawsuitUpdateAsyncProcess(cnj: string): Promise<LawsuitUpdateAsyncProcess>;
+	getLawsuitDataByCnj(cnj: string): Promise<GenericExtractedData>;
 }
 
 export type GenericExtractedData = {
@@ -49,7 +53,7 @@ export type LawsuitUpdateAsyncProcessExternalResponse = {
 	numero_cnj: string;
 	criado_em: string; // date-time
 	concluido_em: string | null;
-  enviar_callback: string;
+	enviar_callback: string;
 };
 
 export type LawsuitUpdateAsyncProcess = {
@@ -58,5 +62,5 @@ export type LawsuitUpdateAsyncProcess = {
 	cnj: string;
 	createdAt: Date;
 	finishedAt: Date | null;
-  receiveCallback: boolean;
+	receiveCallback: boolean;
 };

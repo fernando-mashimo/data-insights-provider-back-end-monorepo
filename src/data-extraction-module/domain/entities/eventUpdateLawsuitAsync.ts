@@ -15,6 +15,6 @@ export class EventUpdateLawsuitAsync {
     public startDate = new Date(),
     public endDate?: Date,
   ) {
-    this.id = `${externalId}#${startDate.toISOString()}`;
+    this.id = `${externalId}`;
   }
 }

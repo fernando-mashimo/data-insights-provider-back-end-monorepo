@@ -41,7 +41,7 @@ export class DataExtractionStack extends cdk.Stack {
 		this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
 		this.handleCompanyMonitoringReceivedDataQueue = this.setupHandleCompanyMonitoringReceivedData();
 		this.setupExtractPersonData();
-    this.setupUpdateLawsuitDataAsync();
+		this.setupUpdateLawsuitDataAsync();
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -223,9 +223,9 @@ export class DataExtractionStack extends cdk.Stack {
 	private setupHandleCompanyMonitoringReceivedData() {
 		const { lambda, queue } = new EventListener(this, 'HandleCompanyMonitoringReceivedData', {
 			lambdaProps: {
-				entry:
-					'src/data-extraction-module/adapters/input/sqs/handleCompanyMonitoringReceivedData/index.ts',
-				handler: 'handler'
+				entry: 'src/data-extraction-module/adapters/input/sqs/handleEscavadorReceivedData/index.ts',
+				handler: 'handler',
+				timeout: cdk.Duration.seconds(900)
 			},
 			sqsEventSourceProps: {
 				batchSize: 1
@@ -253,17 +253,17 @@ export class DataExtractionStack extends cdk.Stack {
 		this.bucket.grantReadWrite(lambda);
 	}
 
-  private setupUpdateLawsuitDataAsync(): void {
-    const { lambda } = new EventListener(this, 'UpdateLawsuitDataAsync', {
-      lambdaProps: {
-        entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitDataAsync/index.ts',
-        handler: 'handler'
-      },
-      sqsEventSourceProps: {
-        batchSize: 1
-      }
-    });
+	private setupUpdateLawsuitDataAsync(): void {
+		const { lambda } = new EventListener(this, 'UpdateLawsuitDataAsync', {
+			lambdaProps: {
+				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitDataAsync/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1
+			}
+		});
 
-    this.ddbTable.grantReadWriteData(lambda);
-  }
+		this.ddbTable.grantReadWriteData(lambda);
+	}
 }

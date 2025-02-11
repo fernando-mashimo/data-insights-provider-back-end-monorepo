@@ -1,5 +1,8 @@
-import { DynamoDBDocument, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { EventUpdateLawsuitAsync, EventUpdateLawsuitAsyncStatus } from '../../../domain/entities/eventUpdateLawsuitAsync';
+import { DynamoDBDocument, GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import {
+	EventUpdateLawsuitAsync,
+	EventUpdateLawsuitAsyncStatus
+} from '../../../domain/entities/eventUpdateLawsuitAsync';
 import { EventUpdateLawsuitAsyncRepository } from '../../../domain/repositories/eventUpdateLawsuitAsyncRepository';
 import { BaseDdbTableType } from './baseDdbTableTable';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
@@ -40,10 +43,34 @@ export class EventUpdateLawsuitAsyncRepositoryImp implements EventUpdateLawsuitA
 			}
 		};
 
-    const command = new QueryCommand(params);
-    const response = await this.databaseClient.send(command);
+		const command = new QueryCommand(params);
+		const response = await this.databaseClient.send(command);
 
-    return response.Items?.map((item) => this.ddbItemToEntity(item as DDBItem)) ?? [];
+		return response.Items?.map((item) => this.ddbItemToEntity(item as DDBItem)) ?? [];
+	}
+
+	public async getByCnjAndExternalId(
+		cnj: string,
+		externalId: string
+	): Promise<EventUpdateLawsuitAsync> {
+		const params = {
+			TableName: $config.DATA_EXTRACTION_EVENTS_TABLE_NAME,
+			Key: {
+				pk: `EventUpdateLawsuitAsync#${cnj}`,
+				sk: externalId
+			}
+		};
+
+		const command = new GetCommand(params);
+		const response = await this.databaseClient.send(command);
+
+		if (!response.Item) {
+			throw new Error(
+				`EventUpdateLawsuitAsync with cnj ${cnj} and external id ${externalId} not found`
+			);
+		}
+
+		return this.ddbItemToEntity(response.Item as DDBItem);
 	}
 
 	private ddbItemToEntity(item: DDBItem): EventUpdateLawsuitAsync {
@@ -53,7 +80,7 @@ export class EventUpdateLawsuitAsyncRepositoryImp implements EventUpdateLawsuitA
 			status: item.status as EventUpdateLawsuitAsyncStatus,
 			startDate: new Date(item.startDate),
 			id: item.id,
-			endDate: item.endDate ? new Date(item.endDate) : undefined,
+			endDate: item.endDate ? new Date(item.endDate) : undefined
 		};
 	}
 

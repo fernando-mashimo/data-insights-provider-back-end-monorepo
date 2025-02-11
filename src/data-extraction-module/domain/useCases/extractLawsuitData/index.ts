@@ -118,7 +118,7 @@ export class ExtractLawsuitDataUseCase implements UseCase<ExtractLawsuitDataUseC
 
 		while (hasNextPage) {
 			const lawsuitsData: LawsuitDataExtractionResponse =
-				await this.lawsuitDataExtractorClient.getLawsuits(cleanCnpj, nextPageUrl);
+				await this.lawsuitDataExtractorClient.getLawsuitsByCnpj(cleanCnpj, nextPageUrl);
 
 			await this.persistLawsuitsData(cleanCnpj, lawsuitsData.lawsuits);
 

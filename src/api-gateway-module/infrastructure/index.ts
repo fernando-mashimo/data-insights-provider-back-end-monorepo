@@ -59,7 +59,7 @@ export class ApiGatewayStack extends cdk.Stack {
 				}
 			)
 			.post(
-				'/data-extraction/company-new-lawsuits-data/receive',
+				'/data-extraction/escavador-callback/receive',
 				props.handleCompanyMonitoringReceivedDataQueue,
 				{
 					methodOptions: {
