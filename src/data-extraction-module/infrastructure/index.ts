@@ -28,17 +28,26 @@ export class DataExtractionStack extends cdk.Stack {
 
 		this.downloadExtractedLinkedinProfileQueue = this.setUpDownloadExtractedLinkedinProfile();
 		this.setupExtractLinkedinProfileByName();
+
 		const extractLawsuitsTimelineDataQueue = this.setupExtractLawsuitsTimelineData();
+
 		const updateLawsuitDataQueue = this.setupUpdateLawsuitData();
+
 		const createCompanyMonitoringQueue = this.setupCreateCompanyMonitoring();
+
 		this.setupExtractLawsuitData(
 			extractLawsuitsTimelineDataQueue,
 			updateLawsuitDataQueue,
 			createCompanyMonitoringQueue
 		);
+
 		const triggerUpdateLawsuitDataFunction =
 			this.setupTriggerUpdateLawsuitData(updateLawsuitDataQueue);
-		this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
+
+		if ($config.ENABLE_UPDATE_LAWSUIT_DATA_CRON) {
+			this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
+		}
+
 		this.handleCompanyMonitoringReceivedDataQueue = this.setupHandleCompanyMonitoringReceivedData();
 		this.setupExtractPersonData();
 		this.setupUpdateLawsuitDataAsync();
@@ -132,6 +141,9 @@ export class DataExtractionStack extends cdk.Stack {
 					CREATE_COMPANY_MONITORING_QUEUE_URL: createCompanyMonitoringQueue.queueUrl
 				},
 				timeout: cdk.Duration.seconds(900)
+			},
+			queueProps: {
+				visibilityTimeout: cdk.Duration.seconds(900)
 			},
 			sqsEventSourceProps: {
 				batchSize: 1,

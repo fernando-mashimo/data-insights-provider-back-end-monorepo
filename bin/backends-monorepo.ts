@@ -7,11 +7,12 @@ import { ApiGatewayStack } from '../src/api-gateway-module/infrastructure';
 import { MetabaseStack } from '../src/metabase-module/infrastructure';
 import { DataExtractionStack } from '../src/data-extraction-module/infrastructure';
 import { GlobalAlarmsModule } from '../src/global-alarms-module/infrastructure';
+import { $config } from '../src/config';
 const app = new cdk.App();
 
 const prodEnv: cdk.Environment = {
-	account: '225989342294',
-	region: 'us-east-1'
+	account: $config.AWS_ACCOUNT_ID,
+	region: $config.AWS_REGION
 };
 
 const domainStack = new DomainStack(app, 'DomainStack', {
@@ -63,7 +64,8 @@ const apiGatewayStack = new ApiGatewayStack(app, 'ApiGatewayStack', {
 	description: 'Configure API Gateway',
 	getEmbedUrlHandler: metabaseStack.getEmbedUrlHandler,
 	downloadExtractedLinkedinProfileQueue: dataExtractionStack.downloadExtractedLinkedinProfileQueue,
-  handleCompanyMonitoringReceivedDataQueue: dataExtractionStack.handleCompanyMonitoringReceivedDataQueue,
+	handleCompanyMonitoringReceivedDataQueue:
+		dataExtractionStack.handleCompanyMonitoringReceivedDataQueue,
 	userPool: authzStack.userPool
 });
 apiGatewayStack.addDependency(metabaseStack);
