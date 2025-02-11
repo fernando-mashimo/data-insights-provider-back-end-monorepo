@@ -41,6 +41,7 @@ export class DataExtractionStack extends cdk.Stack {
 		this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
 		this.handleCompanyMonitoringReceivedDataQueue = this.setupHandleCompanyMonitoringReceivedData();
 		this.setupExtractPersonData();
+    this.setupUpdateLawsuitDataAsync();
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -251,4 +252,18 @@ export class DataExtractionStack extends cdk.Stack {
 		this.ddbTable.grantReadWriteData(lambda);
 		this.bucket.grantReadWrite(lambda);
 	}
+
+  private setupUpdateLawsuitDataAsync(): void {
+    const { lambda } = new EventListener(this, 'UpdateLawsuitDataAsync', {
+      lambdaProps: {
+        entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitDataAsync/index.ts',
+        handler: 'handler'
+      },
+      sqsEventSourceProps: {
+        batchSize: 1
+      }
+    });
+
+    this.ddbTable.grantReadWriteData(lambda);
+  }
 }

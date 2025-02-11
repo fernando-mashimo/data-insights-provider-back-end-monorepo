@@ -2,6 +2,7 @@ export interface LawsuitDataExtractorClient {
 	getLawsuits(cnpj: string, nextPageUrl?: string | null): Promise<LawsuitDataExtractionResponse>;
 	verifyIfTermIsAlreadyMonitored(term: string): Promise<boolean>;
 	createTermMonitoring(term: string): Promise<MonitoredTerm>;
+  createLawsuitUpdateAsyncProcess(cnj: string): Promise<LawsuitUpdateAsyncProcess>;
 }
 
 export type GenericExtractedData = {
@@ -35,4 +36,27 @@ export type GetMonitoredTermResponse = {
 	variacoes: string[];
 	termos_auxiliares: string[];
 	tribunais_especificos: string[];
+};
+
+export type CreateLawsuitUpdateAsyncProcessBody = {
+	enviar_callback: number;
+	documentos_publicos: number;
+};
+
+export type LawsuitUpdateAsyncProcessExternalResponse = {
+	id: number;
+	status: string;
+	numero_cnj: string;
+	criado_em: string; // date-time
+	concluido_em: string | null;
+  enviar_callback: string;
+};
+
+export type LawsuitUpdateAsyncProcess = {
+	id: string;
+	status: string;
+	cnj: string;
+	createdAt: Date;
+	finishedAt: Date | null;
+  receiveCallback: boolean;
 };

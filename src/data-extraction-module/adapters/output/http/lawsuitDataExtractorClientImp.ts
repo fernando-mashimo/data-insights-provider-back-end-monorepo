@@ -5,7 +5,9 @@ import {
 	CreateTermMonitoringBody,
 	LawsuitDataExtractionResponse,
 	LawsuitDataExtractorClient,
-	MonitoredTerm
+	MonitoredTerm,
+	LawsuitUpdateAsyncProcess,
+	CreateLawsuitUpdateAsyncProcessBody
 } from '../../../domain/services/lawsuitDataExtractorClient';
 
 export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient {
@@ -108,5 +110,42 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 			variationTerm: data.variacoes[0],
 			externalId: data.id.toString()
 		};
+	}
+
+	public async createLawsuitUpdateAsyncProcess(cnj: string): Promise<LawsuitUpdateAsyncProcess> {
+		const url = new URL($config.ESCAVADOR_API_URL);
+		url.pathname = `api/v2/processos/numero_cnj/${cnj}/solicitar-atualizacao`;
+
+		const headers = {
+			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
+		};
+
+		const payload: CreateLawsuitUpdateAsyncProcessBody = {
+			enviar_callback: 1,
+			documentos_publicos: 0
+		};
+
+		try {
+			const { data } = await this.client.post(url.toString(), payload, { headers });
+
+			return {
+				id: data.id.toString(),
+				status: data.status,
+				cnj: data.numero_cnj,
+				createdAt: new Date(data.criado_em),
+				finishedAt: data.concluido_em ? new Date(data.concluido_em) : null,
+				receiveCallback: data.enviar_callback === 'SIM' ? true : false
+			};
+		} catch (error) {
+			console.error(`Error creating async lawsuit update process for CNJ ${cnj}`);
+			if (error instanceof AxiosError) {
+				if (error.status === 422) // TO DO: refinar tratamento erro 422 - CNJ inválido ou já processado
+					throw new Error('Invalid CNJ format or CNJ already processed in the same day'); // Invalid CNJ format or CNJ already processed in the same day
+				if (error.status && error.status < 500)
+					throw new Error('Some error ocurred - verify input data');
+				if (error.status && error.status >= 500) throw new Error('Internal server error');
+			}
+			throw error;
+		}
 	}
 }
