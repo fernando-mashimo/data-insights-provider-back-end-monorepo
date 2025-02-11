@@ -61,7 +61,8 @@ export class AuthzStack extends cdk.Stack {
 			customAttributes: {
 				company_name: new cognito.StringAttribute({ mutable: true }),
 				company_cnpj: new cognito.StringAttribute({ mutable: true }),
-				dashboard_id: new cognito.NumberAttribute({ mutable: true })
+				dashboard_id: new cognito.NumberAttribute({ mutable: true }), // not in use anymore
+				dashboards_id: new cognito.StringAttribute({ mutable: true }) // separated by comma
 			}
 		});
 	}
