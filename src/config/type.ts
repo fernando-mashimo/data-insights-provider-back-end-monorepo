@@ -193,7 +193,7 @@ export interface Config {
 	/**
 	 * Authorization token for Escavador company monitoring received data webhook.
 	 */
-	ESCAVADOR_COMPANY_MONITORING_RECEIVED_DATA_WEBHOOK_AUTHORIZATION: string;
+	ESCAVADOR_CALLBACK_AUTHORIZATION: string;
 
 	/**
 	 * URL for Big Data Corp API.
