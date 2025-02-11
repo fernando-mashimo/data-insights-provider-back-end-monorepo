@@ -9,9 +9,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 /**
- * When deploying this stack from ground up you must perform a 2 step deploy:
- * 1. commented customizeAuthUI
- * 2. uncommented customizeAuthUI
+ * When deploying this stack from ground up you must perform a 3 step deploy:
+ * 1. make sure that the parent domain have a A record pointing to anywhere
+ * 2. commented customizeAuthUI
+ * 3. await the custom domain be ative on use pool, and uncommented customizeAuthUI
  *
  * When changing the stack domain you must perform a 3 step deploy
  * 1. commented customizeAuthUI and addCustomDomain

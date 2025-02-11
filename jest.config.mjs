@@ -5,7 +5,8 @@ export default {
 	transform: {
 		'^.+\\.tsx?$': 'ts-jest'
 	},
-  moduleNameMapper: {
-    '^\\$config$': '<rootDir>/src/config.ts',
-  }
+	moduleNameMapper: {
+		'^\\$config$': '<rootDir>/src/config/index.ts',
+		'^\\$lib$': '<rootDir>/lib/*'
+	}
 };

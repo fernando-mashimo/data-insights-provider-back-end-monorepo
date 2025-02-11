@@ -16,6 +16,8 @@ import { LambdaBasic } from '$lib/infrastructure/constructors/lambda';
  * For the first execution you need to change the create Ec2Instance to on init format the volume.
  * After the first execution, you can comment the formatExternalVolume.
  *
+ * For others environments, that not production, we are not creating the Metabase instance, to reduce costs.
+ *
  * NOTE: The volume attachment is not automatic, you need to manually attach the volume to the instance.
  * Wait the volume and instance be created, go to the EBS volume console, and attach/detach the volume to the instance.
  * After that, the instance will mount the volume and start the docker-compose automatically.
@@ -35,11 +37,13 @@ export class MetabaseStack extends cdk.Stack {
 		super(scope, id, props);
 
 		// metabase instance
-		const vpc = this.createVpc();
-		const securityGroup = this.createSecurityGroup(vpc);
-		this.createPersistentEBSVolumeToDb();
-		const ec2Instance = this.createEc2Instance(vpc, securityGroup);
-		this.createCloudFrontForMetabase(ec2Instance);
+		if ($config.DEPLOY_BI) {
+			const vpc = this.createVpc();
+			const securityGroup = this.createSecurityGroup(vpc);
+			this.createPersistentEBSVolumeToDb();
+			const ec2Instance = this.createEc2Instance(vpc, securityGroup);
+			this.createCloudFrontForMetabase(ec2Instance);
+		}
 
 		// metabase integration
 		this.getEmbedUrlHandler = this.createGetEmbedUrlHandler();

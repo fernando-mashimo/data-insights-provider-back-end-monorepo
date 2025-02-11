@@ -19,7 +19,7 @@
 		"strictPropertyInitialization": false,
 		"typeRoots": ["./node_modules/@types"],
 		"paths": {
-			"$config": ["./src/config.ts"],
+			"$config": ["./src/config/index.ts"],
 			"$lib/*": ["./lib/*"]
 		}
 	},
