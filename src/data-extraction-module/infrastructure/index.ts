@@ -12,7 +12,7 @@ import { EventRuleBasic } from '$lib/infrastructure/constructors/eventRule';
 
 export class DataExtractionStack extends cdk.Stack {
 	readonly downloadExtractedLinkedinProfileQueue: sqs.Queue;
-	readonly handleCompanyMonitoringReceivedDataQueue: sqs.Queue;
+	readonly handleEscavadorCallbackResponseQueue: sqs.Queue;
 
 	private readonly ddbTable: dynamodb.Table;
 	private readonly bucket: s3.Bucket;
@@ -39,7 +39,7 @@ export class DataExtractionStack extends cdk.Stack {
 		const triggerUpdateLawsuitDataFunction =
 			this.setupTriggerUpdateLawsuitData(updateLawsuitDataQueue);
 		this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
-		this.handleCompanyMonitoringReceivedDataQueue = this.setupHandleCompanyMonitoringReceivedData();
+		this.handleEscavadorCallbackResponseQueue = this.setupHandleEscavadorCallbackResponse();
 		this.setupExtractPersonData();
 		this.setupUpdateLawsuitDataAsync();
 	}
@@ -220,10 +220,11 @@ export class DataExtractionStack extends cdk.Stack {
 		return queue;
 	}
 
-	private setupHandleCompanyMonitoringReceivedData() {
-		const { lambda, queue } = new EventListener(this, 'HandleCompanyMonitoringReceivedData', {
+	private setupHandleEscavadorCallbackResponse() {
+		const { lambda, queue } = new EventListener(this, 'HandleEscavadorCallbackResponse', {
 			lambdaProps: {
-				entry: 'src/data-extraction-module/adapters/input/sqs/handleEscavadorReceivedData/index.ts',
+				entry:
+					'src/data-extraction-module/adapters/input/sqs/handleEscavadorCallbackResponse/index.ts',
 				handler: 'handler',
 				timeout: cdk.Duration.seconds(900)
 			},

@@ -28,12 +28,14 @@ export class EventListener extends Construct {
 		const maxBatchingWindow =
 			props?.sqsEventSourceProps?.maxBatchingWindow || cdk.Duration.seconds(30);
 
+		const maxTimeout = props?.lambdaProps?.timeout || cdk.Duration.seconds(30);
+
 		const { queue, dlq } = new SqsBasic(this, `SQS`, {
-      visibilityTimeout: maxBatchingWindow,
-      ...props.queueProps
-    });
+			visibilityTimeout: maxTimeout,
+			...props.queueProps
+		});
 		const { lambda } = new LambdaBasic(this, `Lambda`, {
-			timeout: maxBatchingWindow,
+			timeout: maxTimeout,
 			...props.lambdaProps
 		});
 

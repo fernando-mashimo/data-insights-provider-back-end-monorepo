@@ -15,7 +15,7 @@ import { HeaderAuthorizer } from './headerAuthorizerBuilder';
 interface ApiGatewayStackProps extends cdk.StackProps {
 	getEmbedUrlHandler: lambdaNodejs.NodejsFunction;
 	downloadExtractedLinkedinProfileQueue: sqs.Queue;
-	handleCompanyMonitoringReceivedDataQueue: sqs.Queue;
+	handleEscavadorCallbackResponseQueue: sqs.Queue;
 	userPool: cognito.IUserPool;
 }
 
@@ -60,12 +60,11 @@ export class ApiGatewayStack extends cdk.Stack {
 			)
 			.post(
 				'/data-extraction/escavador-callback/receive',
-				props.handleCompanyMonitoringReceivedDataQueue,
+				props.handleEscavadorCallbackResponseQueue,
 				{
 					methodOptions: {
-						authorizer: new HeaderAuthorizer(this, 'CompanyMonitoringReceivedDataAuthorizer', {
-							authorizationHeaderValue:
-								$config.ESCAVADOR_COMPANY_MONITORING_RECEIVED_DATA_WEBHOOK_AUTHORIZATION
+						authorizer: new HeaderAuthorizer(this, 'EscavadorCallbackResponseAuthorizer', {
+							authorizationHeaderValue: $config.ESCAVADOR_CALLBACK_AUTHORIZATION
 						}).authorizer,
 						authorizationType: apiGateway.AuthorizationType.CUSTOM
 					}
