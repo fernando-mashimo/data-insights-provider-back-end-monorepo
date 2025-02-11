@@ -61,7 +61,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 	if (body.event === CallbackEventType.LAWSUIT_DATA_UPDATED) {
 		const useCaseInput: ExtractUpdatedLawsuitDataAsyncUseCaseInput = {
-			cnj: body.atualizacao.numero_cnj,
+			cnj: body.atualizacao.numero_cnj.replace(/\D/g, ''),
 			asyncProcessExternalId: body.atualizacao.id.toString()
 		};
 

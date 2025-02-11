@@ -23,6 +23,7 @@ export class UpdateLawsuitDataAsyncUseCase
 	}
 
 	public async execute(input: UpdateLawsuitDataAsyncUseCaseInput): Promise<void> {
+    const cleanCnj = input.cnj.replace(/\D/g, '');
 		const lastUpdateDate = new Date(
 			new Date().getDate() - $config.ESCAVADOR_ASYNC_UPDATE_MAX_TIME_WINDOW_DAYS
 		);
@@ -30,7 +31,7 @@ export class UpdateLawsuitDataAsyncUseCase
 		try {
 			const existingRecentEvents =
 				await this.eventUpdateLawsuitAsyncRepository.getByCnjAndLastUpdateDate(
-					input.cnj,
+					cleanCnj,
 					lastUpdateDate
 				);
 
@@ -46,9 +47,9 @@ export class UpdateLawsuitDataAsyncUseCase
 			}
 
 			const newAsyncLawsuitUpdateProcess =
-				await this.lawsuitDataExtractorClient.createLawsuitUpdateAsyncProcess(input.cnj);
+				await this.lawsuitDataExtractorClient.createLawsuitUpdateAsyncProcess(cleanCnj);
 
-			const event = new EventUpdateLawsuitAsync(input.cnj, newAsyncLawsuitUpdateProcess.id);
+			const event = new EventUpdateLawsuitAsync(cleanCnj, newAsyncLawsuitUpdateProcess.id);
 			await this.eventUpdateLawsuitAsyncRepository.put(event);
 		} catch (error) {
 			console.error(`Cannot asynchronously update lawsuit data for CNJ ${input.cnj}`);

@@ -79,8 +79,8 @@ export class ExtractUpdatedLawsuitDataAsyncUseCase
 			Buffer.from(JSON.stringify(data))
 		);
 		const filePath = path.join(
-			`lawsuits/update/escavador/`,
-			`${cnj}_${dataType}_${hashedLawsuitDataString}.json`
+			`lawsuits/update/escavador/${dataType}`,
+			`${cnj}_${hashedLawsuitDataString}.json`
 		);
 
 		await this.fileManagementClient.uploadFile(
