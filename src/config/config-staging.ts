@@ -81,4 +81,6 @@ export class ConfigStaging implements Config {
 
 	public DEPLOY_BI: boolean = false; // used to disable on staging to reduce costs
 	public ENABLE_UPDATE_LAWSUIT_DATA_CRON = false;
+
+	public IS_PRODUCTION_ENV: boolean = false;
 }

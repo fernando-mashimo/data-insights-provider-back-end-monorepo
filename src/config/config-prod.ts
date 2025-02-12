@@ -74,4 +74,6 @@ export class ConfigProd implements Config {
 
 	public DEPLOY_BI: boolean = true;
 	public ENABLE_UPDATE_LAWSUIT_DATA_CRON = true;
+
+  public IS_PRODUCTION_ENV: boolean = true;
 }

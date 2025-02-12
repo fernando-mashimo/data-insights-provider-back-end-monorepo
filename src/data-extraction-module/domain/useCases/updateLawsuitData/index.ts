@@ -9,6 +9,7 @@ import {
 } from '../../services/lawsuitDataUpdateClient';
 import { EventUpdateLawsuitRepository } from '../../repositories/eventUpdateLawsuitRepository';
 import { createHash } from 'node:crypto';
+import { $config } from '$config';
 
 /**
  * Use case to update / fetch additional lawsuit data from external source (currently PIPED API)
@@ -105,9 +106,11 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 			event.endDate = new Date();
 			await this.eventUpdateLawsuitRepository.put(event);
 
-			await this.lawsuitDataUpdateClient.confirmLawsuitSubscriptionSynced(
-				lawsuitSubscriptionData.id
-			);
+			if ($config.IS_PRODUCTION_ENV) {
+				await this.lawsuitDataUpdateClient.confirmLawsuitSubscriptionSynced(
+					lawsuitSubscriptionData.id
+				);
+      }
 		} catch (error) {
 			console.error(`Cannot update data for lawsuit with CNJ ${input.cnj}`, error);
 			throw error;

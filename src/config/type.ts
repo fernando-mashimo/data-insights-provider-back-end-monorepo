@@ -226,4 +226,10 @@ export interface Config {
 	 * production data.
 	 */
 	ENABLE_UPDATE_LAWSUIT_DATA_CRON: boolean;
+
+  /**
+   * Flag that indicates if current environment is PRODUCTION.
+   * Useful to encapsulate sections of code that may only run in PRODUCTION environment.
+   */
+  IS_PRODUCTION_ENV: boolean;
 }
