@@ -1,6 +1,6 @@
 import { GetEmbedUrlUseCase } from '..';
 import { Dashboard } from '../../../entities/Dashboard';
-import { ForbiddenError } from '../../../errors/forbidenError';
+import { ForbiddenError } from '../../../errors/forbiddenError';
 import { MetabaseClient } from '../../../services/MetabaseClient';
 import { GetEmbedUrlUseCaseInput } from '../input';
 import { MetabaseClientMock } from './mocks';

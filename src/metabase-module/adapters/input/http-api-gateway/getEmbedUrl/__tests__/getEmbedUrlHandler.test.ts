@@ -1,6 +1,6 @@
 import { ApiGatewayBaseEvent } from '../../../../../../../test/mock/input/event';
 import { Dashboard } from '../../../../../domain/entities/Dashboard';
-import { ForbiddenError } from '../../../../../domain/errors/forbidenError';
+import { ForbiddenError } from '../../../../../domain/errors/forbiddenError';
 import { UnauthorizedError } from '../../../../../domain/errors/unauthorizedError';
 import { GetEmbedUrlUseCase } from '../../../../../domain/useCases/getEmbedUrl/index';
 import { HttpAuth } from '../../../helpers/http/httpAuth';

@@ -3,7 +3,7 @@ import { IllegalArgumentError } from '../../../../domain/errors/illegalArgumentE
 import { LambdaHttpResponse } from './httpResponse';
 import { UnauthorizedError } from '../../../../domain/errors/unauthorizedError';
 import { HttpError } from './httpErrors';
-import { ForbiddenError } from '../../../../domain/errors/forbidenError';
+import { ForbiddenError } from '../../../../domain/errors/forbiddenError';
 
 export function httpErrorHandler(error: unknown): APIGatewayProxyResult {
 	if (error instanceof IllegalArgumentError)

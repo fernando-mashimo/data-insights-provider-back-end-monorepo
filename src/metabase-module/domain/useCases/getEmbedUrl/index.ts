@@ -1,5 +1,5 @@
 import { Dashboard } from '../../entities/Dashboard';
-import { ForbiddenError } from '../../errors/forbidenError';
+import { ForbiddenError } from '../../errors/forbiddenError';
 import { MetabaseClient, PreFilters } from '../../services/MetabaseClient';
 import { UseCase } from '../UseCase';
 import { GetEmbedUrlUseCaseInput } from './input';
