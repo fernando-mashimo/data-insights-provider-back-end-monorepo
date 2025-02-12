@@ -73,6 +73,48 @@ export class ApiGatewayStack extends cdk.Stack {
 			.build();
 
 		this.addApiGatewayCustomDomain(api);
+		this.setupApiGatewayDefaultResponse(api);
+	}
+
+	/**
+	 * Setup the default response for the API Gateway for when the integration fails.
+	 * Like unauthorized, access denied, etc.
+	 */
+	private setupApiGatewayDefaultResponse(api: apiGateway.RestApi): void {
+		const responseTypes = [
+			apiGateway.ResponseType.ACCESS_DENIED,
+			apiGateway.ResponseType.API_CONFIGURATION_ERROR,
+			apiGateway.ResponseType.AUTHORIZER_FAILURE,
+			apiGateway.ResponseType.AUTHORIZER_CONFIGURATION_ERROR,
+			apiGateway.ResponseType.BAD_REQUEST_PARAMETERS,
+			apiGateway.ResponseType.BAD_REQUEST_BODY,
+			apiGateway.ResponseType.DEFAULT_4XX,
+			apiGateway.ResponseType.DEFAULT_5XX,
+			apiGateway.ResponseType.EXPIRED_TOKEN,
+			apiGateway.ResponseType.INVALID_SIGNATURE,
+			apiGateway.ResponseType.INTEGRATION_FAILURE,
+			apiGateway.ResponseType.INTEGRATION_TIMEOUT,
+			apiGateway.ResponseType.INVALID_API_KEY,
+			apiGateway.ResponseType.MISSING_AUTHENTICATION_TOKEN,
+			apiGateway.ResponseType.QUOTA_EXCEEDED,
+			apiGateway.ResponseType.REQUEST_TOO_LARGE,
+			apiGateway.ResponseType.RESOURCE_NOT_FOUND,
+			apiGateway.ResponseType.THROTTLED,
+			apiGateway.ResponseType.UNAUTHORIZED,
+			apiGateway.ResponseType.UNSUPPORTED_MEDIA_TYPE,
+			apiGateway.ResponseType.WAF_FILTERED
+		];
+
+		responseTypes.forEach((responseType) => {
+			api.addGatewayResponse(`Default${responseType.responseType}`, {
+				type: responseType,
+				responseHeaders: {
+					'Access-Control-Allow-Origin': `'${apiGateway.Cors.ALL_ORIGINS.join(',')}'`,
+					'Access-Control-Allow-Headers': `'${apiGateway.Cors.ALL_METHODS.join(',')}'`,
+					'Access-Control-Allow-Methods': `'${apiGateway.Cors.DEFAULT_HEADERS.join(',')}'`
+				}
+			});
+		});
 	}
 
 	private addApiGatewayCustomDomain(api: apiGateway.RestApi): void {
