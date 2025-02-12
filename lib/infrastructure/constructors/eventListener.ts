@@ -24,10 +24,10 @@ export class EventListener extends Construct {
 	constructor(scope: Construct, id: string, props: EventListenerProps) {
 		super(scope, id);
 
-		// SQS visibility timeout must be greater than or equal the lambda timeout
 		const maxBatchingWindow =
 			props?.sqsEventSourceProps?.maxBatchingWindow || cdk.Duration.seconds(30);
 
+		// SQS visibility timeout must be greater than or equal the lambda timeout
 		const maxTimeout = props?.lambdaProps?.timeout || cdk.Duration.seconds(30);
 
 		const { queue, dlq } = new SqsBasic(this, `SQS`, {

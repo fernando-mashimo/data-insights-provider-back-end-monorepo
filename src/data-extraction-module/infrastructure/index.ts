@@ -140,9 +140,6 @@ export class DataExtractionStack extends cdk.Stack {
 				},
 				timeout: cdk.Duration.seconds(900)
 			},
-			queueProps: {
-				visibilityTimeout: cdk.Duration.seconds(900)
-			},
 			sqsEventSourceProps: {
 				batchSize: 1,
 				maxBatchingWindow: cdk.Duration.seconds(300)
