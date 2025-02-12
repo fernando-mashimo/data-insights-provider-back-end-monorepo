@@ -6,6 +6,9 @@ import {
 } from '../../../domain/services/lawsuitDataUpdateClient';
 
 export class LawsuitDataUpdateClientMock implements LawsuitDataUpdateClient {
+  confirmLawsuitSubscriptionSynced(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
 	getLawsuitSubscriptionById(): Promise<LawsuitSubscription> {
 		throw new Error('Method not implemented.');
 	}

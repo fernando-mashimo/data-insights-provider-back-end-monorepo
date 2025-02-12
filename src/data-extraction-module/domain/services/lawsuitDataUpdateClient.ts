@@ -3,6 +3,7 @@ export interface LawsuitDataUpdateClient {
 	createLawsuitSubscription(cnj: string): Promise<LawsuitSubscription>;
 	getUpdatedLawsuitData(subscriptionId: string): Promise<UpdatedLawsuitData>;
 	getUnsyncedLawsuitsSubscriptions(): Promise<UnsyncedLawsuitSubscription[]>;
+  confirmLawsuitSubscriptionSynced(id: string): Promise<void>;
 }
 
 export type GenericExtractedData = {

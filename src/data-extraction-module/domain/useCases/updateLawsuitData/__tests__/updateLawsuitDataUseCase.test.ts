@@ -87,6 +87,10 @@ beforeEach(() => {
 	jest
 		.spyOn(EventUpdateLawsuitRepositoryMock.prototype, 'put')
 		.mockImplementation(() => Promise.resolve());
+
+	jest
+		.spyOn(LawsuitDataUpdateClientMock.prototype, 'confirmLawsuitSubscriptionSynced')
+		.mockImplementation(() => Promise.resolve());
 });
 
 test('Should update lawsuit data and download document and persist them at S3', async () => {
@@ -155,8 +159,8 @@ test('Should create an event with current date as start date if no events with s
 
 test('Should create a lawsuit/CNJ subscription in the external API service if no subscriptions are found for the input CNJ', async () => {
 	jest
-		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getLawsuitSubscriptionByCnj')
-		.mockImplementation(() => Promise.resolve(undefined));
+		.spyOn(LawsuitDataUpdateClientMock.prototype, 'getLawsuitSubscriptionById')
+		.mockImplementation(() => Promise.resolve());
 
 	await useCase.execute(baseInput);
 

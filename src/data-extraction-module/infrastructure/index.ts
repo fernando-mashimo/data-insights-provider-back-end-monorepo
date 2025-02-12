@@ -174,7 +174,8 @@ export class DataExtractionStack extends cdk.Stack {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitData/index.ts',
 				handler: 'handler',
-				memorySize: 256
+				memorySize: 256,
+        timeout: cdk.Duration.seconds(900)
 			},
 			sqsEventSourceProps: {
 				batchSize: 1,

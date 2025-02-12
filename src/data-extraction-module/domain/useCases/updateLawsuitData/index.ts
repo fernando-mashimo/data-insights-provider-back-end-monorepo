@@ -61,9 +61,9 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 				);
 				event.externalId = newLawsuitSubscription.id;
 				await this.eventUpdateLawsuitRepository.put(event);
-        console.info(`New lawsuit subscription created for CNJ ${input.cnj}`);
+				console.info(`New lawsuit subscription created for CNJ ${input.cnj}`);
 
-        return;
+				return;
 			}
 
 			// checks if lawsuit data has already been updated
@@ -104,6 +104,10 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 
 			event.endDate = new Date();
 			await this.eventUpdateLawsuitRepository.put(event);
+
+			await this.lawsuitDataUpdateClient.confirmLawsuitSubscriptionSynced(
+				lawsuitSubscriptionData.id
+			);
 		} catch (error) {
 			console.error(`Cannot update data for lawsuit with CNJ ${input.cnj}`, error);
 			throw error;

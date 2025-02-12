@@ -55,7 +55,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		try {
 			const { data } = await this.client.post(url.toString(), payload, { headers });
 
-      return data.data;
+			return data.data;
 		} catch (error) {
 			console.error(`Error creating lawsuit subscription for CNJ ${cnj}`, error);
 			throw error;
@@ -75,11 +75,6 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		try {
 			const { data } = await this.client.get(url.toString(), { headers });
 
-			const urlConfirmSynced = new URL($config.PIPED_API_BASE_URL);
-			urlConfirmSynced.pathname = `/v1/subscriptions/${subscriptionId}/sync`;
-			await this.client.get(urlConfirmSynced.toString(), { headers });
-			await this.client.post(urlConfirmSynced.toString(), {}, { headers });
-
 			const documentsUrls: string[] = data.data.map(
 				(source: GenericExtractedData) => source.download ?? undefined
 			);
@@ -88,6 +83,28 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 		} catch (error) {
 			console.error(
 				`Error retrieving updated lawsuit data for subscription ${subscriptionId}`,
+				error
+			);
+			throw error;
+		}
+	}
+
+	public async confirmLawsuitSubscriptionSynced(id: string): Promise<void> {
+		const accessToken = await this.getAccessToken();
+
+		const url = new URL($config.PIPED_API_BASE_URL);
+		url.pathname = `/v1/subscriptions/${id}/sync`;
+
+		const headers = {
+			Authorization: `Bearer ${accessToken}`
+		};
+
+		try {
+			await this.client.get(url.toString(), { headers });
+			await this.client.post(url.toString(), {}, { headers });
+		} catch (error) {
+			console.error(
+				`Error confirming lawsuit subscription synced for subscription id ${id}`,
 				error
 			);
 			throw error;
@@ -108,23 +125,23 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 			let hasNextPage = true;
 			let page = 1;
 			url.searchParams.set('page', page.toString());
-      const unsyncedLawsuitsSubscriptions = [];
+			const unsyncedLawsuitsSubscriptions = [];
 
-      while (hasNextPage) {
-        const { data } = await this.client.get(url.toString(), { headers });
+			while (hasNextPage) {
+				const { data } = await this.client.get(url.toString(), { headers });
 
-        if (!data.data || !data.data.length) return [];
+				if (!data.data || !data.data.length) return [];
 
-        const totalAmountPages = Math.ceil(data.total / data.limit);
+				const totalAmountPages = Math.ceil(data.total / data.limit);
 
-        unsyncedLawsuitsSubscriptions.push(...data.data);
+				unsyncedLawsuitsSubscriptions.push(...data.data);
 
 				if (page === totalAmountPages) hasNextPage = false;
 				else {
 					page += 1;
 					url.searchParams.set('page', page.toString());
 				}
-      }
+			}
 
 			return unsyncedLawsuitsSubscriptions;
 		} catch (error) {
@@ -134,7 +151,7 @@ export class LawsuitDataUpdateClientImp implements LawsuitDataUpdateClient {
 	}
 
 	private async getAccessToken(): Promise<string> {
-		const url = new URL($config.PIPED_API_AUTH_URL);;
+		const url = new URL($config.PIPED_API_AUTH_URL);
 		url.pathname = '/oauth/token';
 
 		const payload = {
