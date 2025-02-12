@@ -1,7 +1,8 @@
 import { Dashboard } from '../entities/Dashboard';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type PreFilters = {};
+export type PreFilters = {
+	cnpj?: string;
+};
 
 export interface MetabaseClient {
 	getEmbedDashboardUrl(dashboard: Dashboard, preFilters: PreFilters): string;

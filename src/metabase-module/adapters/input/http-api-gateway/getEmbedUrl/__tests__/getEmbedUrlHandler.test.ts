@@ -1,5 +1,6 @@
 import { ApiGatewayBaseEvent } from '../../../../../../../test/mock/input/event';
 import { Dashboard } from '../../../../../domain/entities/Dashboard';
+import { ForbiddenError } from '../../../../../domain/errors/forbidenError';
 import { UnauthorizedError } from '../../../../../domain/errors/unauthorizedError';
 import { GetEmbedUrlUseCase } from '../../../../../domain/useCases/getEmbedUrl/index';
 import { HttpAuth } from '../../../helpers/http/httpAuth';
@@ -20,7 +21,10 @@ beforeEach(() => {
 	jest.spyOn(HttpAuth, 'parseLoggedInUser').mockImplementation(() => {
 		return {
 			id: 'any_id',
-			email: 'any_email'
+			email: 'any_email',
+			companyName: 'any_company_name',
+			companyCnpj: 'any_company_cnpj',
+			allowedDashboards: [Dashboard.TEST]
 		};
 	});
 
@@ -79,5 +83,30 @@ describe('Should not return url', () => {
 		const result = await handler(baseEvent);
 
 		expect(result).toEqual(LambdaHttpResponse.error(401, 'UNAUTHORIZED', 'No token provided'));
+	});
+
+	test('when user does not have permission to access the dashboard', async () => {
+		jest.spyOn(GetEmbedUrlUseCase.prototype, 'execute').mockImplementation(() => {
+			throw new ForbiddenError(
+				'Dashboard any_dashboard is not allowed for logged in user any_email'
+			);
+		});
+
+		const body: requestBody = {
+			dashboard: Dashboard.TEST
+		};
+
+		const event = structuredClone(baseEvent);
+		event.body = JSON.stringify(body);
+
+		const result = await handler(event);
+
+		expect(result).toEqual(
+			LambdaHttpResponse.error(
+				403,
+				'FORBIDDEN',
+				'Dashboard any_dashboard is not allowed for logged in user any_email'
+			)
+		);
 	});
 });

@@ -3,6 +3,7 @@ import { IllegalArgumentError } from '../../../../domain/errors/illegalArgumentE
 import { LambdaHttpResponse } from './httpResponse';
 import { UnauthorizedError } from '../../../../domain/errors/unauthorizedError';
 import { HttpError } from './httpErrors';
+import { ForbiddenError } from '../../../../domain/errors/forbidenError';
 
 export function httpErrorHandler(error: unknown): APIGatewayProxyResult {
 	if (error instanceof IllegalArgumentError)
@@ -10,6 +11,9 @@ export function httpErrorHandler(error: unknown): APIGatewayProxyResult {
 
 	if (error instanceof UnauthorizedError)
 		return LambdaHttpResponse.error(401, 'UNAUTHORIZED', error.message);
+
+	if (error instanceof ForbiddenError)
+		return LambdaHttpResponse.error(403, 'FORBIDDEN', error.message);
 
 	if (error instanceof HttpError)
 		return LambdaHttpResponse.error(error.statusCode, error.code, error.message);

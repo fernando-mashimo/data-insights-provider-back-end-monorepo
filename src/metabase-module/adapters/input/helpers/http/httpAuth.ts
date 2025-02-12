@@ -18,6 +18,9 @@ export type IdTokenAttributes = {
 	jti?: string;
 	email: string;
 	'custom:dashboard_id'?: number;
+	'custom:company_name'?: string;
+	'custom:company_cnpj'?: string;
+	'custom:dashboards_id'?: string; // separated by comma
 };
 
 export class HttpAuth {
@@ -33,6 +36,12 @@ export class HttpAuth {
 
 		// token validation is expected to be done on gateway level
 
-		return new LoggedInUser(idToken.sub, idToken.email);
+		return new LoggedInUser(
+			idToken.sub,
+			idToken.email,
+			idToken['custom:company_name'],
+			idToken['custom:company_cnpj'],
+			idToken['custom:dashboards_id']?.split(',')?.map(Number)
+		);
 	}
 }
