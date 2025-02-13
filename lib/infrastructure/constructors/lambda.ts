@@ -18,12 +18,18 @@ export class LambdaBasic extends Construct {
 			runtime: lambda.Runtime.NODEJS_20_X,
 			memorySize: 128,
 			timeout: cdk.Duration.seconds(30),
+
+			...props,
+
 			bundling: {
 				minify: true,
 				sourceMap: true,
 				...(props.bundling || {})
 			},
-			...props
+			environment: {
+				NODE_ENV: process.env.NODE_ENV || 'development',
+				...(props.environment || {})
+			}
 		});
 	}
 }
