@@ -24,8 +24,13 @@ export class EventListener extends Construct {
 	constructor(scope: Construct, id: string, props: EventListenerProps) {
 		super(scope, id);
 
+		const batchSize = props?.sqsEventSourceProps?.batchSize || 1;
+
 		const maxBatchingWindow =
 			props?.sqsEventSourceProps?.maxBatchingWindow || cdk.Duration.seconds(30);
+
+		const maxLambdaConcurrentExecutions =
+			props?.lambdaProps?.reservedConcurrentExecutions || undefined;
 
 		// SQS visibility timeout must be greater than or equal the lambda timeout
 		const maxTimeout = props?.lambdaProps?.timeout || cdk.Duration.seconds(30);
@@ -36,6 +41,7 @@ export class EventListener extends Construct {
 		});
 		const { lambda } = new LambdaBasic(this, `Lambda`, {
 			timeout: maxTimeout,
+			reservedConcurrentExecutions: maxLambdaConcurrentExecutions,
 			...props.lambdaProps
 		});
 
@@ -45,9 +51,9 @@ export class EventListener extends Construct {
 
 		lambda.addEventSource(
 			new lambdaEventSource.SqsEventSource(queue, {
-				batchSize: 1,
+				batchSize,
 				enabled: true,
-				maxBatchingWindow: maxBatchingWindow,
+				maxBatchingWindow,
 				...(props?.sqsEventSourceProps || {})
 			})
 		);

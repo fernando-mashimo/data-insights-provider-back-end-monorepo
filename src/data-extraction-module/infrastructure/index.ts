@@ -175,11 +175,12 @@ export class DataExtractionStack extends cdk.Stack {
 				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitData/index.ts',
 				handler: 'handler',
 				memorySize: 256,
-        timeout: cdk.Duration.seconds(900)
+        timeout: cdk.Duration.seconds(900),
+        reservedConcurrentExecutions: 2,
 			},
 			sqsEventSourceProps: {
-				batchSize: 1,
-				maxBatchingWindow: cdk.Duration.seconds(300)
+				batchSize: 10,
+				maxBatchingWindow: cdk.Duration.seconds(30)
 			}
 		});
 		this.ddbTable.grantReadWriteData(lambda);
