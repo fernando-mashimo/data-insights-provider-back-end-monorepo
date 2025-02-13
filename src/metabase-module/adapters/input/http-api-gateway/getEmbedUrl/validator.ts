@@ -1,4 +1,4 @@
-import { Dashboard } from '../../../../domain/entities/Dashboard';
+// import { Dashboard } from '../../../../domain/entities/Dashboard';
 import { BadRequestError } from '../../helpers/http/httpErrors';
 import { requestBody } from './input';
 
@@ -11,8 +11,13 @@ export function validateBody(body: requestBody): void {
 		throw new BadRequestError('Invalid type for field: dashboard must be a number');
 	}
 
-	const allowedDashboards = Object.values(Dashboard);
-	if (!allowedDashboards.includes(body.dashboard)) {
-		throw new BadRequestError(`Invalid value for field: dashboard`);
-	}
+	/**
+	 * Removed this validation because user can only access dashboards
+	 * that are allowed by the system.
+	 * This check is redundant, and for while take time to maintain.
+	 */
+	// const allowedDashboards = Object.values(Dashboard);
+	// if (!allowedDashboards.includes(body.dashboard)) {
+	// 	throw new BadRequestError(`Invalid value for field: dashboard`);
+	// }
 }
