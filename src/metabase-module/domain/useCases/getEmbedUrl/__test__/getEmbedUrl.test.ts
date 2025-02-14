@@ -62,6 +62,6 @@ it('Should apply some pre filters to some dashboards to prevent user see others 
 	await useCase.execute(input);
 
 	expect(metabaseClient.getEmbedDashboardUrl).toHaveBeenCalledWith(Dashboard.TEST_PRE_FILTER, {
-		cnpj: 'any_company_cnpj'
+		cnpj_dont_change_or_remove: 'any_company_cnpj'
 	});
 });

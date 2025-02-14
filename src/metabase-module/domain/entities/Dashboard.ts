@@ -6,5 +6,7 @@
 export enum Dashboard {
 	// used for testing only, this dashboard does not exist
 	TEST = 0,
-	TEST_PRE_FILTER = -1
+	TEST_PRE_FILTER = -1,
+
+	DEMO_OPERATIONAL_RISK = 26
 }

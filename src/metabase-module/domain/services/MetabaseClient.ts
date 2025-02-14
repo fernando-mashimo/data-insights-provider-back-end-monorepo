@@ -1,7 +1,7 @@
 import { Dashboard } from '../entities/Dashboard';
 
 export type PreFilters = {
-	cnpj?: string;
+	cnpj_dont_change_or_remove?: string;
 };
 
 export interface MetabaseClient {

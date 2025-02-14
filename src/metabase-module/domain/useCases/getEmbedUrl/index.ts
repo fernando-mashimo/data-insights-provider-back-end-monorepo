@@ -24,12 +24,12 @@ export class GetEmbedUrlUseCase
 				);
 			}
 
-			const filteredByCompanyCnpj = [Dashboard.TEST_PRE_FILTER];
+			const filteredByCompanyCnpj = [Dashboard.TEST_PRE_FILTER, Dashboard.DEMO_OPERATIONAL_RISK];
 
 			const preFilters: PreFilters = {};
 
 			if (filteredByCompanyCnpj.includes(input.dashboard)) {
-				preFilters.cnpj = input.loggedInUser.companyCnpj;
+				preFilters.cnpj_dont_change_or_remove = input.loggedInUser.companyCnpj;
 			}
 
 			const dashboardUrl = this.metabaseClient.getEmbedDashboardUrl(input.dashboard, preFilters);

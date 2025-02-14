@@ -5,11 +5,19 @@ set -e
 # Variables
 CREDENTIALS_PROFILE="delta-staging"
 USER_POOL_ID="us-east-1_oHnCLOriG"
-USERNAME="seu email"
+USERNAME="jose.nogueira+staging@usedeltaai.com"
 USER_ATTRIBUTES='[
   {
     "Name": "custom:dashboards_id",
-    "Value": "6,7,8,9"
+    "Value": "24,26,-1,-2,-4"
+  },
+  {
+    "Name": "custom:company_cnpj",
+    "Value": "75315333000109"
+  },
+  {
+    "Name": "custom:company_name",
+    "Value": "Atacadão"
   }
 ]'
 

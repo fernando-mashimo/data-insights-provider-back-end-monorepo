@@ -2,7 +2,7 @@
 
 set -e
 
-CREDENTIALS_PROFILE="delta-prod"
+CREDENTIALS_PROFILE="delta-staging"
 
 # List all user pools in the account
 aws cognito-idp list-user-pools \
