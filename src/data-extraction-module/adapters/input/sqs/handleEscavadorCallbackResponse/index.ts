@@ -17,6 +17,7 @@ import { ExtractUpdatedLawsuitDataAsyncUseCaseInput } from '../../../../domain/u
  * The event types are:
  * 1 - 'novo_processo' (NEW_LAWSUIT)
  * 2 - 'atualizacao_processo_concluida' (UPDATE_LAWSUIT)
+ * 3 - 'resultado_processo_async' (EXTRACT_LAWSUIT_DOCUMENT)
  *
  * Each event type will trigger a different use case.
  */
@@ -44,6 +45,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	const body = JSON.parse(event.Records[0].body) as sqsEventBody;
 
 	if (body.event === CallbackEventType.NEW_LAWSUITS_FOUND) {
+    console.info('Escavador callback handling with flow: Handle company monitoring received data');
+
 		const useCaseInput: HandleCompanyMonitoringReceivedDataUseCaseInput = {
 			monitoredCnpj: body.monitoramento.termo,
 			variationCnpj: body.monitoramento.variacoes[0],
@@ -51,26 +54,33 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			receivedData: body.processo
 		};
 
-		console.info(
-			'Escavador callback handling with flow: Handle company monitoring received data'
-		);
 		await handleCompanyMonitoringReceivedDataUseCase.execute(useCaseInput);
 
 		return;
 	}
 
 	if (body.event === CallbackEventType.LAWSUIT_DATA_UPDATED) {
+    console.info(
+      'Escavador callback handling with flow: Extract updated lawsuit data asynchronously'
+    );
+
 		const useCaseInput: ExtractUpdatedLawsuitDataAsyncUseCaseInput = {
 			cnj: body.atualizacao.numero_cnj.replace(/\D/g, ''),
 			asyncProcessExternalId: body.atualizacao.id.toString()
 		};
 
-		console.info(
-			'Escavador callback handling with flow: Extract updated lawsuit data asynchronously'
-		);
 		await extractUpdatedLawsuitDataAsyncUseCase.execute(useCaseInput);
 
 		return;
+	}
+
+	if (body.event === CallbackEventType.EXTRACT_LAWSUIT_DOCUMENT) {
+    console.info('Escavador callback handling with flow: Extract lawsuit document');
+
+		if (body.status !== 'SUCESSO')
+			throw new Error('Error extracting lawsuit document or lawsuit not found by async process');
+
+    console.info(body.resposta);
 	}
 
 	throw new Error('Invalid Escavador event type');

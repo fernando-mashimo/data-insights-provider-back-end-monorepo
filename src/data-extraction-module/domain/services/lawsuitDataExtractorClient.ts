@@ -7,6 +7,10 @@ export interface LawsuitDataExtractorClient {
 	createTermMonitoring(term: string): Promise<MonitoredTerm>;
 	createLawsuitUpdateAsyncProcess(cnj: string): Promise<LawsuitUpdateAsyncProcess>;
 	getLawsuitDataByCnj(cnj: string): Promise<GenericExtractedData>;
+	createLawsuitDocumentExtractionAsyncProcess(
+		cnj: string,
+		courtState: string
+	): Promise<LawsuitDocumentExtractionAsyncProcess>;
 }
 
 export type GenericExtractedData = {
@@ -63,4 +67,43 @@ export type LawsuitUpdateAsyncProcess = {
 	createdAt: Date;
 	finishedAt: Date | null;
 	receiveCallback: boolean;
+};
+
+export type LawsuitDocumentExtractionAsyncProcessExternalResponse = {
+	id: number;
+	created_at: {
+		date: string;
+		timezone_type: number;
+		timezone: string;
+	};
+	enviar_callback: string;
+	link_api: string;
+	numero_processo: string;
+	resposta: string;
+	status: string;
+	motivo_erro: string;
+	status_callback: string;
+	tipo: string;
+	opcoes?: {
+		autos?: boolean;
+	};
+	tribunal: {
+		sigla: string;
+		nome: string;
+		busca_processo: number;
+		busca_nome: number;
+		busca_oab: number;
+		busca_documento: number;
+		disponivel_autos: number;
+		documentos_publicos: number;
+		quantidade_creditos_busca_processo: number;
+		quantidade_creditos_busca_nome: number;
+		quantidade_creditos_busca_documento: number;
+		quantidade_creditos_busca_oab: number;
+	};
+	valor: string;
+};
+
+export type LawsuitDocumentExtractionAsyncProcess = {
+	id: string;
 };

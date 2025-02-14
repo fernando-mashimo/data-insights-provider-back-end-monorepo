@@ -49,6 +49,7 @@ export class DataExtractionStack extends cdk.Stack {
 		this.handleEscavadorCallbackResponseQueue = this.setupHandleEscavadorCallbackResponse();
 		this.setupExtractPersonData();
 		this.setupUpdateLawsuitDataAsync();
+		this.setupTriggerExtractLawsuitDocumentAsync();
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -175,8 +176,8 @@ export class DataExtractionStack extends cdk.Stack {
 				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitData/index.ts',
 				handler: 'handler',
 				memorySize: 256,
-        timeout: cdk.Duration.seconds(900),
-        reservedConcurrentExecutions: 2,
+				timeout: cdk.Duration.seconds(900),
+				reservedConcurrentExecutions: 2
 			},
 			sqsEventSourceProps: {
 				batchSize: 10,
@@ -267,6 +268,21 @@ export class DataExtractionStack extends cdk.Stack {
 		const { lambda } = new EventListener(this, 'UpdateLawsuitDataAsync', {
 			lambdaProps: {
 				entry: 'src/data-extraction-module/adapters/input/sqs/updateLawsuitDataAsync/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1
+			}
+		});
+
+		this.ddbTable.grantReadWriteData(lambda);
+	}
+
+	private setupTriggerExtractLawsuitDocumentAsync(): void {
+		const { lambda } = new EventListener(this, 'TriggerExtractLawsuitDocumentAsync', {
+			lambdaProps: {
+				entry:
+					'src/data-extraction-module/adapters/input/sqs/triggerExtractLawsuitDocumentAsync/index.ts',
 				handler: 'handler'
 			},
 			sqsEventSourceProps: {

@@ -8,8 +8,10 @@ import {
 	MonitoredTerm,
 	LawsuitUpdateAsyncProcess,
 	CreateLawsuitUpdateAsyncProcessBody,
-	GenericExtractedData
+	GenericExtractedData,
+	LawsuitDocumentExtractionAsyncProcess
 } from '../../../domain/services/lawsuitDataExtractorClient';
+import { getCourtUserCredentials } from './helpers/courtUserCredentials';
 
 export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient {
 	private client: Axios;
@@ -168,6 +170,46 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 			if (error instanceof AxiosError) {
 				if (error.status === 404) throw new Error(`Lawsuit with cnj ${cnj} not found at Escavador`);
 				if (error.status === 422) throw new Error('Invalid CNJ format');
+				if (error.status && error.status < 500)
+					throw new Error('Some error ocurred - verify input data');
+				if (error.status && error.status >= 500) throw new Error('Internal server error');
+			}
+			throw error;
+		}
+	}
+
+	public async createLawsuitDocumentExtractionAsyncProcess(
+		cnj: string,
+		courtState: string
+	): Promise<LawsuitDocumentExtractionAsyncProcess> {
+		const { userName, password } = getCourtUserCredentials(cnj, courtState);
+
+		const url = new URL($config.ESCAVADOR_API_URL);
+		url.pathname = `api/v1/processo-tribunal/${cnj}/async`;
+
+		const headers = {
+			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
+		};
+
+		const payload = {
+			send_callback: 1,
+			autos: 1,
+			usuario: userName,
+			senha: password
+		};
+
+		try {
+			const { data } = await this.client.post(url.toString(), payload, { headers });
+
+			return {
+				id: data.id.toString()
+			};
+		} catch (error) {
+			console.error(`Error creating async lawsuit document extraction process for CNJ ${cnj}`);
+			if (error instanceof AxiosError) {
+				if (error.status === 404) throw new Error(`Lawsuit with cnj ${cnj} not found at Escavador`);
+				if (error.status === 422)
+					throw new Error('Invalid CNJ format or there is already an extraction process in progress');
 				if (error.status && error.status < 500)
 					throw new Error('Some error ocurred - verify input data');
 				if (error.status && error.status >= 500) throw new Error('Internal server error');

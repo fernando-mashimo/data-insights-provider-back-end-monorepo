@@ -185,6 +185,13 @@ export interface Config {
 	ESCAVADOR_EXTRACTION_MAX_TIME_WINDOW_DAYS: number;
 
 	/**
+	 * Maximum time window in days for Escavador document extraction.
+	 * If you request extract the same data in a period less than this value, the workflow will be skipped.
+	 * This is used to avoid extracting the same data multiple times in a short period, which would result in additional costs.
+	 */
+	ESCAVADOR_DOCUMENT_EXTRACTION_MAX_TIME_WINDOW_DAYS: number;
+
+	/**
 	 * Maximum time window in days for asynchronous updates from Escavador.
 	 * If you request extract the same data in a period less than this value, the workflow will be skipped.
 	 */
@@ -227,9 +234,9 @@ export interface Config {
 	 */
 	ENABLE_UPDATE_LAWSUIT_DATA_CRON: boolean;
 
-  /**
-   * Flag that indicates if current environment is PRODUCTION.
-   * Useful to encapsulate sections of code that may only run in PRODUCTION environment.
-   */
-  IS_PRODUCTION_ENV: boolean;
+	/**
+	 * Flag that indicates if current environment is PRODUCTION.
+	 * Useful to encapsulate sections of code that may only run in PRODUCTION environment.
+	 */
+	IS_PRODUCTION_ENV: boolean;
 }

@@ -25,9 +25,26 @@ export type sqsEventBody = {
 		concluido_em: string;
 		enviar_callback: string;
 	};
+
+	// 3 - 'resultado_processo_async' (EXTRACT_LAWSUIT_DOCUMENT):
+	id: number; // id of the async process at Escavador
+	tipo: string;
+	valor: string; // cnj
+	numero_processo: string; // cnj
+	status: 'SUCESSO' | 'ERRO';
+	resposta: GenericExtractedData[]; // extracted data (core data)
+	enviar_callback: string;
+	status_callback: string;
+	link_api: string;
+	created_at: GenericExtractedData;
 };
 
 export enum CallbackEventType {
 	NEW_LAWSUITS_FOUND = 'novo_processo',
-	LAWSUIT_DATA_UPDATED = 'atualizacao_processo_concluida'
+	LAWSUIT_DATA_UPDATED = 'atualizacao_processo_concluida',
+	EXTRACT_LAWSUIT_DOCUMENT = 'resultado_processo_async'
 }
+
+type GenericExtractedData = {
+	[key: string]: string | number | boolean | object | null;
+};

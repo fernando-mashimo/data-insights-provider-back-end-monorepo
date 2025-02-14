@@ -2,12 +2,12 @@ import {
 	GenericExtractedData,
 	LawsuitDataExtractionResponse,
 	LawsuitDataExtractorClient,
-	LawsuitUpdateAsyncProcess,
+	LawsuitDocumentExtractionAsyncProcess,
 	MonitoredTerm
 } from '../../../domain/services/lawsuitDataExtractorClient';
 
 export class LawsuitDataExtractorClientMock implements LawsuitDataExtractorClient {
-	createLawsuitUpdateAsyncProcess(): Promise<LawsuitUpdateAsyncProcess> {
+	createLawsuitUpdateAsyncProcess(): Promise<LawsuitDocumentExtractionAsyncProcess> {
 		throw new Error('Method not implemented.');
 	}
 	getLawsuitDataByCnj(): Promise<GenericExtractedData> {
