@@ -47,8 +47,7 @@ export class TriggerExtractLawsuitDocumentAsyncUseCase
 
 			const createdAsyncProcess =
 				await this.lawsuitDataExtractorClient.createLawsuitDocumentExtractionAsyncProcess(
-					input.cnj,
-					input.courtState
+					input.cnj
 				);
 
 			const event = new EventExtractLawsuitDocumentAsync(

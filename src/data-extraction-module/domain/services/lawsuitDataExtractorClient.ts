@@ -2,16 +2,15 @@ export interface LawsuitDataExtractorClient {
 	createTermMonitoring(term: string): Promise<MonitoredTerm>;
 	createLawsuitUpdateAsyncProcess(cnj: string): Promise<LawsuitUpdateAsyncProcess>;
 	createLawsuitDocumentExtractionAsyncProcess(
-    cnj: string,
-		courtState: string
+		cnj: string
 	): Promise<LawsuitDocumentExtractionAsyncProcess>;
-  verifyIfTermIsAlreadyMonitored(term: string): Promise<boolean>;
-  getLawsuitsByCnpj(
-    cnpj: string,
-    nextPageUrl?: string | null
-  ): Promise<LawsuitDataExtractionResponse>;
-  getLawsuitDataByCnj(cnj: string): Promise<GenericExtractedData>;
-  downloadLawsuitDocument(documenturl: string): Promise<Buffer>;
+	verifyIfTermIsAlreadyMonitored(term: string): Promise<boolean>;
+	getLawsuitsByCnpj(
+		cnpj: string,
+		nextPageUrl?: string | null
+	): Promise<LawsuitDataExtractionResponse>;
+	getLawsuitDataByCnj(cnj: string): Promise<GenericExtractedData>;
+	downloadLawsuitDocument(documenturl: string): Promise<Buffer>;
 }
 
 export type GenericExtractedData = {

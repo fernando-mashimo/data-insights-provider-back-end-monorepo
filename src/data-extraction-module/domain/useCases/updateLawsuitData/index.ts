@@ -163,7 +163,7 @@ export class UpdateLawsuitDataUseCase implements UseCase<UpdateLawsuitDataUseCas
 
 				const filePath = path.join(
 					`lawsuits/documents/piped`,
-					`${cnj}_${hashedDocumentDataString}.pdf` // TO DO: necessário agregar nome original do documento na fonte
+					`${cnj}_${hashedDocumentDataString}.pdf`
 				);
 
 				await this.fileManagementClient.uploadFile(filePath, 'application/pdf', documentData);

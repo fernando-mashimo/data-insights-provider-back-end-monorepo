@@ -11,7 +11,7 @@ import {
 	GenericExtractedData,
 	LawsuitDocumentExtractionAsyncProcess
 } from '../../../domain/services/lawsuitDataExtractorClient';
-import { getCourtUserCredentials } from './helpers/courtUserCredentials';
+import { getCourtCredentialsByCnj } from './helpers/getCourtCredentialsByCnj';
 
 export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient {
 	private client: Axios;
@@ -180,9 +180,8 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 
 	public async createLawsuitDocumentExtractionAsyncProcess(
 		cnj: string,
-		courtState: string
 	): Promise<LawsuitDocumentExtractionAsyncProcess> {
-		const { userName, password } = getCourtUserCredentials(cnj, courtState);
+		const { userName, password } = getCourtCredentialsByCnj(cnj);
 
 		const url = new URL($config.ESCAVADOR_API_URL);
 		url.pathname = `api/v1/processo-tribunal/${cnj}/async`;
