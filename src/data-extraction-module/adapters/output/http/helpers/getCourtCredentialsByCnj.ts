@@ -81,6 +81,3 @@ const getCredentialsByLawsuitCourt = (
 
 	return courtAndCredendtialsMapping[courtIdentificationString].credentials;
 };
-
-const credentials = getCourtCredentialsByCnj('00037166920238050113');
-console.log(credentials);
