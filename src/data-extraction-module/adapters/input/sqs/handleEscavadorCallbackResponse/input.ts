@@ -32,7 +32,17 @@ export type sqsEventBody = {
 	valor: string; // cnj
 	numero_processo: string; // cnj
 	status: 'SUCESSO' | 'ERRO';
-	resposta: GenericExtractedData[]; // extracted data (core data)
+	resposta: {
+		[key: string]: string | number | boolean | object | null;
+		instancias: {
+			[key: string]: string | number | boolean | object | null;
+			documentos_restritos: {
+				[key: string]: string | number | boolean | object | null;
+				posicao_id: number;
+				link_api: string;
+			}[];
+		}[];
+	}; // extracted data (core data)
 	enviar_callback: string;
 	status_callback: string;
 	link_api: string;

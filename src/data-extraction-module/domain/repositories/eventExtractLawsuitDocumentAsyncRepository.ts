@@ -5,5 +5,6 @@ export interface EventExtractLawsuitDocumentAsyncRepository {
 		cnj: string,
 		lastExtractionDate: Date
 	): Promise<EventExtractLawsuitDocumentAsync[]>;
+	getByCnjAndExternalId(cnj: string, externalId: string): Promise<EventExtractLawsuitDocumentAsync>;
 	put(entity: EventExtractLawsuitDocumentAsync): Promise<void>;
 }

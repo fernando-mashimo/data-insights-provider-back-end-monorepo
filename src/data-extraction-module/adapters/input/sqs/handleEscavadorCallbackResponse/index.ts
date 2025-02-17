@@ -9,6 +9,10 @@ import { LawsuitDataExtractorClientImp } from '../../../output/http/lawsuitDataE
 import { LawsuitTimelineDataExtractorClientImp } from '../../../output/http/lawsuitTimelineDataExtractorClientImp';
 import { ExtractUpdatedLawsuitDataAsyncUseCase } from '../../../../domain/useCases/extractUpdatedLawsuitDataAsync';
 import { ExtractUpdatedLawsuitDataAsyncUseCaseInput } from '../../../../domain/useCases/extractUpdatedLawsuitDataAsync/input';
+import { ExtractLawsuitDocumentUseCaseInput } from '../../../../domain/useCases/extractLawsuitDocument/input';
+import { EventExtractLawsuitDocumentAsyncRepositoryImp } from '../../../output/database/eventExtractLawsuitDocumentAsyncRepositoryImp';
+import { LawsuitDocumentDownloadAndPersistQueueImp } from '../../../output/sqs/lawsuitDocumentDownloadAndPersistQueueImp';
+import { ExtractLawsuitDocumentUseCase } from '../../../../domain/useCases/extractLawsuitDocument';
 
 /**
  * This function is responsible for handling data received from Escavador callback.
@@ -41,11 +45,20 @@ const extractUpdatedLawsuitDataAsyncUseCase = new ExtractUpdatedLawsuitDataAsync
 	fileManagementClient
 );
 
+const eventExtractLawsuitDocumentAsyncRepository =
+	new EventExtractLawsuitDocumentAsyncRepositoryImp();
+const lawsuitDocumentExtractionQueue = new LawsuitDocumentDownloadAndPersistQueueImp();
+const extractLawsuitDocumentUseCase = new ExtractLawsuitDocumentUseCase(
+	eventExtractLawsuitDocumentAsyncRepository,
+	lawsuitDocumentExtractionQueue,
+	fileManagementClient
+);
+
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const body = JSON.parse(event.Records[0].body) as sqsEventBody;
 
 	if (body.event === CallbackEventType.NEW_LAWSUITS_FOUND) {
-    console.info('Escavador callback handling with flow: Handle company monitoring received data');
+		console.info('Escavador callback handling with flow: Handle company monitoring received data');
 
 		const useCaseInput: HandleCompanyMonitoringReceivedDataUseCaseInput = {
 			monitoredCnpj: body.monitoramento.termo,
@@ -60,9 +73,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	}
 
 	if (body.event === CallbackEventType.LAWSUIT_DATA_UPDATED) {
-    console.info(
-      'Escavador callback handling with flow: Extract updated lawsuit data asynchronously'
-    );
+		console.info(
+			'Escavador callback handling with flow: Extract updated lawsuit data asynchronously'
+		);
 
 		const useCaseInput: ExtractUpdatedLawsuitDataAsyncUseCaseInput = {
 			cnj: body.atualizacao.numero_cnj.replace(/\D/g, ''),
@@ -75,12 +88,35 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	}
 
 	if (body.event === CallbackEventType.EXTRACT_LAWSUIT_DOCUMENT) {
-    console.info('Escavador callback handling with flow: Extract lawsuit document');
+		console.info('Escavador callback handling with flow: Extract lawsuit document');
 
-		if (body.status !== 'SUCESSO')
-			throw new Error('Error extracting lawsuit document or lawsuit not found by async process');
+		const { id, numero_processo, resposta, status } = body;
+		const cleanCnj = numero_processo.replace(/\D/g, '');
 
-    console.info(body.resposta);
+		if (status !== 'SUCESSO')
+			throw new Error(
+				`Error extracting lawsuit document or lawsuit not found by async process for CNJ ${cleanCnj}`
+			);
+
+		const lawsuitDocumentsUrls: string[] = [];
+
+		for (const item of resposta.instancias) {
+			if (item.documentos_restritos && item.documentos_restritos.length)
+				item.documentos_restritos.forEach((document) =>
+					lawsuitDocumentsUrls.push(document.link_api)
+				);
+		}
+
+		const useCaseInput: ExtractLawsuitDocumentUseCaseInput = {
+			cnj: cleanCnj,
+			asyncProcessExternalId: id.toString(),
+			lawsuitData: body,
+			lawsuitDocumentsUrls
+		};
+
+		await extractLawsuitDocumentUseCase.execute(useCaseInput);
+
+		return;
 	}
 
 	throw new Error('Invalid Escavador event type');

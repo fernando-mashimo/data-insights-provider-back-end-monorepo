@@ -46,7 +46,11 @@ export class DataExtractionStack extends cdk.Stack {
 		if ($config.ENABLE_UPDATE_LAWSUIT_DATA_CRON) {
 			this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
 		}
-		this.handleEscavadorCallbackResponseQueue = this.setupHandleEscavadorCallbackResponse();
+		const downloadAndPersistLawsuitDocumentQueue =
+			this.setupDownloadAndPersistLawsuitDocument();
+		this.handleEscavadorCallbackResponseQueue = this.setupHandleEscavadorCallbackResponse(
+			downloadAndPersistLawsuitDocumentQueue
+		);
 		this.setupExtractPersonData();
 		this.setupUpdateLawsuitDataAsync();
 		this.setupTriggerExtractLawsuitDocumentAsync();
@@ -230,13 +234,36 @@ export class DataExtractionStack extends cdk.Stack {
 		return queue;
 	}
 
-	private setupHandleEscavadorCallbackResponse() {
+	private setupDownloadAndPersistLawsuitDocument(): sqs.Queue {
+		const { lambda, queue } = new EventListener(this, 'DownloadAndPersistLawsuitDocument', {
+			lambdaProps: {
+				entry:
+					'src/data-extraction-module/adapters/input/sqs/downloadAndPersistLawsuitDocument/index.ts',
+				handler: 'handler'
+			},
+      sqsEventSourceProps: {
+        batchSize: 1
+      }
+		});
+
+    this.ddbTable.grantReadWriteData(lambda);
+    this.bucket.grantReadWrite(lambda);
+
+		return queue;
+	}
+
+	private setupHandleEscavadorCallbackResponse(
+		downloadAndPersistLawsuitDocumentQueue: sqs.Queue
+	): sqs.Queue {
 		const { lambda, queue } = new EventListener(this, 'HandleEscavadorCallbackResponse', {
 			lambdaProps: {
 				entry:
 					'src/data-extraction-module/adapters/input/sqs/handleEscavadorCallbackResponse/index.ts',
 				handler: 'handler',
-				timeout: cdk.Duration.seconds(900)
+				timeout: cdk.Duration.seconds(900),
+				environment: {
+					DOWNLOAD_AND_PERSIST_LAWSUIT_DOCUMENT_QUEUE_URL: downloadAndPersistLawsuitDocumentQueue.queueUrl
+				}
 			},
 			sqsEventSourceProps: {
 				batchSize: 1

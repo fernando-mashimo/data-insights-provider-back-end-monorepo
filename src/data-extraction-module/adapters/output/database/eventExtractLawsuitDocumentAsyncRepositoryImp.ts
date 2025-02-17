@@ -1,4 +1,4 @@
-import { DynamoDBDocument, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
 	EventExtractLawsuitDocumentAsync,
@@ -51,6 +51,30 @@ export class EventExtractLawsuitDocumentAsyncRepositoryImp
 		return response.Items?.map((item) => this.ddbItemToEntity(item as DDBItem)) ?? [];
 	}
 
+	public async getByCnjAndExternalId(
+		cnj: string,
+		externalId: string
+	): Promise<EventExtractLawsuitDocumentAsync> {
+		const params = {
+			TableName: $config.DATA_EXTRACTION_EVENTS_TABLE_NAME,
+			Key: {
+				pk: `EventExtractLawsuitDocumentAsync#${cnj}`,
+				sk: externalId
+			}
+		};
+
+		const command = new GetCommand(params);
+		const response = await this.databaseClient.send(command);
+
+		if (!response.Item) {
+			throw new Error(
+				`EventExtractLawsuitDocumentAsync with cnj ${cnj} and external id ${externalId} not found`
+			);
+		}
+
+		return this.ddbItemToEntity(response.Item as DDBItem);
+	}
+
 	private ddbItemToEntity(item: DDBItem): EventExtractLawsuitDocumentAsync {
 		return {
 			cnj: item.cnj,
@@ -58,8 +82,6 @@ export class EventExtractLawsuitDocumentAsyncRepositoryImp
 			status: item.status as EventExtractLawsuitDocumentAsyncStatus,
 			startDate: new Date(item.startDate),
 			endDate: item.endDate ? new Date(item.endDate) : undefined,
-			totalDocuments: item.totalDocuments ? parseInt(item.totalDocuments) : undefined,
-			documentsDownloaded: item.documentsDownloaded ? parseInt(item.documentsDownloaded) : undefined
 		};
 	}
 
@@ -72,8 +94,6 @@ export class EventExtractLawsuitDocumentAsyncRepositoryImp
 
 			...entity,
 			startDate: entity.startDate.toISOString(),
-			totalDocuments: entity.totalDocuments?.toString(),
-			documentsDownloaded: entity.documentsDownloaded?.toString(),
 			endDate: entity.endDate?.toISOString()
 		};
 	}

@@ -10,7 +10,5 @@ export class EventExtractLawsuitDocumentAsync {
 		public status = EventExtractLawsuitDocumentAsyncStatus.PENDING,
 		public startDate = new Date(),
 		public endDate?: Date,
-    public totalDocuments?: number,
-    public documentsDownloaded?: number
 	) {}
 }

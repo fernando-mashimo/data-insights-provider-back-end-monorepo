@@ -217,4 +217,13 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 			throw error;
 		}
 	}
+
+  public async downloadLawsuitDocument(documentUrl: string): Promise<Buffer> {
+		const headers = {
+			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
+		};
+
+    const { data } = await this.client.get(documentUrl, { headers, responseType: 'arraybuffer' });
+    return Buffer.from(data);
+  }
 }
