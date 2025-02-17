@@ -272,6 +272,7 @@ export class DataExtractionStack extends cdk.Stack {
 
 		this.ddbTable.grantReadWriteData(lambda);
 		this.bucket.grantReadWrite(lambda);
+    downloadAndPersistLawsuitDocumentQueue.grantSendMessages(lambda);
 
 		return queue;
 	}

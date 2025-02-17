@@ -16,12 +16,13 @@ const triggerExtractLawsuitDocumentAsyncUseCase = new TriggerExtractLawsuitDocum
 export const handler = async (event: SQSEvent): Promise<void> => {
 	for (const record of event.Records) {
 		const { cnj, courtState } = JSON.parse(record.body) as sqsEventBody;
+    const cleanCnj = cnj.replace(/\D/g, '');
 
 		if (!allowedStates.includes(courtState))
 			throw new Error(`Invalid state provided: ${courtState}`);
 
 		const useCaseInput: TriggerExtractLawsuitDocumentAsyncUseCaseInput = {
-			cnj,
+			cnj: cleanCnj,
 			courtState
 		};
 

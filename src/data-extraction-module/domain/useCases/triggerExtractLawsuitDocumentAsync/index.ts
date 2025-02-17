@@ -23,7 +23,6 @@ export class TriggerExtractLawsuitDocumentAsyncUseCase
 	}
 
 	public async execute(input: TriggerExtractLawsuitDocumentAsyncUseCaseInput): Promise<void> {
-		const cleanCnj = input.cnj.replace(/\D/g, '');
 		const extractionTimeWindow = new Date(
 			new Date().getDate() - $config.ESCAVADOR_DOCUMENT_EXTRACTION_MAX_TIME_WINDOW_DAYS
 		);
@@ -31,7 +30,7 @@ export class TriggerExtractLawsuitDocumentAsyncUseCase
 		try {
 			const existingRecentEvents =
 				await this.eventExtractLawsuitDocumentAsyncRepository.getByCnjAndLastExtractionDate(
-					cleanCnj,
+					input.cnj,
 					extractionTimeWindow
 				);
 
@@ -42,18 +41,18 @@ export class TriggerExtractLawsuitDocumentAsyncUseCase
 						event.status === EventExtractLawsuitDocumentAsyncStatus.FINISHED
 				)
 			) {
-				console.info(`Lawsuit document for CNJ ${cleanCnj} recently extracted`);
+				console.info(`Lawsuit document for CNJ ${input.cnj} recently extracted`);
 				return;
 			}
 
 			const createdAsyncProcess =
 				await this.lawsuitDataExtractorClient.createLawsuitDocumentExtractionAsyncProcess(
-					cleanCnj,
+					input.cnj,
 					input.courtState
 				);
 
 			const event = new EventExtractLawsuitDocumentAsync(
-				cleanCnj,
+				input.cnj,
 				createdAsyncProcess.id,
 				EventExtractLawsuitDocumentAsyncStatus.PENDING,
 				new Date()
