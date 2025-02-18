@@ -179,7 +179,7 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 	}
 
 	public async createLawsuitDocumentExtractionAsyncProcess(
-		cnj: string,
+		cnj: string
 	): Promise<LawsuitDocumentExtractionAsyncProcess> {
 		const { userName, password } = getCourtCredentialsByCnj(cnj);
 
@@ -208,7 +208,9 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 			if (error instanceof AxiosError) {
 				if (error.status === 404) throw new Error(`Lawsuit with cnj ${cnj} not found at Escavador`);
 				if (error.status === 422)
-					throw new Error('Invalid CNJ format or there is already an extraction process in progress');
+					throw new Error(
+						'Error: 1-Invalid CNJ format, or 2-Lawsuit documents are not available, or 3-There is already an extraction process in progress'
+					);
 				if (error.status && error.status < 500)
 					throw new Error('Some error ocurred - verify input data');
 				if (error.status && error.status >= 500) throw new Error('Internal server error');
@@ -217,12 +219,12 @@ export class LawsuitDataExtractorClientImp implements LawsuitDataExtractorClient
 		}
 	}
 
-  public async downloadLawsuitDocument(documentUrl: string): Promise<Buffer> {
+	public async downloadLawsuitDocument(documentUrl: string): Promise<Buffer> {
 		const headers = {
 			Authorization: `Bearer ${$config.ESCAVADOR_API_KEY}`
 		};
 
-    const { data } = await this.client.get(documentUrl, { headers, responseType: 'arraybuffer' });
-    return Buffer.from(data);
-  }
+		const { data } = await this.client.get(documentUrl, { headers, responseType: 'arraybuffer' });
+		return Buffer.from(data);
+	}
 }

@@ -98,12 +98,12 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				`Error extracting lawsuit document or lawsuit not found by async process for CNJ ${cleanCnj}`
 			);
 
-		const lawsuitDocumentsUrls: string[] = [];
+		const lawsuitDocumentsData: { url: string, fileHash: string }[] = [];
 
 		for (const item of resposta.instancias) {
 			if (item.documentos_restritos && item.documentos_restritos.length)
 				item.documentos_restritos.forEach((document) =>
-					lawsuitDocumentsUrls.push(document.link_api)
+					lawsuitDocumentsData.push({ url: document.link_api, fileHash: document.hash })
 				);
 		}
 
@@ -111,7 +111,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			cnj: cleanCnj,
 			asyncProcessExternalId: id.toString(),
 			lawsuitData: body,
-			lawsuitDocumentsUrls
+			lawsuitDocumentsData
 		};
 
 		await extractLawsuitDocumentUseCase.execute(useCaseInput);

@@ -38,8 +38,8 @@ export type sqsEventBody = {
 			[key: string]: string | number | boolean | object | null;
 			documentos_restritos: {
 				[key: string]: string | number | boolean | object | null;
-				posicao_id: number;
 				link_api: string;
+        hash: string;
 			}[];
 		}[];
 	}; // extracted data (core data)

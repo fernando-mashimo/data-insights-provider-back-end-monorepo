@@ -32,12 +32,12 @@ export class ExtractLawsuitDocumentUseCase
 			);
 
 			const sendMessagePromises = [];
-			for (const documentUrl of input.lawsuitDocumentsUrls) {
+			for (const documentData of input.lawsuitDocumentsData) {
 				sendMessagePromises.push(
 					this.lawsuitDocumentDownloadAndPersistQueue.sendDownloadAndPersistDocumentMessage(
 						input.cnj,
 						input.asyncProcessExternalId,
-						documentUrl
+						documentData
 					)
 				);
 			}

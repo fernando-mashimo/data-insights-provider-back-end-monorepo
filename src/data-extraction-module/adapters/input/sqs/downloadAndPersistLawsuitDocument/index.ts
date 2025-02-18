@@ -18,14 +18,15 @@ const downloadAndPersistLawsuitDocumentUseCase = new DownloadAndPersistLawsuitDo
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	for (const record of event.Records) {
-		const { cnj, externalId, documentUrl }: sqsEventBody = JSON.parse(record.body);
+		const { cnj, externalId, documentData: { url, fileHash } }: sqsEventBody = JSON.parse(record.body);
 
     const cleanCnj = cnj.replace(/\D/g, '');
 
 		const useCaseInput: DownloadAndPersistLawsuitDocumentUseCaseInput = {
 			cnj: cleanCnj,
 			externalId,
-			documentUrl
+			url,
+      fileHash
 		};
 
 		await downloadAndPersistLawsuitDocumentUseCase.execute(useCaseInput);

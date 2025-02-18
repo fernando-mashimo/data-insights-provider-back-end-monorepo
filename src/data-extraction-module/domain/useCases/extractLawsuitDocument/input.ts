@@ -4,5 +4,5 @@ export type ExtractLawsuitDocumentUseCaseInput = {
 	lawsuitData: {
 		[key: string]: string | number | boolean | object | null;
 	};
-	lawsuitDocumentsUrls: string[];
+	lawsuitDocumentsData: { url: string; fileHash: string }[];
 };

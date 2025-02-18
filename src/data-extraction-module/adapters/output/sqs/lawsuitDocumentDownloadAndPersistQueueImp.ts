@@ -13,14 +13,14 @@ export class LawsuitDocumentDownloadAndPersistQueueImp
 	public async sendDownloadAndPersistDocumentMessage(
 		cnj: string,
 		externalId: string,
-		documentUrl: string,
+		documentData: { url: string, fileHash: string},
 	): Promise<void> {
 		const parameter: SendMessageCommandInput = {
 			QueueUrl: process.env.DOWNLOAD_AND_PERSIST_LAWSUIT_DOCUMENT_QUEUE_URL,
 			MessageBody: JSON.stringify({
 				cnj,
 				externalId,
-				documentUrl
+				documentData
 			})
 		};
 

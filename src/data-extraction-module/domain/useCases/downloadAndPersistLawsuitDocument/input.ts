@@ -1,5 +1,6 @@
 export type DownloadAndPersistLawsuitDocumentUseCaseInput = {
   cnj: string;
   externalId: string;
-  documentUrl: string;
+  url: string;
+  fileHash: string;
 };
