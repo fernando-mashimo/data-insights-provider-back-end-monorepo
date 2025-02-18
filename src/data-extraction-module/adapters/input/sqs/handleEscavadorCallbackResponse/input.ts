@@ -32,6 +32,7 @@ export type sqsEventBody = {
 	valor: string; // cnj
 	numero_processo: string; // cnj
 	status: 'SUCESSO' | 'ERRO';
+  motivo_erro: string;
 	resposta: {
 		[key: string]: string | number | boolean | object | null;
 		instancias: {

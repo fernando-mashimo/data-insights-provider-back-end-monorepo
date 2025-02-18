@@ -90,12 +90,13 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	if (body.event === CallbackEventType.EXTRACT_LAWSUIT_DOCUMENT) {
 		console.info('Escavador callback handling with flow: Extract lawsuit document');
 
-		const { id, numero_processo, resposta, status } = body;
+		const { id, numero_processo, resposta, status, motivo_erro } = body;
 		const cleanCnj = numero_processo.replace(/\D/g, '');
 
 		if (status !== 'SUCESSO')
 			throw new Error(
-				`Error extracting lawsuit document or lawsuit not found by async process for CNJ ${cleanCnj}`
+				`Error extracting lawsuit document or lawsuit not found by async process for CNJ ${cleanCnj}\n
+        Reason provided by Escavador: ${motivo_erro}`
 			);
 
 		const lawsuitDocumentsData: { url: string, fileHash: string }[] = [];
