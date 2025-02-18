@@ -24,7 +24,16 @@ export class GetEmbedUrlUseCase
 				);
 			}
 
-			const filteredByCompanyCnpj = [Dashboard.TEST_PRE_FILTER, Dashboard.DEMO_OPERATIONAL_RISK];
+			const filteredByCompanyCnpj = [
+				Dashboard.TEST_PRE_FILTER,
+				Dashboard.DEMO_OPERATIONAL_RISK,
+				Dashboard.DEMO_MY_LAWSUITS,
+				Dashboard.GENERAL_RISK,
+				Dashboard.FINANCIAL_RISK,
+				Dashboard.OPERATIONAL_RISK,
+				Dashboard.MY_LAWSUITS,
+				Dashboard.LAWSUIT_PROBABILITY_RISK
+			];
 
 			const preFilters: PreFilters = {};
 

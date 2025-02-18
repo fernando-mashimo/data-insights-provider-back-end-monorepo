@@ -7,3 +7,6 @@ Dashs comuns com dado Fake
 
 Dashs de demo Atacadão
 24,26,-1,-2,-4
+
+Dashs de demo Comum
+29,26,-1,-2,-4
