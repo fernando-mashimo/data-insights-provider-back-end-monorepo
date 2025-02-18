@@ -239,7 +239,9 @@ export class DataExtractionStack extends cdk.Stack {
 			lambdaProps: {
 				entry:
 					'src/data-extraction-module/adapters/input/sqs/downloadAndPersistLawsuitDocument/index.ts',
-				handler: 'handler'
+				handler: 'handler',
+        memorySize: 256,
+        timeout: cdk.Duration.seconds(900)
 			},
       sqsEventSourceProps: {
         batchSize: 1
