@@ -38,7 +38,7 @@ export enum Dashboard {
 	/**
 	 * Common Dashboards
 	 */
-	GENERAL_RISK = 13,
+	GENERAL_RISK = 16,
 	FINANCIAL_RISK = 14,
 	OPERATIONAL_RISK = 18,
 	MY_LAWSUITS = 25,
