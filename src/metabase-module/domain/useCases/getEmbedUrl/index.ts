@@ -1,5 +1,6 @@
 import { Dashboard } from '../../entities/Dashboard';
 import { ForbiddenError } from '../../errors/forbiddenError';
+import { IllegalArgumentError } from '../../errors/illegalArgumentError';
 import { MetabaseClient, PreFilters } from '../../services/MetabaseClient';
 import { UseCase } from '../UseCase';
 import { GetEmbedUrlUseCaseInput } from './input';
@@ -39,6 +40,13 @@ export class GetEmbedUrlUseCase
 
 			if (filteredByCompanyCnpj.includes(input.dashboard)) {
 				preFilters.cnpj_dont_change_or_remove = input.loggedInUser.companyCnpj;
+			}
+
+			if (input.dashboard === Dashboard.ATACADAO_MY_LAWSUITS_DETAIL) {
+				if (!input.cnj) {
+					throw new IllegalArgumentError('CNJ is required for this dashboard');
+				}
+				preFilters.cnj_dont_change_or_remove = input.cnj;
 			}
 
 			const dashboardUrl = this.metabaseClient.getEmbedDashboardUrl(input.dashboard, preFilters);

@@ -23,6 +23,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 		const useCaseInput: GetEmbedUrlUseCaseInput = {
 			dashboard: body.dashboard,
+			cnj: body.cnj,
 			loggedInUser
 		};
 		const result: GetEmbedUrlUseCaseOutput = await useCase.execute(useCaseInput);
