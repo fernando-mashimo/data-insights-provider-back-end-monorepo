@@ -3,9 +3,11 @@ import { ComplaintsDataExtractorTokenRepository } from '../../repositories/compl
 import { ComplaintsDataExtractorClient } from '../../services/complaintsDataExtractorClient';
 import { DataEncryptionClient } from '../../services/dataEncryptionClient';
 import { UseCase } from '../UseCase';
-import { UpdateAccessTokenUseCaseInput } from './input';
+import { UpdateComplaintDataExtractorAccessTokenUseCaseInput } from './input';
 
-export class UpdateAccessTokenUseCase implements UseCase<UpdateAccessTokenUseCaseInput, void> {
+export class UpdateComplaintDataExtractorAccessTokenUseCase
+	implements UseCase<UpdateComplaintDataExtractorAccessTokenUseCaseInput, void>
+{
 	private complaintsDataExtractorTokenRepository: ComplaintsDataExtractorTokenRepository;
 	private complaintsDataExtractorClient: ComplaintsDataExtractorClient;
 	private dataEncryptionClient: DataEncryptionClient;
@@ -20,7 +22,7 @@ export class UpdateAccessTokenUseCase implements UseCase<UpdateAccessTokenUseCas
 		this.dataEncryptionClient = dataEncryptionClient;
 	}
 
-	public async execute(input?: UpdateAccessTokenUseCaseInput): Promise<void> {
+	public async execute(input?: UpdateComplaintDataExtractorAccessTokenUseCaseInput): Promise<void> {
 		if (input && input.cnpj && input.refreshToken) {
 			console.info(`Updating access token for CNPJ ${input.cnpj}`);
 			try {

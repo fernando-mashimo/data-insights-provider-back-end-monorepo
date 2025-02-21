@@ -359,9 +359,10 @@ export class DataExtractionStack extends cdk.Stack {
 	}
 
 	private setupUpdateAccessToken(): lambdaNodejs.NodejsFunction {
-		const { lambda } = new EventListener(this, 'UpdateAccessToken', {
+		const { lambda } = new EventListener(this, 'UpdateComplaintDataExtractorAccessToken', {
 			lambdaProps: {
-				entry: 'src/data-extraction-module/adapters/input/sqs/updateAccessToken/index.ts',
+				entry:
+					'src/data-extraction-module/adapters/input/sqs/updateComplaintDataExtractorAccessToken/index.ts',
 				handler: 'handler'
 			},
 			sqsEventSourceProps: {
