@@ -239,4 +239,20 @@ export interface Config {
 	 * Useful to encapsulate sections of code that may only run in PRODUCTION environment.
 	 */
 	IS_PRODUCTION_ENV: boolean;
+
+	/**
+	 * Secret Key used to encrypt/decrypt 'Reclame Aqui' token.
+	 **/
+	RECLAME_AQUI_TOKEN_ENCRYPTION_SECRET: string;
+
+	/**
+	 * The name of the table that stores the 'Reclame Aqui' token.
+	 **/
+	RECLAME_AQUI_TOKEN_TABLE_NAME: string;
+
+
+  /**
+   * The base URL for the 'Reclame Aqui' authentication.
+  **/
+  RECLAME_AQUI_AUTH_BASE_URL: string;
 }

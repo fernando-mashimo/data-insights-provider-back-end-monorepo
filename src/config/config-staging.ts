@@ -85,4 +85,9 @@ export class ConfigStaging implements Config {
 	public ENABLE_UPDATE_LAWSUIT_DATA_CRON = false;
 
 	public IS_PRODUCTION_ENV: boolean = false;
+
+	public RECLAME_AQUI_TOKEN_ENCRYPTION_SECRET: string =
+		'e65047076278998d0ea104b79b3ee32ce20249f7e25b6fd4f4a3f3684a5fb22';
+	public RECLAME_AQUI_TOKEN_TABLE_NAME: string = 'reclame_aqui_tokens';
+	public RECLAME_AQUI_AUTH_BASE_URL: string = 'https://auth.reclameaqui.com.br';
 }

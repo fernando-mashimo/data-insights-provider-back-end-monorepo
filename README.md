@@ -68,13 +68,14 @@ src/                # Main source code directory
     │   │   ├── sns/                # SNS handlers
     │   │   ├── sqs/                # SQS handlers
     │   │   └── schedule/           # Schedule handlers
-    │   └── output/         # Output adapters
-    │       ├── helpers/           # Helper functions for output
-    │       ├── database/          # Database access implementations
-    │       ├── file/              # File system access implementations
-    │       ├── sns/               # Message producer implementations using SNS
-    │       ├── sqs/               # Queue implementations using SQS
-    │       └── http/              # HTTP implementations
+    │   ├── output/         # Output adapters
+    │   │   ├── helpers/           # Helper functions for output
+    │   │   ├── database/          # Database access implementations
+    │   │   ├── file/              # File system access implementations
+    │   │   ├── sns/               # Message producer implementations using SNS
+    │   │   ├── sqs/               # Queue implementations using SQS
+    │   │   └── http/              # HTTP implementations
+    │   └── infrastructure/  # External services adapters
     ├── test-mock/   # Common test-mocking resources
     └── infrastructure/  # CDK infrastructure setup
         └── index/       # Entry point for CDK stack

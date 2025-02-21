@@ -9,6 +9,7 @@ import { LambdaBasic } from '$lib/infrastructure/constructors/lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import { EventRuleBasic } from '$lib/infrastructure/constructors/eventRule';
+// import * as events from 'aws-cdk-lib/aws-events';
 
 export class DataExtractionStack extends cdk.Stack {
 	readonly downloadExtractedLinkedinProfileQueue: sqs.Queue;
@@ -16,6 +17,7 @@ export class DataExtractionStack extends cdk.Stack {
 
 	private readonly ddbTable: dynamodb.Table;
 	private readonly bucket: s3.Bucket;
+	private readonly complaintsDataExtractorTokenDdbTable: dynamodb.Table;
 
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
@@ -46,14 +48,16 @@ export class DataExtractionStack extends cdk.Stack {
 		if ($config.ENABLE_UPDATE_LAWSUIT_DATA_CRON) {
 			this.setupDailyTriggerForUpdateLawsuitData(triggerUpdateLawsuitDataFunction);
 		}
-		const downloadAndPersistLawsuitDocumentQueue =
-			this.setupDownloadAndPersistLawsuitDocument();
+		const downloadAndPersistLawsuitDocumentQueue = this.setupDownloadAndPersistLawsuitDocument();
 		this.handleEscavadorCallbackResponseQueue = this.setupHandleEscavadorCallbackResponse(
 			downloadAndPersistLawsuitDocumentQueue
 		);
 		this.setupExtractPersonData();
 		this.setupUpdateLawsuitDataAsync();
 		this.setupTriggerExtractLawsuitDocumentAsync();
+		this.complaintsDataExtractorTokenDdbTable = this.createComplaintsDataExtractorTokenTable();
+		this.setupUpdateAccessToken();
+		// this.setupTriggerForUpdateAccessToken(updateAccessTokenLambda);
 	}
 
 	private createDataExtractionEventsTable(): dynamodb.Table {
@@ -79,6 +83,36 @@ export class DataExtractionStack extends cdk.Stack {
 			},
 			sortKey: {
 				name: 'gsi1sk',
+				type: dynamodb.AttributeType.STRING
+			}
+		});
+
+		return table;
+	}
+
+	private createComplaintsDataExtractorTokenTable(): dynamodb.Table {
+		const table = new dynamodb.Table(this, 'ComplaintsDataExtractorTokenTable', {
+			tableName: $config.RECLAME_AQUI_TOKEN_TABLE_NAME,
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
+			partitionKey: {
+				name: 'pk',
+				type: dynamodb.AttributeType.STRING
+			},
+			sortKey: {
+				name: 'sk',
+				type: dynamodb.AttributeType.STRING
+			},
+			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST
+		});
+
+		table.addGlobalSecondaryIndex({
+			indexName: 'gsi-reclame-aqui-token',
+			partitionKey: {
+				name: 'gsiReclameAquiPk',
+				type: dynamodb.AttributeType.STRING
+			},
+			sortKey: {
+				name: 'gsiReclameAquiSk',
 				type: dynamodb.AttributeType.STRING
 			}
 		});
@@ -240,16 +274,16 @@ export class DataExtractionStack extends cdk.Stack {
 				entry:
 					'src/data-extraction-module/adapters/input/sqs/downloadAndPersistLawsuitDocument/index.ts',
 				handler: 'handler',
-        memorySize: 256,
-        timeout: cdk.Duration.seconds(900)
+				memorySize: 256,
+				timeout: cdk.Duration.seconds(900)
 			},
-      sqsEventSourceProps: {
-        batchSize: 1
-      }
+			sqsEventSourceProps: {
+				batchSize: 1
+			}
 		});
 
-    this.ddbTable.grantReadWriteData(lambda);
-    this.bucket.grantReadWrite(lambda);
+		this.ddbTable.grantReadWriteData(lambda);
+		this.bucket.grantReadWrite(lambda);
 
 		return queue;
 	}
@@ -264,7 +298,8 @@ export class DataExtractionStack extends cdk.Stack {
 				handler: 'handler',
 				timeout: cdk.Duration.seconds(900),
 				environment: {
-					DOWNLOAD_AND_PERSIST_LAWSUIT_DOCUMENT_QUEUE_URL: downloadAndPersistLawsuitDocumentQueue.queueUrl
+					DOWNLOAD_AND_PERSIST_LAWSUIT_DOCUMENT_QUEUE_URL:
+						downloadAndPersistLawsuitDocumentQueue.queueUrl
 				}
 			},
 			sqsEventSourceProps: {
@@ -274,7 +309,7 @@ export class DataExtractionStack extends cdk.Stack {
 
 		this.ddbTable.grantReadWriteData(lambda);
 		this.bucket.grantReadWrite(lambda);
-    downloadAndPersistLawsuitDocumentQueue.grantSendMessages(lambda);
+		downloadAndPersistLawsuitDocumentQueue.grantSendMessages(lambda);
 
 		return queue;
 	}
@@ -322,4 +357,38 @@ export class DataExtractionStack extends cdk.Stack {
 
 		this.ddbTable.grantReadWriteData(lambda);
 	}
+
+	private setupUpdateAccessToken(): lambdaNodejs.NodejsFunction {
+		const { lambda } = new EventListener(this, 'UpdateAccessToken', {
+			lambdaProps: {
+				entry: 'src/data-extraction-module/adapters/input/sqs/updateAccessToken/index.ts',
+				handler: 'handler'
+			},
+			sqsEventSourceProps: {
+				batchSize: 1
+			}
+		});
+
+		this.complaintsDataExtractorTokenDdbTable.grantReadWriteData(lambda);
+
+		return lambda;
+	}
+
+	// private setupTriggerForUpdateAccessToken(
+	// 	// 30-minute interval from 7am to 10pm, Monday to Friday
+	// 	updateAccessTokenLambda: lambdaNodejs.NodejsFunction
+	// ) {
+	// 	const { eventRule } = new EventRuleBasic(this, 'EventRuleUpdateAccessToken', {
+	// 		schedule: events.Schedule.cron({
+	// 			minute: '0,30',
+	// 			hour: '7-22',
+	// 			// day: '?',
+	// 			month: '*',
+	// 			year: '*',
+	// 			weekDay: '2-6'
+	// 		})
+	// 	});
+
+	// 	eventRule.addTarget(new targets.LambdaFunction(updateAccessTokenLambda));
+	// }
 }

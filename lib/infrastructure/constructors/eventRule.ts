@@ -16,7 +16,7 @@ export class EventRuleBasic extends Construct {
 
 		this.eventRule = new events.Rule(this, `EventRule`, {
 			enabled: true,
-      schedule: events.Schedule.cron({ minute: '0', hour: '3' }), // default to 3am UTC
+			schedule: props.schedule ? props.schedule : events.Schedule.cron({ minute: '0', hour: '3' }), // default to 3am UTC
 			...props
 		});
 	}

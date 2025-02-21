@@ -4,8 +4,11 @@ export type BaseDdbTableType = {
 	pk: string;
 	sk: string;
 
-	gsi1pk: string;
-	gsi1sk: string;
+	gsi1pk?: string;
+	gsi1sk?: string;
+
+  gsiReclameAquiPk?: string;
+  gsiReclameAquiSk?: string;
 };
 
 export const EMPTY_DDB_ATTRIBUTE = '-';
