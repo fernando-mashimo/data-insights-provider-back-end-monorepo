@@ -29,7 +29,10 @@ export class TriggerUpdateLawsuitDataUseCase implements UseCase<void, void> {
 			const unsyncedLawsuitsSubscriptions =
 				await this.lawsuitDataUpdateClient.getUnsyncedLawsuitsSubscriptions();
 
-			if (!unsyncedLawsuitsSubscriptions.length) return;
+			if (!unsyncedLawsuitsSubscriptions.length){
+        console.info('No unsynced lawsuits subscriptions found at Piped');
+        return;
+      };
 
 			const unsyncedLawsuitsSubscriptionsIds = unsyncedLawsuitsSubscriptions.map(
 				(subscription) => subscription.id
