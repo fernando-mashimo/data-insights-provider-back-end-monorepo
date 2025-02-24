@@ -5,6 +5,9 @@ Para facilitar a criação de usuários e outros, aqui está um conjunto de IDs 
 Dashs comuns com dado Fake
 6,7,8,9
 
+Dashs comuns com dado Fake V2
+35,32,31,33,34
+
 Dashs de demo Atacadão
 24,26,-1,-2,-4
 
