@@ -11,5 +11,11 @@ Dashs comuns com dado Fake V2
 Dashs de demo Atacadão
 24,26,-1,-2,-4
 
+Dashs de demo Atacadão Liberado e Detalhado
+21,30,22,26,-1,-2,-4
+
 Dashs de demo Comum
 29,26,-1,-2,-4
+
+Dash comum com dado reais
+25,27,14,16,18
