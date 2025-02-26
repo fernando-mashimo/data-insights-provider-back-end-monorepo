@@ -31,18 +31,23 @@ export class UpdateComplaintsListUseCase
 	public async execute(input: UpdateComplaintsListUseCaseInput): Promise<void> {
 		try {
 			console.info('Initiating execution UpdateComplaintsList...');
+
+      // retrieve company metadata from external service
 			const companyMetadata = await this.complaintsDataExtractorClient.getCompanyMetadata(
 				input.accessToken
 			);
 
+      // retrieve event complaints extraction metadata from repository
 			const [eventComplaintsExtractionMetadata] =
 				await this.eventComplaintsExtractionMetadataRepository.getByCnpj(companyMetadata.cnpj);
 
+      // retrieve complaints list from external service
 			const complaints = await this.complaintsDataExtractorClient.getComplaints(
 				companyMetadata.companyExternalId,
 				input.accessToken
 			);
 
+      // check if complaints list has changed since last update
 			const complaintsHash = this.hashDataAndConvertToString(
 				Buffer.from(JSON.stringify(complaints))
 			);
