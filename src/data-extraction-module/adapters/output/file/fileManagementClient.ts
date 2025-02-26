@@ -1,4 +1,4 @@
-import { $config } from '$config';
+// import { $config } from '$config';
 import axios, { Axios } from 'axios';
 import { FileManagementClient } from '../../../domain/services/fileManagementClient';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -9,8 +9,11 @@ export class FileManagementClientImp implements FileManagementClient {
 
 	constructor() {
 		this.s3Client = new S3Client({});
+		// this.axiosClient = axios.create({
+		// 	timeout: $config.AXIOS_REQUEST_TIMEOUT_SECONDS * 1000
+		// });
 		this.axiosClient = axios.create({
-			timeout: $config.AXIOS_REQUEST_TIMEOUT_SECONDS * 1000
+			timeout: 900 * 1000
 		});
 	}
 
@@ -27,7 +30,8 @@ export class FileManagementClientImp implements FileManagementClient {
 
 	public async uploadFile(path: string, contentType: string, content: Buffer): Promise<void> {
 		const command = new PutObjectCommand({
-			Bucket: $config.DATA_EXTRACTION_BUCKET_NAME,
+			// Bucket: $config.DATA_EXTRACTION_BUCKET_NAME,
+			Bucket: 'delta-ai-extraction-data',
 			Key: path,
 			Body: content,
 			ContentType: contentType

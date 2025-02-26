@@ -90,4 +90,7 @@ export class ConfigStaging implements Config {
 		'e65047076278998d0ea104b79b3ee32ce20249f7e25b6fd4f4a3f3684a5fb22';
 	public RECLAME_AQUI_TOKEN_TABLE_NAME: string = 'reclame_aqui_tokens';
 	public RECLAME_AQUI_AUTH_BASE_URL: string = 'https://auth.reclameaqui.com.br';
+	public RECLAME_AQUI_SITE_BASE_URL: string = 'https://iosite.reclameaqui.com.br';
+	public RECLAME_AQUI_DOMAIN_URL: string = 'https://www.reclameaqui.com.br';
+	public RECLAME_AQUI_SEARCH_URL: string = 'https://iosearch.reclameaqui.com.br';
 }

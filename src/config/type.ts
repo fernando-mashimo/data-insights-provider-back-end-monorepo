@@ -255,4 +255,19 @@ export interface Config {
    * The base URL for the 'Reclame Aqui' authentication.
   **/
   RECLAME_AQUI_AUTH_BASE_URL: string;
+
+  /**
+   * The base URL of  'Reclame Aqui' website.
+   * */
+  RECLAME_AQUI_SITE_BASE_URL: string;
+
+  /**
+   * The URL for retrieving company basic metadata from 'Reclame Aqui'.
+   **/
+  RECLAME_AQUI_DOMAIN_URL: string;
+
+  /**
+   * The URL for searching some of the required data from 'Reclame Aqui'.
+   **/
+  RECLAME_AQUI_SEARCH_URL: string;
 }

@@ -33,5 +33,3 @@ export const handler = async (event: SQSEvent | undefined): Promise<void> => {
 
 	await updateAccessTokenUseCase.execute();
 };
-
-handler(undefined);
