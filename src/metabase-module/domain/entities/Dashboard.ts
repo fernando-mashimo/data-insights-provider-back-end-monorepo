@@ -28,6 +28,15 @@ export enum Dashboard {
 	FAKE_LAWSUIT_PROBABILITY_RISK = 9,
 
 	/**
+	 * Navigable dashboards but with no real data V2.
+	 */
+	FAKE_V2_GENERAL_RISK = 35,
+	FAKE_V2_FINANCIAL_RISK = 32,
+	FAKE_V2_OPERATIONAL_RISK = 31,
+	FAKE_V2_LAWSUIT_PROBABILITY_RISK = 33,
+	FAKE_V2_MY_LAWSUIT = 34,
+
+	/**
 	 * These are not real dashboard ids, they are used to show a disclaimer page
 	 * like "You don't have access to this dashboard - Buy our product to access it".
 	 * But user must have this dashboard in the list of allowedItems to access it.
