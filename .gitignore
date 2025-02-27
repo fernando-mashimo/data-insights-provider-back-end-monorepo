@@ -4,6 +4,7 @@
 *.d.ts
 node_modules
 .env
+src/config
 
 # CDK asset staging directory
 .cdk.staging
