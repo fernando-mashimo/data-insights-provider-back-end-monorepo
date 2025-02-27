@@ -1,6 +1,6 @@
 import { SQSEvent } from 'aws-lambda';
 import { UpdateComplaintDataExtractorAccessTokenUseCase } from '../../../../domain/useCases/updateComplaintDataExtractorAccessToken';
-import { ReclameAquiTokenEncryptionClientImp } from '../../../infrastructure/crypto/reclameAquiDataEncryption/reclameAquiTokenEncryptionClientImp';
+import { ReclameAquiTokenEncryptionClientImp } from '../../../helpers/crypto/reclameAquiDataEncryption/reclameAquiTokenEncryptionClientImp';
 import { ComplaintsDataExtractorTokenRepositoryImp } from '../../../output/database/complaintsDataExtractorTokenRepositoryImp';
 import { ComplaintsDataExtractorClientImp } from '../../../output/http/complaintsDataExtractorClientImp';
 import { sqsEventBody } from './input';
