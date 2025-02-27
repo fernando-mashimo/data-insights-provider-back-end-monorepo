@@ -8,8 +8,7 @@ import { UseCase } from '../UseCase';
 import { UpdateComplaintsListUseCaseInput } from './input';
 import * as path from 'path';
 import { FileManagementClient } from '../../services/fileManagementClient';
-import { handler as updateComplaintDataHandler } from '../../../adapters/input/sqs/updateComplaintData';
-import { sqsRecordAttributes } from '../../../adapters/input/sqs/helpers/sqsRecordAttributes';
+import { UpdateComplaintDataUseCase } from '../updateComplaintData';
 
 export class UpdateComplaintsListUseCase
 	implements UseCase<UpdateComplaintsListUseCaseInput, void>
@@ -17,37 +16,40 @@ export class UpdateComplaintsListUseCase
 	private eventComplaintsExtractionMetadataRepository: EventComplaintsExtractionMetadataRepository;
 	private complaintsDataExtractorClient: ComplaintsDataExtractorClient;
 	private fileManagementClient: FileManagementClient;
+	private updateComplaintDataUseCase: UpdateComplaintDataUseCase;
 
 	constructor(
 		eventComplaintsExtractionMetadataRepository: EventComplaintsExtractionMetadataRepository,
 		complaintsDataExtractorClient: ComplaintsDataExtractorClient,
-		fileManagementClient: FileManagementClient
+		fileManagementClient: FileManagementClient,
+		updateComplaintDataUseCase: UpdateComplaintDataUseCase
 	) {
 		this.eventComplaintsExtractionMetadataRepository = eventComplaintsExtractionMetadataRepository;
 		this.complaintsDataExtractorClient = complaintsDataExtractorClient;
 		this.fileManagementClient = fileManagementClient;
+		this.updateComplaintDataUseCase = updateComplaintDataUseCase;
 	}
 
 	public async execute(input: UpdateComplaintsListUseCaseInput): Promise<void> {
 		try {
 			console.info('Initiating execution UpdateComplaintsList...');
 
-      // retrieve company metadata from external service
+			// retrieve company metadata from external service
 			const companyMetadata = await this.complaintsDataExtractorClient.getCompanyMetadata(
 				input.accessToken
 			);
 
-      // retrieve event complaints extraction metadata from repository
+			// retrieve event complaints extraction metadata from repository
 			const [eventComplaintsExtractionMetadata] =
 				await this.eventComplaintsExtractionMetadataRepository.getByCnpj(companyMetadata.cnpj);
 
-      // retrieve complaints list from external service
+			// retrieve complaints list from external service
 			const complaints = await this.complaintsDataExtractorClient.getComplaints(
 				companyMetadata.companyExternalId,
 				input.accessToken
 			);
 
-      // check if complaints list has changed since last update
+			// check if complaints list has changed since last update
 			const complaintsHash = this.hashDataAndConvertToString(
 				Buffer.from(JSON.stringify(complaints))
 			);
@@ -67,25 +69,18 @@ export class UpdateComplaintsListUseCase
 			await this.eventComplaintsExtractionMetadataRepository.put(eventComplaintsExtractionMetadata);
 
 			for (const complaint of complaints) {
-        // for each of the complaints found for the company,
-        // this use case calls updateComplaintData flow through its lambda function handler
+				// for each of the complaints found for the company,
+				// this use case calls updateComplaintData flow through its use case
 				// to start the complaint data updating process
 				// this is a workaround due to not being able to make requests to Reclame Aqui through lambda functions without a proxy - the actual sequence would be to send a message to an SQS queue
-				await updateComplaintDataHandler({
-          Records: [
-            {
-              body: JSON.stringify({
-                complaintExternalId: complaint.id,
-								accessToken: input.accessToken
-							}),
-							...sqsRecordAttributes
-						}
-					]
+				await this.updateComplaintDataUseCase.execute({
+					complaintExternalId: complaint.id,
+					accessToken: input.accessToken
 				});
 			}
-      console.info('UpdateComplaintData flow has been called for each complaint found');
+			console.info('UpdateComplaintData flow has been called for each complaint found');
 
-      console.info('UpdateComplaintsList execution finished');
+			console.info('UpdateComplaintsList execution finished');
 		} catch (error) {
 			console.error('Cannot update complaints list', error);
 			throw error;

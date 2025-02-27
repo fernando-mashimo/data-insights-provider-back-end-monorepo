@@ -3,21 +3,23 @@ import { EventComplaintsExtractionMetadataRepository } from '../../repositories/
 import { ComplaintsDataExtractorClient } from '../../services/complaintsDataExtractorClient';
 import { UseCase } from '../UseCase';
 import { CreateComplaintsExtractionMetadataUseCaseInput } from './input';
-import { handler as updateComplaintsListHandler } from '../../../adapters/input/sqs/updateComplaintsList';
-import { sqsRecordAttributes } from '../../../adapters/input/sqs/helpers/sqsRecordAttributes';
+import { UpdateComplaintsListUseCase } from '../updateComplaintsList';
 
 export class CreateComplaintsExtractionMetadataUseCase
 	implements UseCase<CreateComplaintsExtractionMetadataUseCaseInput, void>
 {
 	private eventComplaintsExtractionMetadataRepository: EventComplaintsExtractionMetadataRepository;
 	private complaintsDataExtractorClient: ComplaintsDataExtractorClient;
+  private updateComplaintsListUsecase: UpdateComplaintsListUseCase;
 
 	constructor(
 		eventComplaintsExtractionMetadataRepository: EventComplaintsExtractionMetadataRepository,
-		complaintsDataExtractorClient: ComplaintsDataExtractorClient
+		complaintsDataExtractorClient: ComplaintsDataExtractorClient,
+    updateComplaintsListUsecase: UpdateComplaintsListUseCase
 	) {
 		this.eventComplaintsExtractionMetadataRepository = eventComplaintsExtractionMetadataRepository;
 		this.complaintsDataExtractorClient = complaintsDataExtractorClient;
+    this.updateComplaintsListUsecase = updateComplaintsListUsecase;
 	}
 
 	public async execute(input: CreateComplaintsExtractionMetadataUseCaseInput): Promise<void> {
@@ -50,19 +52,12 @@ export class CreateComplaintsExtractionMetadataUseCase
 
 			await this.eventComplaintsExtractionMetadataRepository.put(event);
 
-			// calls updateComplaintsList flow through its lambda function handler
+			// calls updateComplaintsList flow use case
       // to start the complaints list extraction process
       // this is a workaround due to not being able to make requests to Reclame Aqui through lambda functions without a proxy - the actual sequence would be to send a message to an SQS queue
-			await updateComplaintsListHandler({
-				Records: [
-					{
-						body: JSON.stringify({
-							accessToken: complaintsExtractorAccessToken
-						}),
-						...sqsRecordAttributes
-					}
-				]
-			});
+			await this.updateComplaintsListUsecase.execute({
+        accessToken: complaintsExtractorAccessToken,
+      });
 
 			console.info('CreateComplaintsExtractionMetadata execution finished');
 		} catch (error) {
